@@ -180,40 +180,41 @@ const AdminDashboard = () => {
 
       {/* Ações Rápidas */}
       <div className="row mt-4">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Ações Rápidas</h5>
-            </div>
-            <div className="card-body">
-              <div className="d-grid gap-2">
-                <Link to="/admin/noticias" className="btn btn-primary">
-                  <FaNewspaper className="me-2" />
-                  Ver Todas as Notícias
-                </Link>
-                <Link to="/admin/categorias" className="btn btn-outline-primary">
-                  <FaTags className="me-2" />
-                  Gerenciar Categorias
-                </Link>
+        <div className="col-md-4">
+          <Link to="/admin/noticias" className="text-decoration-none">
+            <div className="card stat-card h-100 text-center hover-shadow">
+              <div className="card-body d-flex flex-column align-items-center justify-content-center">
+                <div className="stat-icon mb-2">
+                  <FaNewspaper />
+                </div>
+                <h5 className="stat-label mb-1">Ver Todas as Notícias</h5>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
-        
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Configurações</h5>
-            </div>
-            <div className="card-body">
-              <div className="d-grid gap-2">
-                <Link to="/admin/configuracoes" className="btn btn-outline-secondary">
-                  <FaCog className="me-2" />
-                  Configurações
-                </Link>
+        <div className="col-md-4">
+          <Link to="/admin/categorias" className="text-decoration-none">
+            <div className="card stat-card h-100 text-center hover-shadow">
+              <div className="card-body d-flex flex-column align-items-center justify-content-center">
+                <div className="stat-icon mb-2">
+                  <FaTags />
+                </div>
+                <h5 className="stat-label mb-1">Gerenciar Categorias</h5>
               </div>
             </div>
-          </div>
+          </Link>
+        </div>
+        <div className="col-md-4">
+          <Link to="/admin/configuracoes" className="text-decoration-none">
+            <div className="card stat-card h-100 text-center hover-shadow">
+              <div className="card-body d-flex flex-column align-items-center justify-content-center">
+                <div className="stat-icon mb-2">
+                  <FaCog />
+                </div>
+                <h5 className="stat-label mb-1">Configurações</h5>
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
