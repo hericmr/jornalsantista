@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaSave, FaTimes, FaImage, FaLink } from 'react-icons/fa';
-import { Editor, EditorProvider } from 'react-simple-wysiwyg';
+import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -108,6 +107,47 @@ const AdminEditarNoticia = () => {
     }
   };
 
+  // Funções para formatação de texto
+  const formatText = (command, value = null) => {
+    const textarea = document.getElementById('content');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = post.content.substring(start, end);
+    let newText = '';
+
+    switch (command) {
+      case 'bold':
+        newText = `<strong>${selectedText}</strong>`;
+        break;
+      case 'italic':
+        newText = `<em>${selectedText}</em>`;
+        break;
+      case 'underline':
+        newText = `<u>${selectedText}</u>`;
+        break;
+      case 'ul':
+        newText = `<ul><li>${selectedText}</li></ul>`;
+        break;
+      case 'ol':
+        newText = `<ol><li>${selectedText}</li></ol>`;
+        break;
+      case 'quote':
+        newText = `<blockquote>${selectedText}</blockquote>`;
+        break;
+      default:
+        return;
+    }
+
+    const newContent = post.content.substring(0, start) + newText + post.content.substring(end);
+    setPost(prev => ({ ...prev, content: newContent }));
+    
+    // Restaurar foco
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start, start + newText.length);
+    }, 0);
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
@@ -176,19 +216,79 @@ const AdminEditarNoticia = () => {
 
                 <div className="mb-3">
                   <label htmlFor="content" className="form-label">Conteúdo *</label>
-                  <EditorProvider>
-                    <Editor
-                      value={post.content}
-                      onChange={value => setPost(prev => ({ ...prev, content: value }))}
-                      containerProps={{
-                        style: {
-                          border: '1px solid #ced4da',
-                          borderRadius: '0.375rem',
-                          minHeight: '350px'
-                        }
-                      }}
-                    />
-                  </EditorProvider>
+                  
+                  {/* Barra de ferramentas */}
+                  <div className="editor-toolbar mb-2">
+                    <div className="btn-group" role="group">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => formatText('bold')}
+                        title="Negrito"
+                      >
+                        <FaBold />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => formatText('italic')}
+                        title="Itálico"
+                      >
+                        <FaItalic />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => formatText('underline')}
+                        title="Sublinhado"
+                      >
+                        <FaUnderline />
+                      </button>
+                    </div>
+                    
+                    <div className="btn-group ms-2" role="group">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => formatText('ul')}
+                        title="Lista não ordenada"
+                      >
+                        <FaListUl />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => formatText('ol')}
+                        title="Lista ordenada"
+                      >
+                        <FaListOl />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => formatText('quote')}
+                        title="Citação"
+                      >
+                        <FaQuoteLeft />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Área de edição */}
+                  <textarea
+                    className="form-control"
+                    id="content"
+                    name="content"
+                    rows="15"
+                    value={post.content}
+                    onChange={handleInputChange}
+                    required
+                    style={{ fontFamily: 'Georgia, Times New Roman, serif', fontSize: '16px', lineHeight: '1.6' }}
+                  />
+                  
+                  <div className="form-text">
+                    Dica: Selecione o texto e use os botões acima para formatar. Você pode usar HTML diretamente.
+                  </div>
                 </div>
               </div>
             </div>
