@@ -34,8 +34,8 @@ const AdminEditarNoticia = () => {
         setPost({
           title: foundPost.title || '',
           excerpt: foundPost.excerpt || '',
-          content: foundPost.content || '',
-          category: foundPost.category || '',
+          content: foundPost.text_content || foundPost.content || '', // Corrigido para text_content
+          category: foundPost.category || foundPost.categories?.[0] || '', // Corrigido para categories
           author: foundPost.author || '',
           published: foundPost.published ? new Date(foundPost.published).toISOString().split('T')[0] : '',
           images: foundPost.images || [],
