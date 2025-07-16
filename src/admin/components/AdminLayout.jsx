@@ -11,7 +11,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="admin-layout min-vh-100 bg-light">
+    <div className="admin-layout">
       {/* Header */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container-fluid">
@@ -42,17 +42,13 @@ const AdminLayout = ({ children }) => {
         </div>
       </nav>
 
-      <div className="container-fluid">
-        <div className="row">
-          {/* Sidebar */}
-          <div className="col-md-3 col-lg-2 d-md-block bg-white sidebar">
-            <AdminSidebar />
-          </div>
-          
-          {/* Main Content */}
-          <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            {children}
-          </main>
+      <div className="d-flex">
+        {/* Sidebar */}
+        <AdminSidebar />
+        
+        {/* Main Content */}
+        <div className="admin-content">
+          {children}
         </div>
       </div>
     </div>
