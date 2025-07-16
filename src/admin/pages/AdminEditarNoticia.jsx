@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
+import { postsAPI } from '../../lib/supabase';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -11,11 +12,12 @@ const AdminEditarNoticia = () => {
     title: '',
     excerpt: '',
     content: '',
-    category: '',
+    categories: [],
     author: '',
     published: '',
     images: [],
-    tags: []
+    tags: [],
+    status: 'draft'
   });
 
   useEffect(() => {
@@ -26,25 +28,21 @@ const AdminEditarNoticia = () => {
 
   const loadPost = async () => {
     try {
-      const response = await fetch('/blog_posts.json');
-      const data = await response.json();
-      // Aceita tanto {posts: [...]} quanto um array direto
-      const posts = Array.isArray(data) ? data : data.posts;
-      const foundPost = posts && posts.find(p => p.id === id);
+      const foundPost = await postsAPI.getPostById(id);
       
       console.log('Post encontrado:', foundPost); // Debug
-      console.log('text_content:', foundPost?.text_content); // Debug
       
       if (foundPost) {
         const postData = {
           title: foundPost.title || '',
           excerpt: foundPost.excerpt || '',
-          content: foundPost.text_content || foundPost.content || '', // Corrigido para text_content
-          category: foundPost.category || foundPost.categories?.[0] || '', // Corrigido para categories
+          content: foundPost.content || '',
+          categories: foundPost.categories || [],
           author: foundPost.author || '',
-          published: foundPost.published ? new Date(foundPost.published).toISOString().split('T')[0] : '',
+          published: foundPost.published_at ? new Date(foundPost.published_at).toISOString().split('T')[0] : '',
           images: foundPost.images || [],
-          tags: foundPost.tags || []
+          tags: foundPost.tags || [],
+          status: foundPost.status || 'draft'
         };
         
         console.log('Dados mapeados:', postData); // Debug
@@ -91,17 +89,36 @@ const AdminEditarNoticia = () => {
     setSaving(true);
 
     try {
-      // Aqui você implementaria a lógica para salvar no backend
-      console.log('Salvando post:', post);
+      const postData = {
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        categories: post.categories,
+        author: post.author,
+        published_at: post.published ? new Date(post.published).toISOString() : null,
+        images: post.images,
+        tags: post.tags,
+        status: post.status,
+        updated_at: new Date().toISOString()
+      };
+
+      if (id) {
+        // Atualizar postagem existente
+        await postsAPI.updatePost(id, postData);
+        alert('Notícia atualizada com sucesso!');
+      } else {
+        // Criar nova postagem
+        await postsAPI.createPost({
+          ...postData,
+          created_at: new Date().toISOString()
+        });
+        alert('Notícia criada com sucesso!');
+      }
       
-      // Simular salvamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Notícia salva com sucesso!');
       navigate('/admin/noticias');
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar a notícia');
+      alert('Erro ao salvar a notícia: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -212,6 +229,43 @@ const AdminEditarNoticia = () => {
                     value={post.excerpt}
                     onChange={handleInputChange}
                   />
+                </div>
+
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label htmlFor="categories" className="form-label">Categorias</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="categories"
+                        name="categories"
+                        value={Array.isArray(post.categories) ? post.categories.join(', ') : post.categories}
+                        onChange={(e) => {
+                          const categories = e.target.value.split(',').map(cat => cat.trim()).filter(cat => cat);
+                          setPost(prev => ({ ...prev, categories }));
+                        }}
+                        placeholder="Categoria 1, Categoria 2, Categoria 3"
+                      />
+                      <div className="form-text">Separe as categorias por vírgula</div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="mb-3">
+                      <label htmlFor="status" className="form-label">Status</label>
+                      <select
+                        className="form-select"
+                        id="status"
+                        name="status"
+                        value={post.status}
+                        onChange={handleInputChange}
+                      >
+                        <option value="draft">Rascunho</option>
+                        <option value="published">Publicado</option>
+                        <option value="archived">Arquivado</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mb-3">

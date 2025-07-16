@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
+import { postsAPI } from '../../lib/supabase';
 
 const AdminNoticias = () => {
   const [posts, setPosts] = useState([]);
@@ -12,10 +13,7 @@ const AdminNoticias = () => {
 
   const loadPosts = async () => {
     try {
-      const response = await fetch('/blog_posts.json');
-      const data = await response.json();
-      // Aceita tanto {posts: [...]} quanto um array direto
-      const posts = Array.isArray(data) ? data : data.posts || [];
+      const posts = await postsAPI.getAllPosts();
       setPosts(posts);
       console.log('Posts carregados:', posts.length); // Debug
     } catch (error) {
@@ -25,10 +23,16 @@ const AdminNoticias = () => {
     }
   };
 
-  const handleDelete = (postId) => {
+  const handleDelete = async (postId) => {
     if (window.confirm('Tem certeza que deseja excluir esta notícia?')) {
-      // Implementar exclusão
-      console.log('Excluir post:', postId);
+      try {
+        await postsAPI.deletePost(postId);
+        alert('Notícia excluída com sucesso!');
+        loadPosts(); // Recarregar a lista
+      } catch (error) {
+        console.error('Erro ao excluir post:', error);
+        alert('Erro ao excluir a notícia: ' + error.message);
+      }
     }
   };
 
@@ -81,15 +85,19 @@ const AdminNoticias = () => {
                             {cat}
                           </span>
                         ))
-                      ) : post.category ? (
-                        <span className="badge bg-secondary">{post.category}</span>
                       ) : (
                         <span className="text-muted">Sem categoria</span>
                       )}
                     </td>
-                    <td>{new Date(post.published).toLocaleDateString('pt-BR')}</td>
+                    <td>{post.published_at ? new Date(post.published_at).toLocaleDateString('pt-BR') : 'Não publicado'}</td>
                     <td>
-                      <span className="badge bg-success">Publicado</span>
+                      <span className={`badge ${
+                        post.status === 'published' ? 'bg-success' : 
+                        post.status === 'draft' ? 'bg-warning' : 'bg-secondary'
+                      }`}>
+                        {post.status === 'published' ? 'Publicado' : 
+                         post.status === 'draft' ? 'Rascunho' : 'Arquivado'}
+                      </span>
                     </td>
                     <td>
                       <div className="btn-group btn-group-sm">
