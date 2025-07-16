@@ -12,6 +12,8 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import AdminLogin from './admin/pages/AdminLogin';
 import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminLayout from './admin/components/AdminLayout';
+import AdminNoticias from './admin/pages/AdminNoticias';
+import AdminEditarNoticia from './admin/pages/AdminEditarNoticia';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -88,10 +90,14 @@ function App() {
           <Route path="/admin/noticias" element={
             <ProtectedRoute>
               <AdminLayout>
-                <div className="p-4">
-                  <h2>Gerenciar Notícias</h2>
-                  <p>Funcionalidade em desenvolvimento...</p>
-                </div>
+                <AdminNoticias />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/noticias/editar/:id" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminEditarNoticia />
               </AdminLayout>
             </ProtectedRoute>
           } />

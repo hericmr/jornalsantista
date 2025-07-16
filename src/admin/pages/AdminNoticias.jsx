@@ -1,0 +1,117 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
+
+const AdminNoticias = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    try {
+      const response = await fetch('/blog_posts.json');
+      const data = await response.json();
+      setPosts(data.posts || []);
+    } catch (error) {
+      console.error('Erro ao carregar posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = (postId) => {
+    if (window.confirm('Tem certeza que deseja excluir esta notícia?')) {
+      // Implementar exclusão
+      console.log('Excluir post:', postId);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-noticias">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciar Notícias</h2>
+        <Link to="/admin/noticias/nova" className="btn btn-primary">
+          <FaPlus className="me-2" />
+          Nova Notícia
+        </Link>
+      </div>
+
+      <div className="card">
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Categoria</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {posts.map((post) => (
+                  <tr key={post.id}>
+                    <td>
+                      <div>
+                        <div className="fw-semibold">{post.title}</div>
+                        <small className="text-muted">{post.excerpt}</small>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="badge bg-secondary">{post.category}</span>
+                    </td>
+                    <td>{new Date(post.published).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                      <span className="badge bg-success">Publicado</span>
+                    </td>
+                    <td>
+                      <div className="btn-group btn-group-sm">
+                        <Link 
+                          to={`/noticia/${post.id}`} 
+                          className="btn btn-outline-info"
+                          title="Visualizar"
+                        >
+                          <FaEye />
+                        </Link>
+                        <Link 
+                          to={`/admin/noticias/editar/${post.id}`} 
+                          className="btn btn-outline-primary"
+                          title="Editar"
+                        >
+                          <FaEdit />
+                        </Link>
+                        <button 
+                          onClick={() => handleDelete(post.id)}
+                          className="btn btn-outline-danger"
+                          title="Excluir"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminNoticias; 
