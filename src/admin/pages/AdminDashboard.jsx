@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaNewspaper, FaTags, FaEye, FaEdit, FaTrash, FaPlus, FaCog } from 'react-icons/fa';
+import { FaNewspaper, FaTags, FaEye, FaEdit, FaTrash, FaPlus, FaCog, FaCalendar, FaBolt } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -81,39 +81,31 @@ const AdminDashboard = () => {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card text-white bg-info">
-            <div className="card-body">
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h5 className="card-title">Notícias Hoje</h5>
-                  <h2 className="mb-0">
-                    {stats.recentNews.filter(news => {
-                      const today = new Date().toDateString();
-                      const newsDate = new Date(news.published).toDateString();
-                      return today === newsDate;
-                    }).length}
-                  </h2>
-                </div>
-                <div className="align-self-center">
-                  <span style={{ fontSize: '2rem' }}>📅</span>
-                </div>
+          <div className="card stat-card">
+            <div className="card-body text-center">
+              <div className="stat-icon">
+                <FaCalendar />
               </div>
+              <h3 className="stat-number">
+                {stats.recentNews.filter(news => {
+                  const today = new Date().toDateString();
+                  const newsDate = new Date(news.published).toDateString();
+                  return today === newsDate;
+                }).length}
+              </h3>
+              <p className="stat-label">Notícias Hoje</p>
             </div>
           </div>
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card text-white bg-warning">
-            <div className="card-body">
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h5 className="card-title">Ações Rápidas</h5>
-                  <p className="mb-0">Gerenciar conteúdo</p>
-                </div>
-                <div className="align-self-center">
-                  <span style={{ fontSize: '2rem' }}>⚡</span>
-                </div>
+          <div className="card stat-card">
+            <div className="card-body text-center">
+              <div className="stat-icon">
+                <FaBolt />
               </div>
+              <h3 className="stat-number">4</h3>
+              <p className="stat-label">Ações Rápidas</p>
             </div>
           </div>
         </div>
@@ -188,7 +180,7 @@ const AdminDashboard = () => {
 
       {/* Ações Rápidas */}
       <div className="row mt-4">
-        <div className="col-12">
+        <div className="col-md-6">
           <div className="card">
             <div className="card-header">
               <h5 className="mb-0">Ações Rápidas</h5>
