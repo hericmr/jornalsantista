@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaNewspaper, FaTags, FaEye, FaEdit, FaTrash, FaPlus, FaCog, FaCalendar, FaBolt } from 'react-icons/fa';
+import { FaNewspaper, FaTags, FaEye, FaEdit, FaTrash, FaPlus, FaCog, FaCalendar, FaBolt, FaDatabase } from 'react-icons/fa';
+import { testSupabaseConnection, checkPostsTable } from '../../lib/testSupabase';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -8,10 +9,29 @@ const AdminDashboard = () => {
     totalCategories: 0,
     recentNews: []
   });
+  const [dbStatus, setDbStatus] = useState('unknown');
 
   useEffect(() => {
     fetchStats();
+    testDatabaseConnection();
   }, []);
+
+  const testDatabaseConnection = async () => {
+    try {
+      setDbStatus('testing');
+      const connectionOk = await testSupabaseConnection();
+      const tableOk = await checkPostsTable();
+      
+      if (connectionOk && tableOk) {
+        setDbStatus('connected');
+      } else {
+        setDbStatus('error');
+      }
+    } catch (error) {
+      console.error('Erro ao testar conexão:', error);
+      setDbStatus('error');
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -102,10 +122,18 @@ const AdminDashboard = () => {
           <div className="card stat-card">
             <div className="card-body text-center">
               <div className="stat-icon">
-                <FaBolt />
+                <FaDatabase />
               </div>
-              <h3 className="stat-number">4</h3>
-              <p className="stat-label">Ações Rápidas</p>
+              <h3 className="stat-number">
+                {dbStatus === 'connected' ? '✅' : 
+                 dbStatus === 'testing' ? '🔄' : 
+                 dbStatus === 'error' ? '❌' : '❓'}
+              </h3>
+              <p className="stat-label">
+                {dbStatus === 'connected' ? 'Banco Conectado' : 
+                 dbStatus === 'testing' ? 'Testando...' : 
+                 dbStatus === 'error' ? 'Erro de Conexão' : 'Status Desconhecido'}
+              </p>
             </div>
           </div>
         </div>

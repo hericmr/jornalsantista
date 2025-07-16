@@ -1,0 +1,4 @@
+# Copie estas variáveis para um arquivo .env na raiz do projeto:
+
+VITE_SUPABASE_URL=https://ypxauswxgbdegvkxgzmi.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlweGF1c3d4Z2JkZWd2a3hnem1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDUzNTIsImV4cCI6MjA2ODI4MTM1Mn0._jYk-5djNOllJIGSwRD1lzXWSq5mcZrVijQMC3bTYYc 
