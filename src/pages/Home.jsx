@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import PostItem from '../components/PostItem';
 import SearchBar from '../components/SearchBar';
 
@@ -126,9 +127,9 @@ const Home = () => {
                               {new Date(featuredPost.published).toLocaleDateString('pt-BR')}
                             </small>
                           </div>
-                          <a href={`/noticia/${featuredPost.id}`} className="btn btn-dark btn-lg">
+                          <Link to={`/noticia/${featuredPost.id}`} className="btn btn-dark btn-lg">
                             Ler mais
-                          </a>
+                          </Link>
                         </div>
                       </div>
                     </div>
