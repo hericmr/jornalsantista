@@ -58,11 +58,17 @@ const Home = () => {
   }
 
   const featuredPost = filteredPosts[0];
-  const otherPosts = filteredPosts.slice(1);
+  const otherPosts = filteredPosts.slice(1, 7); // Limitar a 6 notícias secundárias
+  const remainingPosts = filteredPosts.slice(7);
 
   return (
-    <div className="container mt-4">
-      <SearchBar onSearch={handleSearch} />
+    <div className="container-fluid mt-4">
+      {/* Barra de busca */}
+      <div className="row mb-4">
+        <div className="col-lg-8 mx-auto">
+          <SearchBar onSearch={handleSearch} />
+        </div>
+      </div>
       
       {filteredPosts.length === 0 ? (
         <div className="text-center mt-5">
@@ -73,35 +79,61 @@ const Home = () => {
         <>
           {/* Matéria em Destaque */}
           {featuredPost && (
-            <div className="mb-5">
-              <h2 className="mb-4">Destaque</h2>
-              <div className="card shadow-lg">
-                <div className="row g-0">
-                  {featuredPost.images && featuredPost.images.length > 0 && (
-                    <div className="col-md-6">
-                      <img 
-                        src={featuredPost.images[0]} 
-                        className="img-fluid rounded-start h-100 object-fit-cover" 
-                        alt={featuredPost.title}
-                        style={{ minHeight: '300px' }}
-                      />
-                    </div>
-                  )}
-                  <div className={featuredPost.images && featuredPost.images.length > 0 ? 'col-md-6' : 'col-md-12'}>
-                    <div className="card-body">
-                      <h3 className="card-title">{featuredPost.title}</h3>
-                      <p className="card-text text-muted">
-                        {featuredPost.text_content.substring(0, 300)}...
-                      </p>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="text-muted">
-                          <span>Por {featuredPost.author}</span>
-                          <br />
-                          <span>{new Date(featuredPost.published).toLocaleDateString('pt-BR')}</span>
+            <div className="row mb-5">
+              <div className="col-12">
+                <div className="border-bottom pb-3 mb-4">
+                  <h2 className="text-uppercase fw-bold text-dark">
+                    <i className="bi bi-star-fill text-warning me-2"></i>
+                    Destaque
+                  </h2>
+                </div>
+                <div className="card shadow-lg border-0">
+                  <div className="row g-0">
+                    {featuredPost.images && featuredPost.images.length > 0 && (
+                      <div className="col-lg-6">
+                        <img 
+                          src={featuredPost.images[0]} 
+                          className="img-fluid rounded-start h-100 object-fit-cover" 
+                          alt={featuredPost.title}
+                          style={{ minHeight: '400px' }}
+                        />
+                      </div>
+                    )}
+                    <div className={featuredPost.images && featuredPost.images.length > 0 ? 'col-lg-6' : 'col-12'}>
+                      <div className="card-body p-4">
+                        <div className="mb-3">
+                          {featuredPost.categories && featuredPost.categories.length > 0 ? (
+                            featuredPost.categories.map((category, index) => (
+                              <span key={index} className="badge bg-primary me-1 mb-2">
+                                {category}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="badge bg-secondary me-1 mb-2">Sem categoria</span>
+                          )}
                         </div>
-                        <a href={`/noticia/${featuredPost.id}`} className="btn btn-dark">
-                          Ler mais
-                        </a>
+                        <h1 className="card-title display-6 fw-bold mb-3">
+                          {featuredPost.title}
+                        </h1>
+                        <p className="card-text lead text-muted mb-4">
+                          {featuredPost.text_content.substring(0, 300)}...
+                        </p>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="text-muted">
+                            <div className="fw-semibold">
+                              <i className="bi bi-person me-1"></i>
+                              {featuredPost.author}
+                            </div>
+                            <small>
+                              <i className="bi bi-calendar3 me-1"></i>
+                              {new Date(featuredPost.published).toLocaleDateString('pt-BR')}
+                            </small>
+                          </div>
+                          <a href={`/noticia/${featuredPost.id}`} className="btn btn-dark btn-lg">
+                            <i className="bi bi-arrow-right me-1"></i>
+                            Ler mais
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -110,13 +142,45 @@ const Home = () => {
             </div>
           )}
 
-          {/* Outras Notícias */}
+          {/* Últimas Notícias */}
           {otherPosts.length > 0 && (
-            <div>
-              <h2 className="mb-4">Últimas Notícias</h2>
-              {otherPosts.map(post => (
-                <PostItem key={post.id} post={post} />
-              ))}
+            <div className="row mb-5">
+              <div className="col-12">
+                <div className="border-bottom pb-3 mb-4">
+                  <h2 className="text-uppercase fw-bold text-dark">
+                    <i className="bi bi-clock me-2"></i>
+                    Últimas Notícias
+                  </h2>
+                </div>
+                <div className="row">
+                  {otherPosts.map((post, index) => (
+                    <div key={post.id} className={index < 2 ? 'col-lg-6 mb-4' : 'col-lg-4 mb-4'}>
+                      <PostItem post={post} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mais Notícias */}
+          {remainingPosts.length > 0 && (
+            <div className="row">
+              <div className="col-12">
+                <div className="border-bottom pb-3 mb-4">
+                  <h3 className="text-uppercase fw-bold text-dark">
+                    <i className="bi bi-newspaper me-2"></i>
+                    Mais Notícias
+                  </h3>
+                </div>
+                <div className="row">
+                  {remainingPosts.map(post => (
+                    <div key={post.id} className="col-lg-4 col-md-6 mb-4">
+                      <PostItem post={post} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </>

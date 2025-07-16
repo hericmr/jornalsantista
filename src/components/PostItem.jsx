@@ -23,44 +23,55 @@ const PostItem = ({ post }) => {
   };
 
   return (
-    <div className="card mb-4 shadow-sm">
-      <div className="row g-0">
-        {getFeaturedImage() && (
-          <div className="col-md-4">
-            <img 
-              src={getFeaturedImage()} 
-              className="img-fluid rounded-start h-100 object-fit-cover" 
-              alt={post.title}
-              style={{ minHeight: '200px' }}
-            />
+    <div className="card h-100 shadow-sm border-0">
+      {getFeaturedImage() && (
+        <div className="position-relative">
+          <img 
+            src={getFeaturedImage()} 
+            className="card-img-top" 
+            alt={post.title}
+            style={{ height: '200px', objectFit: 'cover' }}
+          />
+          <div className="position-absolute top-0 start-0 m-2">
+            {post.categories && post.categories.length > 0 ? (
+              <span className="badge bg-primary">
+                {post.categories[0]}
+              </span>
+            ) : (
+              <span className="badge bg-secondary">Sem categoria</span>
+            )}
           </div>
-        )}
-        <div className={getFeaturedImage() ? 'col-md-8' : 'col-md-12'}>
-          <div className="card-body">
-            <h5 className="card-title">
-              <Link to={`/noticia/${post.id}`} className="text-decoration-none text-dark">
-                {post.title}
-              </Link>
-            </h5>
-            <p className="card-text text-muted">
-              {getExcerpt(post.text_content)}
-            </p>
-            <div className="d-flex justify-content-between align-items-center">
-              <div className="text-muted small">
-                <span>Por {post.author}</span>
-                <br />
-                <span>{formatDate(post.published)}</span>
-              </div>
-              <div className="text-end">
-                {post.categories && post.categories.length > 0 ? (
-                  <span className="badge bg-secondary me-1">
-                    {post.categories[0]}
-                  </span>
-                ) : (
-                  <span className="badge bg-light text-dark">Sem categoria</span>
-                )}
-              </div>
+        </div>
+      )}
+      
+      <div className="card-body d-flex flex-column">
+        <div className="mb-2">
+          <small className="text-muted">
+            <i className="bi bi-calendar3 me-1"></i>
+            {formatDate(post.published)}
+          </small>
+        </div>
+        
+        <h5 className="card-title fw-bold mb-3">
+          <Link to={`/noticia/${post.id}`} className="text-decoration-none text-dark">
+            {post.title}
+          </Link>
+        </h5>
+        
+        <p className="card-text text-muted flex-grow-1">
+          {getExcerpt(post.text_content)}
+        </p>
+        
+        <div className="mt-auto">
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="text-muted small">
+              <i className="bi bi-person me-1"></i>
+              {post.author}
             </div>
+            <Link to={`/noticia/${post.id}`} className="btn btn-outline-dark btn-sm">
+              <i className="bi bi-arrow-right me-1"></i>
+              Ler
+            </Link>
           </div>
         </div>
       </div>
