@@ -30,8 +30,11 @@ const AdminEditarNoticia = () => {
       const posts = Array.isArray(data) ? data : data.posts;
       const foundPost = posts && posts.find(p => p.id === id);
       
+      console.log('Post encontrado:', foundPost); // Debug
+      console.log('text_content:', foundPost?.text_content); // Debug
+      
       if (foundPost) {
-        setPost({
+        const postData = {
           title: foundPost.title || '',
           excerpt: foundPost.excerpt || '',
           content: foundPost.text_content || foundPost.content || '', // Corrigido para text_content
@@ -40,7 +43,10 @@ const AdminEditarNoticia = () => {
           published: foundPost.published ? new Date(foundPost.published).toISOString().split('T')[0] : '',
           images: foundPost.images || [],
           tags: foundPost.tags || []
-        });
+        };
+        
+        console.log('Dados mapeados:', postData); // Debug
+        setPost(postData);
       } else {
         alert('Notícia não encontrada');
         navigate('/admin/noticias');
