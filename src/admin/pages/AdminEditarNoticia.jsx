@@ -26,7 +26,9 @@ const AdminEditarNoticia = () => {
     try {
       const response = await fetch('/blog_posts.json');
       const data = await response.json();
-      const foundPost = data.posts.find(p => p.id === id);
+      // Aceita tanto {posts: [...]} quanto um array direto
+      const posts = Array.isArray(data) ? data : data.posts;
+      const foundPost = posts && posts.find(p => p.id === id);
       
       if (foundPost) {
         setPost({
