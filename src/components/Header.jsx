@@ -18,13 +18,11 @@ const Header = () => {
           <div className="row align-items-center">
             <div className="col-md-6">
               <small className="text-muted">
-                <i className="bi bi-calendar3 me-1"></i>
                 {currentDate}
               </small>
             </div>
             <div className="col-md-6 text-end">
               <small className="text-muted">
-                <i className="bi bi-geo-alt me-1"></i>
                 Baixada Santista, SP
               </small>
             </div>
@@ -65,25 +63,21 @@ const Header = () => {
             <ul className="navbar-nav ms-auto">
               <li className="nav-item">
                 <Link className="nav-link fw-semibold" to="/">
-                  <i className="bi bi-house me-1"></i>
                   Home
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link fw-semibold" to="/categorias">
-                  <i className="bi bi-tags me-1"></i>
                   Categorias
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link fw-semibold" to="/sobre">
-                  <i className="bi bi-info-circle me-1"></i>
                   Sobre
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link fw-semibold" to="/contato">
-                  <i className="bi bi-envelope me-1"></i>
                   Contato
                 </Link>
               </li>

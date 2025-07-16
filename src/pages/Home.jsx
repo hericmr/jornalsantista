@@ -83,7 +83,6 @@ const Home = () => {
               <div className="col-12">
                 <div className="border-bottom pb-3 mb-4">
                   <h2 className="text-uppercase fw-bold text-dark">
-                    <i className="bi bi-star-fill text-warning me-2"></i>
                     Destaque
                   </h2>
                 </div>
@@ -121,16 +120,13 @@ const Home = () => {
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="text-muted">
                             <div className="fw-semibold">
-                              <i className="bi bi-person me-1"></i>
                               {featuredPost.author}
                             </div>
                             <small>
-                              <i className="bi bi-calendar3 me-1"></i>
                               {new Date(featuredPost.published).toLocaleDateString('pt-BR')}
                             </small>
                           </div>
                           <a href={`/noticia/${featuredPost.id}`} className="btn btn-dark btn-lg">
-                            <i className="bi bi-arrow-right me-1"></i>
                             Ler mais
                           </a>
                         </div>
@@ -148,7 +144,6 @@ const Home = () => {
               <div className="col-12">
                 <div className="border-bottom pb-3 mb-4">
                   <h2 className="text-uppercase fw-bold text-dark">
-                    <i className="bi bi-clock me-2"></i>
                     Últimas Notícias
                   </h2>
                 </div>
@@ -169,7 +164,6 @@ const Home = () => {
               <div className="col-12">
                 <div className="border-bottom pb-3 mb-4">
                   <h3 className="text-uppercase fw-bold text-dark">
-                    <i className="bi bi-newspaper me-2"></i>
                     Mais Notícias
                   </h3>
                 </div>

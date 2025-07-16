@@ -47,7 +47,6 @@ const PostItem = ({ post }) => {
       <div className="card-body d-flex flex-column">
         <div className="mb-2">
           <small className="text-muted">
-            <i className="bi bi-calendar3 me-1"></i>
             {formatDate(post.published)}
           </small>
         </div>
@@ -65,11 +64,9 @@ const PostItem = ({ post }) => {
         <div className="mt-auto">
           <div className="d-flex justify-content-between align-items-center">
             <div className="text-muted small">
-              <i className="bi bi-person me-1"></i>
               {post.author}
             </div>
             <Link to={`/noticia/${post.id}`} className="btn btn-outline-dark btn-sm">
-              <i className="bi bi-arrow-right me-1"></i>
               Ler
             </Link>
           </div>
