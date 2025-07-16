@@ -13,16 +13,16 @@ const Header = () => {
   return (
     <>
       {/* Barra superior com data */}
-      <div className="bg-dark text-white py-2">
+      <div className="bg-dark text-white py-1">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-md-6">
-              <small className="text-muted">
+              <small className="text-muted" style={{ fontSize: '0.75rem' }}>
                 {currentDate}
               </small>
             </div>
             <div className="col-md-6 text-end">
-              <small className="text-muted">
+              <small className="text-muted" style={{ fontSize: '0.75rem' }}>
                 Baixada Santista, SP
               </small>
             </div>
@@ -31,14 +31,14 @@ const Header = () => {
       </div>
 
       {/* Header principal */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom py-2">
         <div className="container">
           <Link className="navbar-brand d-flex align-items-center" to="/">
             <div>
-              <div className="fw-bold fs-4" style={{ letterSpacing: '1px' }}>
+              <div className="fw-bold fs-5" style={{ letterSpacing: '1px' }}>
                 JORNAL SANTISTA
               </div>
-              <small className="text-muted d-block" style={{ fontSize: '0.7rem' }}>
+              <small className="text-muted d-block" style={{ fontSize: '0.65rem' }}>
                 Uma visão crítica sobre a nossa realidade
               </small>
             </div>
