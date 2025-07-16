@@ -1,0 +1,133 @@
+/* Estilos personalizados para o Jornal Santista */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.card {
+  border: none;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.article-content {
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.article-content p {
+  text-align: justify;
+}
+
+.badge {
+  font-size: 0.8rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: ">";
+}
+
+/* Responsividade para imagens */
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Estilos para links */
+a {
+  color: #000;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #333;
+}
+
+/* Estilos para botões */
+.btn-dark {
+  background-color: #000;
+  border-color: #000;
+}
+
+.btn-dark:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+/* Estilos para o footer */
+footer {
+  margin-top: auto;
+}
+
+/* Estilos para listas */
+.list-group-item.active {
+  background-color: #000;
+  border-color: #000;
+}
+
+/* Estilos para formulários */
+.form-control:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+}
+
+/* Estilos para breadcrumbs */
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+/* Estilos para cards de notícias */
+.card-title a:hover {
+  color: #333 !important;
+}
+
+/* Estilos para imagens de destaque */
+.object-fit-cover {
+  object-fit: cover;
+}
+
+/* Estilos para loading */
+.spinner-border {
+  color: #000;
+}
+
+/* Estilos para alertas */
+.alert-info {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+/* Estilos para ícones */
+.bi {
+  color: #000;
+}
+
+/* Estilos para texto muted */
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Estilos para sombras */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+} 
