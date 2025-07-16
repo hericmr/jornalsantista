@@ -182,70 +182,31 @@ const Noticia = () => {
             </div>
           </header>
 
-          {/* Imagem Principal da Matéria */}
+          {/* Todas as imagens da matéria */}
           {post.images && post.images.length > 0 && (
             <div className="mb-4">
-              <img 
-                src={post.images[0]} 
-                className="img-fluid rounded shadow-lg" 
-                alt={post.title}
-                style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
-                onError={handleImageError}
-              />
-              <small className="text-muted d-block mt-2 text-center">
-                Imagem principal da matéria
-              </small>
+              {post.images.map((image, idx) => (
+                <div key={idx} className="mb-3">
+                  <img
+                    src={image}
+                    className="img-fluid rounded shadow-lg"
+                    alt={`${post.title} - Imagem ${idx + 1}`}
+                    style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+                    onError={handleImageError}
+                  />
+                  <small className="text-muted d-block mt-2 text-center">
+                    Imagem {idx + 1} de {post.images.length}
+                  </small>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Conteúdo do Texto com Imagens Inline */}
+          {/* Texto da matéria */}
           <div className="article-content mb-5">
             {post.text_content.split('\n').map((paragraph, index) => (
-              <React.Fragment key={index}>
-                <p className="mb-3">
-                  {paragraph}
-                </p>
-                
-                {/* Inserir imagens inline a cada 3 parágrafos (excluindo a primeira imagem que já está no topo) */}
-                {post.images && post.images.length > 1 && 
-                 (index + 1) % 3 === 0 && 
-                 Math.floor((index + 1) / 3) <= (post.images.length - 1) && (
-                  <div className="my-4">
-                    <img 
-                      src={post.images[Math.floor((index + 1) / 3)]} 
-                      className="img-fluid rounded shadow" 
-                      alt={`${post.title} - Imagem ${Math.floor((index + 1) / 3) + 1}`}
-                      style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }}
-                      onError={handleImageError}
-                    />
-                    <small className="text-muted d-block mt-2 text-center">
-                      Imagem {Math.floor((index + 1) / 3) + 1} de {post.images.length}
-                    </small>
-                  </div>
-                )}
-              </React.Fragment>
+              <p className="mb-3" key={index}>{paragraph}</p>
             ))}
-            
-            {/* Mostrar imagens restantes no final se houver (excluindo a primeira imagem) */}
-            {post.images && post.images.length > 1 && 
-             Math.ceil(post.text_content.split('\n').length / 3) < (post.images.length - 1) && (
-              <div className="mt-4">
-                {post.images.slice(Math.ceil(post.text_content.split('\n').length / 3) + 1).map((image, index) => (
-                  <div key={index} className="mb-4">
-                    <img 
-                      src={image} 
-                      className="img-fluid rounded shadow" 
-                      alt={`${post.title} - Imagem ${Math.ceil(post.text_content.split('\n').length / 3) + index + 2}`}
-                      style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }}
-                      onError={handleImageError}
-                    />
-                    <small className="text-muted d-block mt-2 text-center">
-                      Imagem {Math.ceil(post.text_content.split('\n').length / 3) + index + 2} de {post.images.length}
-                    </small>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Tags e Categorias */}
