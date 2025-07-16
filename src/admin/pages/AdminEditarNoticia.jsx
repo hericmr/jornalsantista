@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink } from 'react-icons/fa';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -175,14 +177,13 @@ const AdminEditarNoticia = () => {
 
                 <div className="mb-3">
                   <label htmlFor="content" className="form-label">Conteúdo *</label>
-                  <textarea
-                    className="form-control"
+                  <ReactQuill
+                    theme="snow"
                     id="content"
                     name="content"
-                    rows="15"
                     value={post.content}
-                    onChange={handleInputChange}
-                    required
+                    onChange={value => setPost(prev => ({ ...prev, content: value }))}
+                    style={{ minHeight: '300px', background: 'white' }}
                   />
                 </div>
               </div>
