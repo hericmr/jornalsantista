@@ -7,27 +7,127 @@ import Noticia from './pages/Noticia';
 import Categorias from './pages/Categorias';
 import Sobre from './pages/Sobre';
 import Contato from './pages/Contato';
+import { AuthProvider } from './auth/AuthContext';
+import ProtectedRoute from './auth/ProtectedRoute';
+import AdminLogin from './admin/pages/AdminLogin';
+import AdminDashboard from './admin/pages/AdminDashboard';
+import AdminLayout from './admin/components/AdminLayout';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function App() {
   return (
-    <Router>
-      <div className="d-flex flex-column min-vh-100">
-        <Header />
-        <main className="flex-grow-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/noticia/:id" element={<Noticia />} />
-            <Route path="/categorias" element={<Categorias />} />
-            <Route path="/categorias/:categoria" element={<Categorias />} />
-            <Route path="/sobre" element={<Sobre />} />
-            <Route path="/contato" element={<Contato />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Rotas Públicas */}
+          <Route path="/" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <Home />
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/noticia/:id" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <Noticia />
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/categorias" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <Categorias />
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/categorias/:categoria" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <Categorias />
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/sobre" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <Sobre />
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/contato" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <Contato />
+              </main>
+              <Footer />
+            </div>
+          } />
+
+          {/* Rotas Administrativas */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/noticias" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <div className="p-4">
+                  <h2>Gerenciar Notícias</h2>
+                  <p>Funcionalidade em desenvolvimento...</p>
+                </div>
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/categorias" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <div className="p-4">
+                  <h2>Gerenciar Categorias</h2>
+                  <p>Funcionalidade em desenvolvimento...</p>
+                </div>
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/usuarios" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <div className="p-4">
+                  <h2>Gerenciar Usuários</h2>
+                  <p>Funcionalidade em desenvolvimento...</p>
+                </div>
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/configuracoes" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <div className="p-4">
+                  <h2>Configurações</h2>
+                  <p>Funcionalidade em desenvolvimento...</p>
+                </div>
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
