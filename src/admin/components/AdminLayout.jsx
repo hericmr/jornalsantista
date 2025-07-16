@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import AdminSidebar from './AdminSidebar';
+import { FaUser } from 'react-icons/fa';
 
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -28,7 +29,7 @@ const AdminLayout = ({ children }) => {
           <div className="navbar-nav ms-auto">
             <div className="nav-item dropdown">
               <a className="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                <span className="me-2">👤</span>
+                <span className="me-2"><FaUser /></span>
                 {user?.name || user?.username}
               </a>
               <ul className="dropdown-menu dropdown-menu-end">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FaNewspaper, FaTags, FaEye, FaEdit, FaTrash, FaPlus, FaCog } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -54,40 +55,32 @@ const AdminDashboard = () => {
       </div>
 
       {/* Cards de Estatísticas */}
-      <div className="row mb-4">
-        <div className="col-md-6 col-lg-3 mb-3">
-          <div className="card text-white bg-primary">
-            <div className="card-body">
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h5 className="card-title">Total de Notícias</h5>
-                  <h2 className="mb-0">{stats.totalNews}</h2>
-                </div>
-                <div className="align-self-center">
-                  <span style={{ fontSize: '2rem' }}>📰</span>
-                </div>
+      <div className="row g-4">
+        <div className="col-md-6 col-lg-3">
+          <div className="card stat-card">
+            <div className="card-body text-center">
+              <div className="stat-icon">
+                <FaNewspaper />
               </div>
+              <h3 className="stat-number">{stats.totalNews}</h3>
+              <p className="stat-label">Total de Notícias</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="col-md-6 col-lg-3">
+          <div className="card stat-card">
+            <div className="card-body text-center">
+              <div className="stat-icon">
+                <FaTags />
+              </div>
+              <h3 className="stat-number">{stats.totalCategories}</h3>
+              <p className="stat-label">Categorias</p>
             </div>
           </div>
         </div>
 
-        <div className="col-md-6 col-lg-3 mb-3">
-          <div className="card text-white bg-success">
-            <div className="card-body">
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h5 className="card-title">Categorias</h5>
-                  <h2 className="mb-0">{stats.totalCategories}</h2>
-                </div>
-                <div className="align-self-center">
-                  <span style={{ fontSize: '2rem' }}>🏷️</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6 col-lg-3 mb-3">
+        <div className="col-md-6 col-lg-3">
           <div className="card text-white bg-info">
             <div className="card-body">
               <div className="d-flex justify-content-between">
@@ -109,7 +102,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="col-md-6 col-lg-3 mb-3">
+        <div className="col-md-6 col-lg-3">
           <div className="card text-white bg-warning">
             <div className="card-body">
               <div className="d-flex justify-content-between">
@@ -201,27 +194,31 @@ const AdminDashboard = () => {
               <h5 className="mb-0">Ações Rápidas</h5>
             </div>
             <div className="card-body">
-              <div className="row">
-                <div className="col-md-3 mb-3">
-                  <Link to="/admin/noticias" className="btn btn-primary w-100">
-                    📰 Ver Todas as Notícias
-                  </Link>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <Link to="/admin/categorias" className="btn btn-success w-100">
-                    🏷️ Gerenciar Categorias
-                  </Link>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <Link to="/admin/usuarios" className="btn btn-info w-100">
-                    👥 Gerenciar Usuários
-                  </Link>
-                </div>
-                <div className="col-md-3 mb-3">
-                  <Link to="/admin/configuracoes" className="btn btn-warning w-100">
-                    ⚙️ Configurações
-                  </Link>
-                </div>
+              <div className="d-grid gap-2">
+                <Link to="/admin/noticias" className="btn btn-primary">
+                  <FaNewspaper className="me-2" />
+                  Ver Todas as Notícias
+                </Link>
+                <Link to="/admin/categorias" className="btn btn-outline-primary">
+                  <FaTags className="me-2" />
+                  Gerenciar Categorias
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Configurações</h5>
+            </div>
+            <div className="card-body">
+              <div className="d-grid gap-2">
+                <Link to="/admin/configuracoes" className="btn btn-outline-secondary">
+                  <FaCog className="me-2" />
+                  Configurações
+                </Link>
               </div>
             </div>
           </div>
