@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink } from 'react-icons/fa';
-import { Editor } from 'react-simple-wysiwyg';
+import { Editor, EditorProvider } from 'react-simple-wysiwyg';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -176,17 +176,19 @@ const AdminEditarNoticia = () => {
 
                 <div className="mb-3">
                   <label htmlFor="content" className="form-label">Conteúdo *</label>
-                  <Editor
-                    value={post.content}
-                    onChange={value => setPost(prev => ({ ...prev, content: value }))}
-                    containerProps={{
-                      style: {
-                        border: '1px solid #ced4da',
-                        borderRadius: '0.375rem',
-                        minHeight: '350px'
-                      }
-                    }}
-                  />
+                  <EditorProvider>
+                    <Editor
+                      value={post.content}
+                      onChange={value => setPost(prev => ({ ...prev, content: value }))}
+                      containerProps={{
+                        style: {
+                          border: '1px solid #ced4da',
+                          borderRadius: '0.375rem',
+                          minHeight: '350px'
+                        }
+                      }}
+                    />
+                  </EditorProvider>
                 </div>
               </div>
             </div>
