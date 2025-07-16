@@ -14,7 +14,10 @@ const AdminNoticias = () => {
     try {
       const response = await fetch('/blog_posts.json');
       const data = await response.json();
-      setPosts(data.posts || []);
+      // Aceita tanto {posts: [...]} quanto um array direto
+      const posts = Array.isArray(data) ? data : data.posts || [];
+      setPosts(posts);
+      console.log('Posts carregados:', posts.length); // Debug
     } catch (error) {
       console.error('Erro ao carregar posts:', error);
     } finally {
@@ -72,7 +75,17 @@ const AdminNoticias = () => {
                       </div>
                     </td>
                     <td>
-                      <span className="badge bg-secondary">{post.category}</span>
+                      {post.categories && post.categories.length > 0 ? (
+                        post.categories.map((cat, index) => (
+                          <span key={index} className="badge bg-secondary me-1">
+                            {cat}
+                          </span>
+                        ))
+                      ) : post.category ? (
+                        <span className="badge bg-secondary">{post.category}</span>
+                      ) : (
+                        <span className="text-muted">Sem categoria</span>
+                      )}
                     </td>
                     <td>{new Date(post.published).toLocaleDateString('pt-BR')}</td>
                     <td>
