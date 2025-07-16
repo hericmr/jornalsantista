@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PostItem from '../components/PostItem';
+import { getAllPosts } from '../lib/postsService';
 import SearchBar from '../components/SearchBar';
 
 const Home = () => {
@@ -14,21 +15,13 @@ const Home = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('/blog_posts.json');
-      const data = await response.json();
-      
-      // Ordenar por data de publicação (mais recentes primeiro)
-      const sortedPosts = data.sort((a, b) => 
-        new Date(b.published) - new Date(a.published)
-      );
-      
-
-      
-      setPosts(sortedPosts);
-      setFilteredPosts(sortedPosts);
-      setLoading(false);
+      setLoading(true);
+      const posts = await getAllPosts();
+      setPosts(posts);
+      setFilteredPosts(posts);
     } catch (error) {
       console.error('Erro ao carregar posts:', error);
+    } finally {
       setLoading(false);
     }
   };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
-import { postsAPI } from '../../lib/supabase';
+import { getPostById, savePost } from '../../lib/postsService';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -28,18 +28,20 @@ const AdminEditarNoticia = () => {
 
   const loadPost = async () => {
     try {
-      const foundPost = await postsAPI.getPostById(id);
+      const foundPost = await getPostById(id);
       
       console.log('Post encontrado:', foundPost); // Debug
       
       if (foundPost) {
         const postData = {
+          id: foundPost.id,
           title: foundPost.title || '',
           excerpt: foundPost.excerpt || '',
-          content: foundPost.content || '',
+          content: foundPost.content || foundPost.text_content || '',
           categories: foundPost.categories || [],
           author: foundPost.author || '',
-          published: foundPost.published_at ? new Date(foundPost.published_at).toISOString().split('T')[0] : '',
+          published: foundPost.published_at || foundPost.published ? 
+            new Date(foundPost.published_at || foundPost.published).toISOString().split('T')[0] : '',
           images: foundPost.images || [],
           tags: foundPost.tags || [],
           status: foundPost.status || 'draft'
@@ -98,20 +100,16 @@ const AdminEditarNoticia = () => {
         published_at: post.published ? new Date(post.published).toISOString() : null,
         images: post.images,
         tags: post.tags,
-        status: post.status,
-        updated_at: new Date().toISOString()
+        status: post.status
       };
 
-      if (id) {
-        // Atualizar postagem existente
-        await postsAPI.updatePost(id, postData);
+      if (id && !id.startsWith('local-')) {
+        // Atualizar postagem existente do Supabase
+        await savePost({ ...postData, id }, false);
         alert('Notícia atualizada com sucesso!');
       } else {
-        // Criar nova postagem
-        await postsAPI.createPost({
-          ...postData,
-          created_at: new Date().toISOString()
-        });
+        // Criar nova postagem no Supabase
+        await savePost(postData, true);
         alert('Notícia criada com sucesso!');
       }
       

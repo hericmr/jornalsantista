@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
-import { postsAPI } from '../../lib/supabase';
+import { getAllPosts, deletePost } from '../../lib/postsService';
 
 const AdminNoticias = () => {
   const [posts, setPosts] = useState([]);
@@ -13,7 +13,7 @@ const AdminNoticias = () => {
 
   const loadPosts = async () => {
     try {
-      const posts = await postsAPI.getAllPosts();
+      const posts = await getAllPosts();
       setPosts(posts);
       console.log('Posts carregados:', posts.length); // Debug
     } catch (error) {
@@ -26,9 +26,13 @@ const AdminNoticias = () => {
   const handleDelete = async (postId) => {
     if (window.confirm('Tem certeza que deseja excluir esta notícia?')) {
       try {
-        await postsAPI.deletePost(postId);
-        alert('Notícia excluída com sucesso!');
-        loadPosts(); // Recarregar a lista
+        const deleted = await deletePost(postId);
+        if (deleted) {
+          alert('Notícia excluída com sucesso!');
+          loadPosts(); // Recarregar a lista
+        } else {
+          alert('Posts locais não podem ser excluídos via interface.');
+        }
       } catch (error) {
         console.error('Erro ao excluir post:', error);
         alert('Erro ao excluir a notícia: ' + error.message);

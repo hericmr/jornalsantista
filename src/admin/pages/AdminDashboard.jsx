@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaNewspaper, FaTags, FaEye, FaEdit, FaTrash, FaPlus, FaCog, FaCalendar, FaBolt, FaDatabase } from 'react-icons/fa';
 import { testSupabaseConnection, checkPostsTable } from '../../lib/testSupabase';
+import { getAllPosts } from '../../lib/postsService';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -35,8 +36,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/blog_posts.json');
-      const news = await response.json();
+      const news = await getAllPosts();
       
       // Extrair categorias únicas
       const categories = new Set();
@@ -47,9 +47,7 @@ const AdminDashboard = () => {
       });
 
       // Pegar notícias mais recentes
-      const recentNews = news
-        .sort((a, b) => new Date(b.published) - new Date(a.published))
-        .slice(0, 5);
+      const recentNews = news.slice(0, 5);
 
       setStats({
         totalNews: news.length,

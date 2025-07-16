@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { getPostById } from '../lib/postsService';
 
 const Noticia = () => {
   const { id } = useParams();
@@ -12,13 +13,12 @@ const Noticia = () => {
 
   const fetchPost = async () => {
     try {
-      const response = await fetch('/blog_posts.json');
-      const data = await response.json();
-      const foundPost = data.find(p => p.id === id);
+      setLoading(true);
+      const foundPost = await getPostById(id);
       setPost(foundPost);
-      setLoading(false);
     } catch (error) {
       console.error('Erro ao carregar post:', error);
+    } finally {
       setLoading(false);
     }
   };
