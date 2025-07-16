@@ -601,4 +601,49 @@ footer {
   .admin-editar-noticia {
     padding: 1rem;
   }
+}
+
+/* Estilos para o editor WYSIWYG */
+.react-simple-wysiwyg {
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.react-simple-wysiwyg .toolbar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ced4da;
+  padding: 0.5rem;
+}
+
+.react-simple-wysiwyg .toolbar button {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.125rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.react-simple-wysiwyg .toolbar button:hover {
+  background-color: #e9ecef;
+}
+
+.react-simple-wysiwyg .toolbar button.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.react-simple-wysiwyg .editor {
+  min-height: 350px;
+  padding: 1rem;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  outline: none;
+}
+
+.react-simple-wysiwyg .editor:focus {
+  outline: none;
 } 

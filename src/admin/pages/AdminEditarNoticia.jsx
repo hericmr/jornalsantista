@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink } from 'react-icons/fa';
-import { Editor } from '@tinymce/tinymce-react';
+import { Editor } from 'react-simple-wysiwyg';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -177,22 +177,15 @@ const AdminEditarNoticia = () => {
                 <div className="mb-3">
                   <label htmlFor="content" className="form-label">Conteúdo *</label>
                   <Editor
-                    apiKey="no-api-key"
-                    id="content"
                     value={post.content}
-                    init={{
-                      height: 350,
-                      menubar: false,
-                      plugins: [
-                        'advlist autolink lists link image charmap preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount'
-                      ],
-                      toolbar:
-                        'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | removeformat | help',
-                      content_style: 'body { font-family:Arial,sans-serif; font-size:16px }'
+                    onChange={value => setPost(prev => ({ ...prev, content: value }))}
+                    containerProps={{
+                      style: {
+                        border: '1px solid #ced4da',
+                        borderRadius: '0.375rem',
+                        minHeight: '350px'
+                      }
                     }}
-                    onEditorChange={value => setPost(prev => ({ ...prev, content: value }))}
                   />
                 </div>
               </div>
