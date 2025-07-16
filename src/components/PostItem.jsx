@@ -22,6 +22,12 @@ const PostItem = ({ post }) => {
     return post.images && post.images.length > 0 ? post.images[0] : null;
   };
 
+  const handleImageError = (e) => {
+    // Se a imagem falhar ao carregar, substitui por um placeholder
+    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbSBuw6NvIGRpc3BvbsOtdmVsPC90ZXh0Pjwvc3ZnPg==';
+    e.target.style.objectFit = 'cover';
+  };
+
   return (
     <div className="card h-100 shadow-sm border-0">
       {getFeaturedImage() && (
@@ -31,6 +37,7 @@ const PostItem = ({ post }) => {
             className="card-img-top" 
             alt={post.title}
             style={{ height: '200px', objectFit: 'cover' }}
+            onError={handleImageError}
           />
           <div className="position-absolute top-0 start-0 m-2">
             {post.categories && post.categories.length > 0 ? (

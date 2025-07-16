@@ -22,6 +22,8 @@ const Home = () => {
         new Date(b.published) - new Date(a.published)
       );
       
+
+      
       setPosts(sortedPosts);
       setFilteredPosts(sortedPosts);
       setLoading(false);
@@ -44,6 +46,12 @@ const Home = () => {
     );
     
     setFilteredPosts(filtered);
+  };
+
+  const handleImageError = (e) => {
+    // Se a imagem falhar ao carregar, substitui por um placeholder
+    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbSBuw6NvIGRpc3BvbsOtdmVsPC90ZXh0Pjwvc3ZnPg==';
+    e.target.style.objectFit = 'cover';
   };
 
   if (loading) {
@@ -96,6 +104,7 @@ const Home = () => {
                           className="img-fluid rounded-start h-100 object-fit-cover" 
                           alt={featuredPost.title}
                           style={{ minHeight: '400px' }}
+                          onError={handleImageError}
                         />
                       </div>
                     )}

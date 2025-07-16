@@ -34,12 +34,6 @@ const Header = () => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
         <div className="container">
           <Link className="navbar-brand d-flex align-items-center" to="/">
-            <img 
-              src="/logo.svg" 
-              alt="Jornal Santista" 
-              height="40" 
-              className="me-2"
-            />
             <div>
               <div className="fw-bold fs-4" style={{ letterSpacing: '1px' }}>
                 JORNAL SANTISTA
