@@ -1,21 +1,37 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { createExcerpt } from '../utils/textUtils';
 
 const PostItem = ({ post }) => {
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'Data não disponível';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Data não disponível';
+    }
   };
 
   const getExcerpt = (text, maxLength = 200) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    // Verificar se text existe e é uma string
+    if (!text || typeof text !== 'string' || text.trim() === '') {
+      console.log('⚠️ PostItem: text_content não disponível para post:', post.id, post.title);
+      console.log('   Tentando usar content:', !!post.content, post.content?.length || 0);
+      return 'Conteúdo não disponível...';
+    }
+    
+    return createExcerpt(text, maxLength);
   };
 
   const getFeaturedImage = () => {
@@ -35,7 +51,7 @@ const PostItem = ({ post }) => {
           <img 
             src={getFeaturedImage()} 
             className="card-img-top" 
-            alt={post.title}
+            alt={post.title || 'Imagem da notícia'}
             style={{ height: '200px', objectFit: 'cover' }}
             onError={handleImageError}
           />
@@ -60,18 +76,18 @@ const PostItem = ({ post }) => {
         
         <h5 className="card-title fw-bold mb-3">
           <Link to={`/noticia/${post.id}`} className="text-decoration-none text-dark">
-            {post.title}
+            {post.title || 'Título não disponível'}
           </Link>
         </h5>
         
         <p className="card-text text-muted flex-grow-1">
-          {getExcerpt(post.text_content)}
+          {getExcerpt(post.text_content || post.content)}
         </p>
         
         <div className="mt-auto">
           <div className="d-flex justify-content-between align-items-center">
             <div className="text-muted small">
-              {post.author}
+              {post.author || 'Autor não informado'}
             </div>
             <Link to={`/noticia/${post.id}`} className="btn btn-outline-dark btn-sm">
               Ler

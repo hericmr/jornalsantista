@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPostById } from '../lib/postsService';
+import { stripHtml } from '../utils/textUtils';
 
 const Noticia = () => {
   const { id } = useParams();
@@ -15,6 +16,13 @@ const Noticia = () => {
     try {
       setLoading(true);
       const foundPost = await getPostById(id);
+      console.log('📰 Noticia: Post carregado:', {
+        id: foundPost?.id,
+        title: foundPost?.title,
+        hasTextContent: !!foundPost?.text_content,
+        textContentLength: foundPost?.text_content?.length || 0,
+        source: foundPost?.source
+      });
       setPost(foundPost);
     } catch (error) {
       console.error('Erro ao carregar post:', error);
@@ -24,20 +32,29 @@ const Noticia = () => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'Data não disponível';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Data não disponível';
+    }
   };
 
   const shareOnSocialMedia = (platform) => {
     const url = window.location.href;
     const title = post?.title || 'Jornal Santista';
-    const text = post?.text_content?.substring(0, 100) || '';
+    const text = stripHtml(post?.text_content || post?.content || '').substring(0, 100);
 
     let shareUrl = '';
     switch (platform) {
@@ -107,7 +124,7 @@ const Noticia = () => {
             </li>
           )}
           <li className="breadcrumb-item active" aria-current="page">
-            {post.title}
+            {post.title || 'Notícia'}
           </li>
         </ol>
       </nav>
@@ -136,14 +153,14 @@ const Noticia = () => {
 
             {/* Título */}
             <h1 className="display-4 fw-bold mb-3" style={{ lineHeight: '1.2' }}>
-              {post.title}
+              {post.title || 'Título não disponível'}
             </h1>
 
             {/* Meta informações */}
             <div className="d-flex flex-wrap justify-content-between align-items-center text-muted mb-4">
               <div>
                 <div className="fw-semibold mb-1">
-                  Por {post.author}
+                  Por {post.author || 'Autor não informado'}
                 </div>
                 <div className="small">
                   Publicado em {formatDate(post.published)}
@@ -190,7 +207,7 @@ const Noticia = () => {
                   <img
                     src={image}
                     className="img-fluid rounded shadow-lg"
-                    alt={`${post.title} - Imagem ${idx + 1}`}
+                    alt={`${post.title || 'Notícia'} - Imagem ${idx + 1}`}
                     style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
                     onError={handleImageError}
                   />
@@ -204,9 +221,15 @@ const Noticia = () => {
 
           {/* Texto da matéria */}
           <div className="article-content mb-5">
-            {post.text_content.split('\n').map((paragraph, index) => (
-              <p className="mb-3" key={index}>{paragraph}</p>
-            ))}
+            {(post.text_content || post.content) ? (
+              <div 
+                dangerouslySetInnerHTML={{ 
+                  __html: post.text_content || post.content 
+                }} 
+              />
+            ) : (
+              <p className="text-muted">Conteúdo não disponível.</p>
+            )}
           </div>
 
           {/* Tags e Categorias */}
@@ -245,7 +268,7 @@ const Noticia = () => {
               <div className="card-body">
                 <h5 className="card-title">Sobre o Autor</h5>
                 <p className="card-text">
-                  <strong>{post.author}</strong>
+                  <strong>{post.author || 'Autor não informado'}</strong>
                 </p>
                 <p className="card-text text-muted small">
                   Jornalista do Jornal Santista
@@ -303,7 +326,7 @@ const Noticia = () => {
                   )}
                   <li className="mb-2">
                     <small className="text-muted">Autor:</small><br />
-                    {post.author}
+                    {post.author || 'Autor não informado'}
                   </li>
                   {post.categories && post.categories.length > 0 && (
                     <li>

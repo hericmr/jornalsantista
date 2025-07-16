@@ -48,11 +48,11 @@ const Sobre = () => {
             <div className="card shadow-sm">
               <div className="card-body p-5">
                 <div className="article-content">
-                  {sobrePost.text_content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-3">
-                      {paragraph}
-                    </p>
-                  ))}
+                  <div 
+                    dangerouslySetInnerHTML={{ 
+                      __html: sobrePost.text_content 
+                    }} 
+                  />
                 </div>
                 
                 <div className="mt-4 pt-4 border-top text-muted">

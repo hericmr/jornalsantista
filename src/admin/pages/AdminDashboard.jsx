@@ -36,7 +36,16 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
+      console.log('📊 Carregando estatísticas...');
       const news = await getAllPosts();
+      console.log('📰 Total de notícias carregadas:', news.length);
+      
+      // Separar posts por origem
+      const localPosts = news.filter(post => post.source === 'local');
+      const supabasePosts = news.filter(post => post.source === 'supabase');
+      
+      console.log('📄 Posts locais:', localPosts.length);
+      console.log('🗄️ Posts do Supabase:', supabasePosts.length);
       
       // Extrair categorias únicas
       const categories = new Set();
@@ -52,7 +61,9 @@ const AdminDashboard = () => {
       setStats({
         totalNews: news.length,
         totalCategories: categories.size,
-        recentNews
+        recentNews,
+        localPosts: localPosts.length,
+        supabasePosts: supabasePosts.length
       });
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
@@ -68,6 +79,15 @@ const AdminDashboard = () => {
             <Link to="/admin/noticias" className="btn btn-sm btn-outline-primary">
               Gerenciar Notícias
             </Link>
+            <button 
+              onClick={() => {
+                fetchStats();
+                testDatabaseConnection();
+              }} 
+              className="btn btn-sm btn-outline-secondary"
+            >
+              Atualizar Dados
+            </button>
           </div>
         </div>
       </div>
@@ -132,6 +152,30 @@ const AdminDashboard = () => {
                  dbStatus === 'testing' ? 'Testando...' : 
                  dbStatus === 'error' ? 'Erro de Conexão' : 'Status Desconhecido'}
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-6 col-lg-3">
+          <div className="card stat-card">
+            <div className="card-body text-center">
+              <div className="stat-icon">
+                <FaNewspaper />
+              </div>
+              <h3 className="stat-number">{stats.localPosts || 0}</h3>
+              <p className="stat-label">Posts Locais</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-6 col-lg-3">
+          <div className="card stat-card">
+            <div className="card-body text-center">
+              <div className="stat-icon">
+                <FaBolt />
+              </div>
+              <h3 className="stat-number">{stats.supabasePosts || 0}</h3>
+              <p className="stat-label">Posts Supabase</p>
             </div>
           </div>
         </div>

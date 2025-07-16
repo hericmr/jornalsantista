@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import PostItem from '../components/PostItem';
 import { getAllPosts } from '../lib/postsService';
 import SearchBar from '../components/SearchBar';
+import { createExcerpt, containsSearchTerm } from '../utils/textUtils';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -17,6 +18,20 @@ const Home = () => {
     try {
       setLoading(true);
       const posts = await getAllPosts();
+      console.log('🏠 Home: Posts carregados:', posts.length);
+      
+      // Verificar posts do Supabase
+      const supabasePosts = posts.filter(post => post.source === 'supabase');
+      console.log('🗄️ Home: Posts do Supabase:', supabasePosts.length);
+      
+      supabasePosts.forEach(post => {
+        console.log(`📝 Home: Post "${post.title}" - text_content: ${!!post.text_content}, length: ${post.text_content?.length || 0}`);
+        if (!post.text_content) {
+          console.log(`⚠️ Home: Post "${post.title}" não tem text_content!`);
+          console.log(`   Content: ${!!post.content}, length: ${post.content?.length || 0}`);
+        }
+      });
+      
       setPosts(posts);
       setFilteredPosts(posts);
     } catch (error) {
@@ -32,11 +47,11 @@ const Home = () => {
       return;
     }
 
-    const filtered = posts.filter(post =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.text_content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = posts.filter(post => {
+      return post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             containsSearchTerm(post.text_content || post.content || '', searchTerm) ||
+             post.author.toLowerCase().includes(searchTerm.toLowerCase());
+    });
     
     setFilteredPosts(filtered);
   };
@@ -118,7 +133,10 @@ const Home = () => {
                           {featuredPost.title}
                         </h1>
                         <p className="card-text lead text-muted mb-4">
-                          {featuredPost.text_content.substring(0, 300)}...
+                          {(featuredPost.text_content || featuredPost.content) ? 
+                            createExcerpt(featuredPost.text_content || featuredPost.content, 300) : 
+                            'Conteúdo não disponível...'
+                          }
                         </p>
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="text-muted">

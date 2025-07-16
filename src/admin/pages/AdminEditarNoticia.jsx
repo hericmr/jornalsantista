@@ -37,7 +37,7 @@ const AdminEditarNoticia = () => {
           id: foundPost.id,
           title: foundPost.title || '',
           excerpt: foundPost.excerpt || '',
-          content: foundPost.content || foundPost.text_content || '',
+          content: foundPost.text_content || foundPost.content || '', // Priorizar text_content
           categories: foundPost.categories || [],
           author: foundPost.author || '',
           published: foundPost.published_at || foundPost.published ? 
@@ -47,7 +47,12 @@ const AdminEditarNoticia = () => {
           status: foundPost.status || 'draft'
         };
         
-        console.log('Dados mapeados:', postData); // Debug
+        console.log('Dados mapeados para editor:', postData); // Debug
+        console.log('Conteúdo do post:', {
+          text_content: foundPost.text_content,
+          content: foundPost.content,
+          finalContent: postData.content
+        });
         setPost(postData);
       } else {
         alert('Notícia não encontrada');
@@ -94,7 +99,7 @@ const AdminEditarNoticia = () => {
       const postData = {
         title: post.title,
         excerpt: post.excerpt,
-        content: post.content,
+        text_content: post.content, // Mapear content para text_content
         categories: post.categories,
         author: post.author,
         published_at: post.published ? new Date(post.published).toISOString() : null,
@@ -103,12 +108,21 @@ const AdminEditarNoticia = () => {
         status: post.status
       };
 
-      if (id && !id.startsWith('local-')) {
+      console.log('📝 Dados a serem salvos:', postData);
+      console.log('📄 Conteúdo:', postData.text_content);
+      console.log('📏 Tamanho do conteúdo:', postData.text_content?.length || 0);
+
+      // Verificar se o ID é um UUID válido (formato do Supabase)
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      
+      if (id && isValidUUID.test(id)) {
         // Atualizar postagem existente do Supabase
+        console.log('🔄 Atualizando post existente com ID:', id);
         await savePost({ ...postData, id }, false);
         alert('Notícia atualizada com sucesso!');
       } else {
         // Criar nova postagem no Supabase
+        console.log('🆕 Criando nova postagem');
         await savePost(postData, true);
         alert('Notícia criada com sucesso!');
       }
