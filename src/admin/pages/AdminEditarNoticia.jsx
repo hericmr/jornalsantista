@@ -19,7 +19,9 @@ const AdminEditarNoticia = () => {
   });
 
   useEffect(() => {
-    loadPost();
+    if (id) {
+      loadPost();
+    }
   }, [id]);
 
   const loadPost = async () => {
