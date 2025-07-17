@@ -46,6 +46,11 @@ const AdminSidebar = () => {
               </NavLink>
             </li>
           ))}
+          <li className="nav-item">
+            <a className="nav-link" href="/admin/noticias/nova">
+              + Nova Notícia
+            </a>
+          </li>
         </ul>
       </nav>
     </div>

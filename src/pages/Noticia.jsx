@@ -117,6 +117,22 @@ const Noticia = () => {
     );
   }
 
+  // Antes do render
+  let images = post.images;
+  if (!images) {
+    images = [];
+  } else if (typeof images === 'string') {
+    try {
+      images = JSON.parse(images);
+      if (!Array.isArray(images)) images = [images];
+    } catch {
+      images = images ? [images] : [];
+    }
+  } else if (!Array.isArray(images)) {
+    images = [images];
+  }
+  images = images.filter(Boolean).map(url => url && typeof url === 'string' ? getFullImageUrl(url) : url);
+
   return (
     <>
       {showNewsletter && <NewsletterModal onClose={() => setShowNewsletter(false)} />}
@@ -222,23 +238,23 @@ const Noticia = () => {
             </div>
           </header>
 
-          {/* Todas as imagens da matéria */}
-          {post.images && post.images.length > 0 && (
+          {/* Imagens do bucket (galeria/thumbnail) */}
+          {images.length > 0 && (
             <div className="mb-4">
-              {post.images.map((image, idx) => (
-                <div key={idx} className="mb-3">
+              {images.map((image, idx) => (
+                <figure key={idx} className="mb-3 text-center">
                   <img
                     src={image}
                     className="img-fluid rounded shadow-lg"
                     alt={`${post.title || 'Notícia'} - Imagem ${idx + 1}`}
+                    title={post.title || 'Notícia'}
                     style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
                     onError={handleImageError}
                     loading="lazy"
                   />
-                  <small className="text-muted d-block mt-2 text-center">
-                    Imagem {idx + 1} de {post.images.length}
-                  </small>
-                </div>
+                  {/* Legenda opcional, se houver */}
+                  {/* <figcaption className="text-muted small mt-2">Legenda da imagem</figcaption> */}
+                </figure>
               ))}
             </div>
           )}

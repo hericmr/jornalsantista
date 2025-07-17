@@ -14,6 +14,7 @@ import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminLayout from './admin/components/AdminLayout';
 import AdminNoticias from './admin/pages/AdminNoticias';
 import AdminEditarNoticia from './admin/pages/AdminEditarNoticia';
+import AdminNovaNoticia from './admin/pages/AdminNovaNoticia';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -98,6 +99,13 @@ function App() {
             <ProtectedRoute>
               <AdminLayout>
                 <AdminEditarNoticia />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/noticias/nova" element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminNovaNoticia />
               </AdminLayout>
             </ProtectedRoute>
           } />

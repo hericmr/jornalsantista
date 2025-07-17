@@ -603,8 +603,14 @@ footer {
 }
 
 .admin-content {
-  margin-left: 250px;
   padding: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #23272b;
+  color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
 }
 
 .admin-header {
@@ -671,6 +677,9 @@ footer {
 /* Admin Editar Noticia */
 .admin-editar-noticia {
   padding: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
 }
 
 .admin-editar-noticia .card {
@@ -691,6 +700,69 @@ footer {
 
 .admin-editar-noticia textarea {
   resize: vertical;
+}
+
+.admin-editar-noticia input,
+.admin-editar-noticia textarea,
+.admin-editar-noticia select {
+  background: #181a1b;
+  color: #f8f9fa;
+  border: 1px solid #343a40;
+}
+
+.admin-editar-noticia input:focus,
+.admin-editar-noticia textarea:focus,
+.admin-editar-noticia select:focus {
+  background: #23272b;
+  color: #fff;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+}
+
+.admin-editar-noticia .btn,
+.admin-editar-noticia .btn:focus {
+  color: #fff;
+  background: #343a40;
+  border: 1px solid #23272b;
+}
+
+.admin-editar-noticia .btn-success {
+  background: #198754;
+  border-color: #198754;
+}
+
+.admin-editar-noticia .btn-outline-secondary {
+  background: transparent;
+  color: #adb5bd;
+  border-color: #495057;
+}
+
+.admin-editar-noticia .btn-outline-secondary:hover {
+  background: #495057;
+  color: #fff;
+}
+
+.admin-editar-noticia .btn-light {
+  background: #343a40;
+  color: #f8f9fa;
+  border: 1px solid #23272b;
+}
+
+.admin-editar-noticia .btn-light:hover {
+  background: #23272b;
+  color: #fff;
+}
+
+.admin-editar-noticia .card {
+  background: #23272b;
+  color: #f8f9fa;
+  border: none;
+}
+
+.admin-editar-noticia .card-header {
+  background: #181a1b;
+  color: #f8f9fa;
+  border-bottom: 1px solid #343a40;
 }
 
 /* Icon styles */
@@ -1053,4 +1125,54 @@ footer {
 .news-grid-empty__content p {
   margin: 0;
   color: #999;
+} 
+
+/* TipTap editor custom styles */
+.tiptap-editor-wrapper figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.5em 0;
+}
+.tiptap-editor-wrapper img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.tiptap-editor-wrapper figcaption {
+  font-size: 0.95em;
+  color: #bbb;
+  margin-top: 0.5em;
+  text-align: center;
+}
+/* Garante que o editor tenha fundo escuro e texto claro, mas imagens fiquem normais */
+.tiptap-editor-wrapper {
+  background: #181a1b;
+  color: #f8f9fa;
+  min-height: 400px;
+  height: auto;
+  padding: 1rem;
+  font-size: 1.1rem;
+  position: relative;
+} 
+
+.tiptap-editor-wrapper p.is-empty.is-editor-empty {
+  min-height: 400px;
+  font-size: 1.1rem;
+  color: #888;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.tiptap-editor-wrapper [data-placeholder]::before {
+  content: attr(data-placeholder);
+  color: #888;
+  font-style: italic;
+  pointer-events: none;
+  position: absolute;
+  left: 1.2rem;
+  top: 1.2rem;
+  font-size: 1.1rem;
 } 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
 import { getPostById, savePost } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
+import { supabase } from '../../lib/supabase';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -20,12 +21,17 @@ const AdminEditarNoticia = () => {
     tags: [],
     status: 'draft'
   });
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => {
     if (id) {
       loadPost();
     }
   }, [id]);
+
+  useEffect(() => {
+    console.log('Estado atual das imagens:', post.images);
+  }, [post.images]);
 
   const loadPost = async () => {
     try {
@@ -75,14 +81,55 @@ const AdminEditarNoticia = () => {
     }));
   };
 
+  // Upload para Supabase (igual AdminNovaNoticia)
+  const uploadImageToSupabase = async (file) => {
+    const fileName = `${Date.now()}-${file.name}`;
+    console.log('Tentando enviar arquivo:', file);
+    const { data, error } = await supabase.storage.from('noticias-imagens').upload(fileName, file);
+    console.log('Resultado do upload:', data, error);
+    if (error) {
+      console.error('Erro detalhado do upload:', error);
+      alert('Erro ao enviar imagem: ' + error.message);
+      return null;
+    }
+    const { data: publicUrlData, error: publicUrlError } = supabase.storage.from('noticias-imagens').getPublicUrl(fileName);
+    console.log('Resultado do getPublicUrl:', publicUrlData, publicUrlError);
+    if (publicUrlData && publicUrlData.publicUrl) {
+      return publicUrlData.publicUrl;
+    } else {
+      alert('Erro ao obter URL pública da imagem!');
+      return null;
+    }
+  };
+
+  // Corrigir handleImageChange para armazenar arquivos selecionados
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const imageUrls = files.map(file => URL.createObjectURL(file));
-    
-    setPost(prev => ({
-      ...prev,
-      images: [...prev.images, ...imageUrls]
-    }));
+    setSelectedFiles(files);
+  };
+
+  // Função para enviar imagens selecionadas
+  const handleUploadImages = async () => {
+    if (!selectedFiles.length) return;
+    const uploadedUrls = [];
+    for (const file of selectedFiles) {
+      const url = await uploadImageToSupabase(file);
+      if (url) uploadedUrls.push(url);
+    }
+    console.log('Imagens enviadas:', uploadedUrls); // Log para depuração
+    if (uploadedUrls.length === 0) {
+      alert('Nenhuma imagem foi enviada com sucesso!');
+      return;
+    }
+    setPost(prev => {
+      const newImages = [...prev.images, ...uploadedUrls];
+      console.log('Novo array de imagens:', newImages); // Log para depuração
+      return {
+        ...prev,
+        images: newImages
+      };
+    });
+    setSelectedFiles([]); // Limpa seleção após upload
   };
 
   const removeImage = (index) => {
@@ -422,14 +469,29 @@ const AdminEditarNoticia = () => {
                     <FaImage className="me-2" />
                     Adicionar Imagens
                   </label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    id="images"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
+                  <div className="d-flex gap-2 align-items-center">
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="images"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-success"
+                      onClick={handleUploadImages}
+                      disabled={selectedFiles.length === 0}
+                    >
+                      Enviar Imagem{selectedFiles.length > 1 ? 's' : ''}
+                    </button>
+                  </div>
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-2 small text-muted">
+                      {selectedFiles.length} arquivo(s) selecionado(s)
+                    </div>
+                  )}
                 </div>
 
                 {post.images.length > 0 && (
