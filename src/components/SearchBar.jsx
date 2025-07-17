@@ -9,7 +9,7 @@ const SearchBar = ({ onSearch }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4">
+    <form onSubmit={handleSubmit} className="">
       <div className="input-group">
         <input
           type="text"

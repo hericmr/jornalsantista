@@ -1,20 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@4000&display=swap');
+
 /* Estilos personalizados para o Jornal Santista */
 
 body {
-  font-family: 'Georgia', 'Times New Roman', serif;
-  line-height: 1.6;
-  color: #333;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-size: 1.08rem;
+  line-height: 17;
+  color: #fff;
+  background: #000;
 }
 
-/* Headers com fonte serifada para aparência jornalística */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: 'Merriweather', serif;
   font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  margin-bottom: 1rem;
 }
 
+h1 {
+  font-size: 2.5rem;
+  text-transform: none;
+}
 
+h2 {
+  font-size: 2rem;
+}
 
-/* Cards com aparência mais jornalística */
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.2rem;
+}
+
+h5, h6 {
+  font-size: 1rem;
+}
+
+.journal-title {
+  font-family: 'Merriweather', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.slogan-text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.nav-link, .navbar-brand {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link.active, .nav-link:focus, .nav-link:hover {
+  color: #fff !important;
+  text-decoration: underline;
+}
+
 .card {
   border: none;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -713,4 +767,290 @@ footer {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-top: none;
+} 
+
+/* Menu lateral estilo Intercept */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1050;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.menu-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #222;
+  z-index: 1051;
+  animation: slideInRight 0.3s ease-out;
+  overflow-y: auto;
+  box-shadow: -2px 0 16px rgba(0,0,0,0.2);
+}
+
+.menu-header {
+  border-bottom: 1px solid #444;
+}
+
+.menu-content .nav-link {
+  color: #fff !important;
+  border-bottom: 1px solid #333;
+  padding: 1rem 0;
+}
+
+.menu-content .nav-link:hover,
+.menu-content .nav-link.active {
+  color: #fff !important;
+  background: #333;
+  text-decoration: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+} 
+
+/* PostItem - Padrão Intercept */
+.news-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Imagem no topo */
+.news-card__image-container {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+}
+
+.news-card__image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.news-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-card__image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Categoria sobreposta */
+.news-card__category {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+}
+
+.news-card__category-badge {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Conteúdo do card */
+.news-card__content {
+  padding: 24px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título grande */
+.news-card__title {
+  margin: 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+.news-card__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Resumo */
+.news-card__excerpt {
+  margin: 0 0 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666;
+  flex-grow: 1;
+}
+
+/* Meta informações */
+.news-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  font-size: 0.875rem;
+}
+
+.news-card__author {
+  font-weight: 600;
+  color: #333;
+}
+
+.news-card__date {
+  color: #999;
+}
+
+/* Grid responsivo */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .news-card__image-container {
+    height: 200px;
+  }
+  
+  .news-card__content {
+    padding: 20px;
+  }
+  
+  .news-card__title {
+    font-size: 1.25rem;
+  }
+  
+  .news-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-card__image-container {
+    height: 180px;
+  }
+  
+  .news-card__content {
+    padding: 16px;
+  }
+  
+  .news-card__title {
+    font-size: 1.125rem;
+    margin-bottom: 12px;
+  }
+  
+  .news-card__excerpt {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+}
+
+/* Variações de tamanho */
+.news-card--featured {
+  grid-column: span 2;
+}
+
+.news-card--featured .news-card__image-container {
+  height: 320px;
+}
+
+.news-card--featured .news-card__title {
+  font-size: 2rem;
+}
+
+.news-card--featured .news-card__excerpt {
+  font-size: 1.125rem;
+}
+
+/* Estados de loading */
+.news-card--loading {
+  opacity: 0.7;
+}
+
+.news-card--loading .news-card__image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 0%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Loading shimmer */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 0%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Estado vazio */
+.news-grid-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.news-grid-empty__content {
+  text-align: center;
+  color: #999;
+}
+
+.news-grid-empty__content h3 {
+  margin: 16px 0 8px 0;
+  color: #666;
+}
+
+.news-grid-empty__content p {
+  margin: 0;
+  color: #999;
 } 

@@ -1,85 +1,44 @@
-import { useEffect } from 'react';
+import React from 'react';
 
-const MetaTags = ({ 
-  title, 
-  description, 
-  image, 
-  url, 
-  type = 'article',
+const MetaTags = ({
+  title = 'Jornal Santista - Notícias Locais e Regionais',
+  description = 'Jornal Santista - Sua fonte de notícias locais e regionais. Fique por dentro das principais notícias da região.',
+  image = '/js.webp',
+  url = window.location.href,
+  type = 'website',
   author,
   publishedTime,
-  modifiedTime 
+  modifiedTime
 }) => {
-  useEffect(() => {
-    // Atualizar título da página
-    document.title = title || 'Jornal Santista';
-    
-    // Função para atualizar ou criar meta tags
-    const updateMetaTag = (name, content) => {
-      let meta = document.querySelector(`meta[name="${name}"]`);
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.name = name;
-        document.head.appendChild(meta);
-      }
-      meta.content = content;
-    };
-
-    // Função para atualizar ou criar meta tags de propriedade (Open Graph)
-    const updatePropertyTag = (property, content) => {
-      let meta = document.querySelector(`meta[property="${property}"]`);
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('property', property);
-        document.head.appendChild(meta);
-      }
-      meta.content = content;
-    };
-
-    // Meta tags básicas
-    updateMetaTag('description', description || 'Jornal Santista - Notícias locais e regionais');
-    updateMetaTag('author', author || 'Jornal Santista');
-    
-    // Open Graph tags
-    updatePropertyTag('og:title', title || 'Jornal Santista');
-    updatePropertyTag('og:description', description || 'Jornal Santista - Notícias locais e regionais');
-    updatePropertyTag('og:type', type);
-    updatePropertyTag('og:url', url || window.location.href);
-    
-    if (image) {
-      updatePropertyTag('og:image', image);
-      updatePropertyTag('og:image:width', '1200');
-      updatePropertyTag('og:image:height', '630');
-    }
-    
-    if (author) {
-      updatePropertyTag('og:author', author);
-    }
-    
-    if (publishedTime) {
-      updatePropertyTag('article:published_time', publishedTime);
-    }
-    
-    if (modifiedTime) {
-      updatePropertyTag('article:modified_time', modifiedTime);
-    }
-    
-    // Twitter Card tags
-    updatePropertyTag('twitter:card', 'summary_large_image');
-    updatePropertyTag('twitter:title', title || 'Jornal Santista');
-    updatePropertyTag('twitter:description', description || 'Jornal Santista - Notícias locais e regionais');
-    
-    if (image) {
-      updatePropertyTag('twitter:image', image);
-    }
-
-    // Cleanup function
-    return () => {
-      document.title = 'Jornal Santista';
-    };
-  }, [title, description, image, url, type, author, publishedTime, modifiedTime]);
-
-  return null; // Este componente não renderiza nada
+  return (
+    <>
+      {/* Meta tags padrão */}
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content="jornal, notícias, santista, região, local, jornalismo" />
+      <meta name="author" content={author || 'Jornal Santista'} />
+      {/* Open Graph */}
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:type" content={type} />
+      <meta property="og:url" content={url} />
+      <meta property="og:site_name" content="Jornal Santista" />
+      <meta property="og:image" content={image} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      {author && <meta property="article:author" content={author} />}
+      {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+      {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+      {/* PWA e extras */}
+      <meta name="theme-color" content="#000" />
+      <meta name="apple-mobile-web-app-title" content="Jornal Santista" />
+    </>
+  );
 };
 
 export default MetaTags; 

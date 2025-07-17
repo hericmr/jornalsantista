@@ -1,84 +1,89 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { FaBars, FaSearch, FaTimes } from 'react-icons/fa';
+import SearchBar from './SearchBar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Header = () => {
-  const currentDate = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+
+  const navLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/categorias', label: 'Categorias' },
+    { to: '/sobre', label: 'Sobre' },
+    { to: '/contato', label: 'Contato' }
+  ];
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setShowSearch(false);
+  };
 
   return (
     <>
-      {/* Barra superior com data */}
-      <div className="bg-dark text-white py-1">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-md-6">
-              <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                {currentDate}
-              </small>
-            </div>
-            <div className="col-md-6 text-end">
-              <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                Baixada Santista, SP
-              </small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Header principal */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark border-bottom py-2">
-        <div className="container">
-          <Link className="navbar-brand d-flex align-items-center" to="/">
-            <div>
-              <div className="fw-bold fs-5" style={{ letterSpacing: '1px' }}>
-                JORNAL SANTISTA
-              </div>
-              <small className="text-muted d-block" style={{ fontSize: '0.65rem' }}>
-                Uma visão crítica sobre a nossa realidade
-              </small>
-            </div>
+      <header className="header-intercept shadow-sm bg-dark border-bottom">
+        <nav className="container d-flex align-items-center justify-content-between py-2">
+          {/* Logo */}
+          <Link to="/" className="navbar-brand d-flex align-items-center p-0 m-0">
+            <span className="fw-bold fs-2 journal-title text-uppercase" style={{ letterSpacing: '2px', fontFamily: 'Merriweather, serif' }}>
+              Jornal Santista
+            </span>
           </Link>
           
-          <button 
-            className="navbar-toggler" 
-            type="button" 
-            data-bs-toggle="collapse" 
-            data-bs-target="#navbarNav"
+          {/* Botão do menu */}
+          <button
+            className="btn border-0 bg-transparent text-white"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Abrir menu"
           >
-            <span className="navbar-toggler-icon"></span>
+            <FaBars size={24} />
           </button>
-          
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav ms-auto">
-              <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/">
-                  Home
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/categorias">
-                  Categorias
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/sobre">
-                  Sobre
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/contato">
-                  Contato
-                </Link>
-              </li>
-            </ul>
+        </nav>
+      </header>
+
+      {/* Menu lateral */}
+      {menuOpen && (
+        <div className="menu-overlay" onClick={closeMenu}>
+          <div className="menu-sidebar" onClick={(e) => e.stopPropagation()}>
+            <div className="menu-header d-flex justify-content-between align-items-center p-3">
+              <h5 className="mb-0 text-white">Menu</h5>
+              <button
+                className="btn border-0 bg-transparent text-white"
+                onClick={closeMenu}
+                aria-label="Fechar menu"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+            
+            <div className="menu-content p-3">
+              {/* Busca */}
+              <div className="mb-4">
+                <SearchBar onSearch={() => {}} />
+              </div>
+              
+              {/* Navegação */}
+              <ul className="nav flex-column">
+                {navLinks.map(link => (
+                  <li key={link.to} className="nav-item">
+                    <NavLink
+                      to={link.to}
+                      className={({ isActive }) =>
+                        `nav-link text-uppercase fw-semibold py-2${isActive ? ' active' : ''}`
+                      }
+                      style={{ letterSpacing: '1px', fontSize: '1rem' }}
+                      onClick={closeMenu}
+                    >
+                      {link.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-      </nav>
+      )}
     </>
   );
 };

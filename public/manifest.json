@@ -1,0 +1,27 @@
+{
+  "name": "Jornal Santista",
+  "short_name": "Jornal Santista",
+  "description": "Sua fonte de notícias locais e regionais da Baixada Santista.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/js.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/js.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "media"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+} 

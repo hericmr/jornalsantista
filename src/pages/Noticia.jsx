@@ -224,6 +224,7 @@ const Noticia = () => {
                     alt={`${post.title || 'Notícia'} - Imagem ${idx + 1}`}
                     style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
                     onError={handleImageError}
+                    loading="lazy"
                   />
                   <small className="text-muted d-block mt-2 text-center">
                     Imagem {idx + 1} de {post.images.length}

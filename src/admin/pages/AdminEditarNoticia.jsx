@@ -439,9 +439,10 @@ const AdminEditarNoticia = () => {
                           <div className="position-relative">
                             <img
                               src={image}
-                              alt={`Imagem ${index + 1}`}
+                              alt={`${post.title || 'Notícia'} - Imagem ${index + 1}`}
                               className="img-fluid rounded"
                               style={{ height: '100px', objectFit: 'cover', width: '100%' }}
+                              loading="lazy"
                             />
                             <button
                               type="button"
