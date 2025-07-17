@@ -153,47 +153,11 @@ const Noticia = () => {
       />
       
       <div className="container mt-4">
-        {/* Breadcrumb Desktop */}
-        <nav aria-label="breadcrumb" className="mb-4 d-none d-md-block">
-          <ol className="breadcrumb small breadcrumb-mobile-small">
-            <li className="breadcrumb-item">
-              <Link to="/" className="text-decoration-none">Home</Link>
-            </li>
-            {post.categories && post.categories.length > 0 && (
-              <li className="breadcrumb-item">
-                <Link to={`/categorias/${post.categories[0]}`} className="text-decoration-none">
-                  {post.categories[0]}
-                </Link>
-              </li>
-            )}
-            <li className="breadcrumb-item active" aria-current="page">
-              {post.title || 'Notícia'}
-            </li>
-          </ol>
-        </nav>
-
         <article className="row">
           {/* Conteúdo Principal */}
           <div className="col-lg-9">
             {/* Header da Notícia */}
             <header className="mb-4">
-              {/* Categorias */}
-              <div className="mb-3">
-                {post.categories && post.categories.length > 0 ? (
-                  post.categories.map((category, index) => (
-                    <Link 
-                      key={index} 
-                      to={`/categorias/${category}`} 
-                      className="badge bg-primary me-1 text-decoration-none"
-                    >
-                      {category}
-                    </Link>
-                  ))
-                ) : (
-                  <span className="badge bg-secondary">Sem categoria</span>
-                )}
-              </div>
-
               {/* Título */}
               <h1 className="display-4 fw-bold mb-3" style={{ lineHeight: '1.2' }}>
                 {post.title || 'Título não disponível'}
