@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
 import { getAllPosts, deletePost } from '../../lib/postsService';
+import { slugify } from '../../utils/textUtils';
 
 const AdminNoticias = () => {
   const [posts, setPosts] = useState([]);
@@ -106,7 +107,7 @@ const AdminNoticias = () => {
                     <td>
                       <div className="btn-group btn-group-sm">
                         <Link 
-                          to={`/noticia/${post.slug || post.id}`} 
+                          to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} 
                           className="btn btn-outline-info"
                           title="Visualizar"
                         >

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { createExcerpt } from '../utils/textUtils';
+import { createExcerpt, slugify } from '../utils/textUtils';
 
 const PostItem = ({ post }) => {
   const formatDate = (dateString) => {
@@ -52,7 +52,7 @@ const PostItem = ({ post }) => {
       {/* Imagem no topo */}
       <div className="news-card__image-container">
         {getFeaturedImage() ? (
-          <Link to={`/noticia/${post.id}`} className="news-card__image-link">
+          <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="news-card__image-link">
             <img 
               src={getFeaturedImage()} 
               className="news-card__image" 
@@ -84,7 +84,7 @@ const PostItem = ({ post }) => {
       <div className="news-card__content">
         {/* Título grande */}
         <h3 className="news-card__title">
-          <Link to={`/noticia/${post.id}`} className="news-card__title-link">
+          <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="news-card__title-link">
             {post.title || 'Título não disponível'}
           </Link>
         </h3>
