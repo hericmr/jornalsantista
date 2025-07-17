@@ -242,3 +242,12 @@
     padding-top: 2rem;
   }
 }
+
+.news-card__image {
+  width: 100%;
+  min-height: 200px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
