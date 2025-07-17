@@ -63,12 +63,13 @@ const Noticia = () => {
   const shareOnSocialMedia = (platform) => {
     const url = window.location.href;
     const title = post?.title || 'Jornal Santista';
-    const text = stripHtml(post?.text_content || post?.content || '').substring(0, 100);
+    // const text = stripHtml(post?.text_content || post?.content || '').substring(0, 100);
 
     let shareUrl = '';
     switch (platform) {
       case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(`${title} - ${text} ${url}`)}`;
+        // Inclui título e link no texto
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`;
         break;
       case 'facebook':
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
@@ -82,7 +83,6 @@ const Noticia = () => {
       default:
         return;
     }
-    
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
@@ -308,11 +308,6 @@ const Noticia = () => {
             </div>
 
             {/* Navegação */}
-            <div className="border-top pt-4">
-              <Link to="/" className="btn btn-dark">
-                ← Voltar para Home
-              </Link>
-            </div>
           </div>
 
           {/* Sidebar */}
@@ -359,9 +354,17 @@ const Noticia = () => {
                     </>
                   )}
                   {/* Remover parágrafos genéricos de autor */}
-                  {post.author !== "Héric Moura" && (
+                  {post.author !== "Héric Moura" && post.author !== "Walter Parreira" && post.author && (
                     <>
-                      {/* Aqui você pode manter outros autores, se desejar */}
+                      <div className="text-center mb-3">
+                        <i className="bi bi-person-circle" style={{ fontSize: '4rem', color: '#888' }}></i>
+                      </div>
+                      <p className="card-text mb-1">
+                        <strong>{post.author}</strong>
+                      </p>
+                      <p className="card-text small mb-0">
+                        Autor(a) convidado(a) do Jornal Santista.
+                      </p>
                     </>
                   )}
                 </div>

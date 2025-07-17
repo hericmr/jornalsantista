@@ -1,0 +1,1192 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@4000&display=swap');
+
+/* Estilos personalizados para o Jornal Santista */
+
+body {
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-size: 1.08rem;
+  line-height: 17;
+  color: #fff;
+  background: #000;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Merriweather', serif;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+  text-transform: none;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.2rem;
+}
+
+h5, h6 {
+  font-size: 1rem;
+}
+
+.journal-title {
+  font-family: 'Merriweather', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.slogan-text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.nav-link, .navbar-brand {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link.active, .nav-link:focus, .nav-link:hover {
+  color: #fff !important;
+  text-decoration: underline;
+}
+
+.card {
+  border: none;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border-radius: 8px;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.card-title a:hover {
+  color: #000 !important;
+  text-decoration: underline !important;
+}
+
+/* Conteúdo de artigos */
+.article-content {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.article-content p {
+  text-align: justify;
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Estilos para conteúdo HTML do editor */
+.article-content strong,
+.article-content b {
+  font-weight: 700;
+}
+
+.article-content em,
+.article-content i {
+  font-style: italic;
+}
+
+.article-content u {
+  text-decoration: underline;
+}
+
+.article-content ul,
+.article-content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+}
+
+.article-content li {
+  margin-bottom: 0.5rem;
+}
+
+.article-content blockquote {
+  border-left: 4px solid #333;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #666;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* Estilos específicos para página de notícia */
+.article-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.article-content h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+.article-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Sidebar sticky */
+.sticky-top {
+  z-index: 1020;
+}
+
+/* Botões de compartilhamento */
+.btn-outline-success {
+  border-color: #198754;
+  color: #198754;
+}
+
+.btn-outline-success:hover {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-outline-primary {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-outline-info {
+  border-color: #0dcaf0;
+  color: #0dcaf0;
+}
+
+.btn-outline-info:hover {
+  background-color: #0dcaf0;
+  border-color: #0dcaf0;
+}
+
+/* Badges mais elegantes */
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.5em 0.75em;
+  border-radius: 20px;
+}
+
+.badge.bg-primary {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+/* Breadcrumbs */
+.breadcrumb-item + .breadcrumb-item::before {
+  content: ">";
+  color: #6c757d;
+}
+
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.breadcrumb-mobile-small {
+  /* já é small, mas vamos reduzir ainda mais em mobile */
+}
+
+@media (max-width: 600px) {
+  .breadcrumb-mobile-small {
+    font-size: 0.75rem !important;
+  }
+  .breadcrumb-mobile-small .breadcrumb-item,
+  .breadcrumb-mobile-small .breadcrumb-item a {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Botões mais elegantes */
+.btn-dark {
+  background-color: #000;
+  border-color: #000;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.btn-dark:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+.btn-outline-dark {
+  border-color: #000;
+  color: #000;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.btn-outline-dark:hover {
+  background-color: #000;
+  border-color: #000;
+}
+
+/* Formulários */
+.form-control:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.25);
+}
+
+.form-control {
+  border-radius: 6px;
+  border: 2px solid #e9ecef;
+}
+
+/* Navbar mais elegante e compacta */
+.navbar {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 1rem;
+  min-height: 60px;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 1.25rem;
+  padding: 0.25rem 0;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  transition: color 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #fff !important;
+}
+
+.navbar-toggler {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Seções com bordas */
+.border-bottom {
+  border-color: #e9ecef !important;
+}
+
+/* Ícones */
+.bi {
+  color: inherit;
+}
+
+/* Texto muted mais legível */
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Sombras mais suaves */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Loading spinner */
+.spinner-border {
+  color: #000;
+}
+
+/* Alertas */
+.alert-info {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #495057;
+  border-radius: 8px;
+}
+
+/* Responsividade para imagens */
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}
+
+/* Links */
+a {
+  color: #000;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #333;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  background-color: #000 !important;
+}
+
+/* Listas */
+.list-group-item.active {
+  background-color: #000;
+  border-color: #000;
+}
+
+/* Container fluid para melhor uso do espaço */
+.container-fluid {
+  max-width: 1400px;
+}
+
+/* Títulos de seção */
+.text-uppercase {
+  letter-spacing: 1px;
+}
+
+/* Espaçamentos */
+.mb-5 {
+  margin-bottom: 3rem !important;
+}
+
+.pb-3 {
+  padding-bottom: 1rem !important;
+}
+
+/* Cards de destaque */
+.card.shadow-lg {
+  border-radius: 12px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.25rem 0.5rem;
+    min-height: 50px;
+  }
+  
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+  
+  .navbar-nav .nav-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .article-content {
+    font-size: 1rem;
+  }
+  
+  .display-6 {
+    font-size: 2rem;
+  }
+  
+  .display-4 {
+    font-size: 2.5rem;
+  }
+  
+  /* Sidebar não sticky em mobile */
+  .sticky-top {
+    position: static !important;
+  }
+} 
+
+/* Estilos para o Layout Administrativo */
+.admin-layout {
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 48px 0 0;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+  background-color: #fff;
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  margin: 0.25rem 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.sidebar .nav-link.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.sidebar .nav-link.active:hover {
+  background-color: #0b5ed7;
+  color: white;
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    position: static;
+    height: auto;
+    padding-top: 0;
+  }
+  
+  .sidebar-sticky {
+    height: auto;
+  }
+}
+
+/* Cards do Dashboard */
+.card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Tabelas responsivas */
+.table-responsive {
+  border-radius: 0.375rem;
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Botões administrativos */
+.btn-toolbar .btn {
+  margin-right: 0.5rem;
+}
+
+/* Formulários administrativos */
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Alertas e notificações */
+.alert {
+  border: none;
+  border-radius: 0.375rem;
+}
+
+/* Loading states */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsividade para telas pequenas */
+@media (max-width: 576px) {
+  .admin-layout .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+} 
+
+/* Admin Layout Styles */
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.admin-sidebar {
+  width: 250px;
+  background: #343a40;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid #495057;
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+}
+
+.sidebar-nav .nav-link {
+  color: #adb5bd;
+  padding: 0.75rem 1rem;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  color: white;
+  background-color: #495057;
+}
+
+.sidebar-nav .nav-link.active {
+  color: white;
+  background-color: #007bff;
+}
+
+.admin-content {
+  padding: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #23272b;
+  color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+}
+
+.admin-header {
+  background: white;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 2rem;
+}
+
+/* Dashboard Stats */
+.stat-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.stat-card:hover, .hover-shadow:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.10);
+  z-index: 2;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #343a40;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #6c757d;
+  margin-bottom: 0;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+/* Admin Noticias */
+.admin-noticias {
+  padding: 2rem;
+}
+
+.admin-noticias .table th {
+  background-color: #f8f9fa;
+  border-top: none;
+  font-weight: 600;
+  color: #495057;
+}
+
+.admin-noticias .table td {
+  vertical-align: middle;
+}
+
+.admin-noticias .btn-group .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Admin Editar Noticia */
+.admin-editar-noticia {
+  padding: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+.admin-editar-noticia .card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.admin-editar-noticia .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+}
+
+.admin-editar-noticia .form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.admin-editar-noticia textarea {
+  resize: vertical;
+}
+
+.admin-editar-noticia input,
+.admin-editar-noticia textarea,
+.admin-editar-noticia select {
+  background: #181a1b;
+  color: #f8f9fa;
+  border: 1px solid #343a40;
+}
+
+.admin-editar-noticia input:focus,
+.admin-editar-noticia textarea:focus,
+.admin-editar-noticia select:focus {
+  background: #23272b;
+  color: #fff;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+}
+
+.admin-editar-noticia .btn,
+.admin-editar-noticia .btn:focus {
+  color: #fff;
+  background: #343a40;
+  border: 1px solid #23272b;
+}
+
+.admin-editar-noticia .btn-success {
+  background: #198754;
+  border-color: #198754;
+}
+
+.admin-editar-noticia .btn-outline-secondary {
+  background: transparent;
+  color: #adb5bd;
+  border-color: #495057;
+}
+
+.admin-editar-noticia .btn-outline-secondary:hover {
+  background: #495057;
+  color: #fff;
+}
+
+.admin-editar-noticia .btn-light {
+  background: #343a40;
+  color: #f8f9fa;
+  border: 1px solid #23272b;
+}
+
+.admin-editar-noticia .btn-light:hover {
+  background: #23272b;
+  color: #fff;
+}
+
+.admin-editar-noticia .card {
+  background: #23272b;
+  color: #f8f9fa;
+  border: none;
+}
+
+.admin-editar-noticia .card-header {
+  background: #181a1b;
+  color: #f8f9fa;
+  border-bottom: 1px solid #343a40;
+}
+
+/* Icon styles */
+.admin-sidebar .nav-link svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.admin-header svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  
+  .admin-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  
+  .admin-header {
+    padding: 1rem;
+  }
+  
+  .admin-noticias,
+  .admin-editar-noticia {
+    padding: 1rem;
+  }
+}
+
+/* Estilos para o editor de texto rico personalizado */
+.editor-toolbar {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-bottom: none;
+  border-radius: 0.375rem 0.375rem 0 0;
+  padding: 0.5rem;
+}
+
+.editor-toolbar .btn-group {
+  margin-right: 0.5rem;
+}
+
+.editor-toolbar .btn {
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.editor-toolbar .btn:hover {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+.editor-toolbar .btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Ajustar textarea para combinar com a toolbar */
+.editor-toolbar + textarea {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+} 
+
+/* Menu lateral estilo Intercept */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1050;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.menu-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #222;
+  z-index: 1051;
+  animation: slideInRight 0.3s ease-out;
+  overflow-y: auto;
+  box-shadow: -2px 0 16px rgba(0,0,0,0.2);
+}
+
+.menu-header {
+  border-bottom: 1px solid #444;
+}
+
+.menu-content .nav-link {
+  color: #fff !important;
+  border-bottom: 1px solid #333;
+  padding: 1rem 0;
+}
+
+.menu-content .nav-link:hover,
+.menu-content .nav-link.active {
+  color: #fff !important;
+  background: #333;
+  text-decoration: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+} 
+
+/* PostItem - Padrão Intercept */
+.news-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Imagem no topo */
+.news-card__image-container {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+}
+
+.news-card__image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.news-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-card__image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Categoria sobreposta */
+.news-card__category {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+}
+
+.news-card__category-badge {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Conteúdo do card */
+.news-card__content {
+  padding: 24px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título grande */
+.news-card__title {
+  margin: 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+.news-card__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Resumo */
+.news-card__excerpt {
+  margin: 0 0 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666;
+  flex-grow: 1;
+}
+
+/* Meta informações */
+.news-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  font-size: 0.875rem;
+}
+
+.news-card__author {
+  font-weight: 600;
+  color: #333;
+}
+
+.news-card__date {
+  color: #999;
+}
+
+/* Grid responsivo */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .news-card__image-container {
+    height: 200px;
+  }
+  
+  .news-card__content {
+    padding: 20px;
+  }
+  
+  .news-card__title {
+    font-size: 1.25rem;
+  }
+  
+  .news-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-card__image-container {
+    height: 180px;
+  }
+  
+  .news-card__content {
+    padding: 16px;
+  }
+  
+  .news-card__title {
+    font-size: 1.125rem;
+    margin-bottom: 12px;
+  }
+  
+  .news-card__excerpt {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+}
+
+/* Variações de tamanho */
+.news-card--featured {
+  grid-column: span 2;
+}
+
+.news-card--featured .news-card__image-container {
+  height: 320px;
+}
+
+.news-card--featured .news-card__title {
+  font-size: 2rem;
+}
+
+.news-card--featured .news-card__excerpt {
+  font-size: 1.125rem;
+}
+
+/* Estados de loading */
+.news-card--loading {
+  opacity: 0.7;
+}
+
+.news-card--loading .news-card__image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 0%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Loading shimmer */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 0%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Estado vazio */
+.news-grid-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.news-grid-empty__content {
+  text-align: center;
+  color: #999;
+}
+
+.news-grid-empty__content h3 {
+  margin: 16px 0 8px 0;
+  color: #666;
+}
+
+.news-grid-empty__content p {
+  margin: 0;
+  color: #999;
+} 
+
+/* TipTap editor custom styles */
+.tiptap-editor-wrapper figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.5em 0;
+}
+.tiptap-editor-wrapper img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.tiptap-editor-wrapper figcaption {
+  font-size: 0.95em;
+  color: #bbb;
+  margin-top: 0.5em;
+  text-align: center;
+}
+/* Garante que o editor tenha fundo escuro e texto claro, mas imagens fiquem normais */
+.tiptap-editor-wrapper {
+  background: #181a1b;
+  color: #f8f9fa;
+  min-height: 400px;
+  height: auto;
+  padding: 1rem;
+  font-size: 1.1rem;
+  position: relative;
+} 
+
+.tiptap-editor-wrapper p.is-empty.is-editor-empty {
+  min-height: 400px;
+  font-size: 1.1rem;
+  color: #888;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.tiptap-editor-wrapper [data-placeholder]::before {
+  content: attr(data-placeholder);
+  color: #888;
+  font-style: italic;
+  pointer-events: none;
+  position: absolute;
+  left: 1.2rem;
+  top: 1.2rem;
+  font-size: 1.1rem;
+} 
