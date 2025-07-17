@@ -235,6 +235,20 @@ h5, h6 {
   margin-bottom: 2rem;
 }
 
+.breadcrumb-mobile-small {
+  /* já é small, mas vamos reduzir ainda mais em mobile */
+}
+
+@media (max-width: 600px) {
+  .breadcrumb-mobile-small {
+    font-size: 0.75rem !important;
+  }
+  .breadcrumb-mobile-small .breadcrumb-item,
+  .breadcrumb-mobile-small .breadcrumb-item a {
+    font-size: 0.75rem !important;
+  }
+}
+
 /* Botões mais elegantes */
 .btn-dark {
   background-color: #000;

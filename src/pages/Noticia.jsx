@@ -149,9 +149,9 @@ const Noticia = () => {
       />
       
       <div className="container mt-4">
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="mb-4">
-          <ol className="breadcrumb small">
+        {/* Breadcrumb Desktop */}
+        <nav aria-label="breadcrumb" className="mb-4 d-none d-md-block">
+          <ol className="breadcrumb small breadcrumb-mobile-small">
             <li className="breadcrumb-item">
               <Link to="/" className="text-decoration-none">Home</Link>
             </li>
@@ -374,6 +374,24 @@ const Noticia = () => {
           </div>
         </article>
       </div>
+      {/* Breadcrumb Mobile (final da página) */}
+      <nav aria-label="breadcrumb" className="mb-4 d-block d-md-none">
+        <ol className="breadcrumb small breadcrumb-mobile-small">
+          <li className="breadcrumb-item">
+            <Link to="/" className="text-decoration-none">Home</Link>
+          </li>
+          {post.categories && post.categories.length > 0 && (
+            <li className="breadcrumb-item">
+              <Link to={`/categorias/${post.categories[0]}`} className="text-decoration-none">
+                {post.categories[0]}
+              </Link>
+            </li>
+          )}
+          <li className="breadcrumb-item active" aria-current="page">
+            {post.title || 'Notícia'}
+          </li>
+        </ol>
+      </nav>
     </>
   );
 };
