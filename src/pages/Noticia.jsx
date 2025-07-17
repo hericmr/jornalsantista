@@ -222,7 +222,7 @@ const Noticia = () => {
                     title="Compartilhar no WhatsApp"
                     style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: '#25D366', border: 'none' }}
                   >
-                    <i className="bi bi-whatsapp" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
+                    <i className="bi bi-whatsapp" style={{ fontSize: '1rem', color: '#fff' }}></i>
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('facebook')}
@@ -230,7 +230,7 @@ const Noticia = () => {
                     title="Compartilhar no Facebook"
                     style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: '#1877F3', border: 'none' }}
                   >
-                    <i className="bi bi-facebook" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
+                    <i className="bi bi-facebook" style={{ fontSize: '1rem', color: '#fff' }}></i>
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('twitter')}
@@ -238,7 +238,7 @@ const Noticia = () => {
                     title="Compartilhar no Twitter"
                     style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: '#1DA1F2', border: 'none' }}
                   >
-                    <i className="bi bi-twitter" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
+                    <i className="bi bi-twitter" style={{ fontSize: '1rem', color: '#fff' }}></i>
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('instagram')}
@@ -246,7 +246,7 @@ const Noticia = () => {
                     title="Compartilhar no Instagram"
                     style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)', border: 'none' }}
                   >
-                    <i className="bi bi-instagram" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
+                    <i className="bi bi-instagram" style={{ fontSize: '1rem', color: '#fff' }}></i>
                   </button>
                 </div>
               </div>
