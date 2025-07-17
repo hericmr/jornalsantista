@@ -32,7 +32,7 @@ function App() {
               <Footer />
             </div>
           } />
-          <Route path="/noticia/:id" element={
+          <Route path="/noticia/:slug" element={
             <div className="d-flex flex-column min-vh-100">
               <Header />
               <main className="flex-grow-1">

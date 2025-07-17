@@ -103,7 +103,7 @@ const Home = () => {
         </div>
       </div>
       <div className="video-gradient"></div>
-
+      
       <div className="home-content">
         {/* Seção de Destaque */}
         {featuredPosts.length > 0 && (

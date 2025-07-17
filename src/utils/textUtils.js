@@ -71,3 +71,20 @@ export const getFullImageUrl = (imageUrl) => {
   const baseUrl = window.location.origin;
   return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
 }; 
+
+/**
+ * Gera um slug URL-friendly a partir de um texto
+ * @param {string} text - Texto de entrada
+ * @returns {string} - Slug gerado
+ */
+export const slugify = (text) => {
+  return text
+    .toString()
+    .normalize('NFD') // Remove acentos
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+    .replace(/\s+/g, '-') // Espaços por hífen
+    .replace(/-+/g, '-'); // Hífens múltiplos por um só
+}; 

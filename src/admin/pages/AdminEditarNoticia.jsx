@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
 import { getPostById, savePost } from '../../lib/postsService';
+import { slugify } from '../../utils/textUtils';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
@@ -105,7 +106,8 @@ const AdminEditarNoticia = () => {
         published_at: post.published ? new Date(post.published).toISOString() : null,
         images: post.images,
         tags: post.tags,
-        status: post.status
+        status: post.status,
+        slug: slugify(post.title)
       };
 
       console.log('📝 Dados a serem salvos:', postData);

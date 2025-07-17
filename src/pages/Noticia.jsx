@@ -3,20 +3,28 @@ import { useParams, Link } from 'react-router-dom';
 import { getPostById } from '../lib/postsService';
 import { stripHtml, processHtmlContent, createExcerpt, getFullImageUrl } from '../utils/textUtils';
 import MetaTags from '../components/MetaTags';
+import NewsletterModal from '../components/NewsletterModal';
 
 const Noticia = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showNewsletter, setShowNewsletter] = useState(false);
 
   useEffect(() => {
     fetchPost();
-  }, [id]);
+    // Controle de leitura de matérias
+    const key = 'noticias_lidas';
+    let count = parseInt(localStorage.getItem(key) || '0', 10);
+    count += 1;
+    localStorage.setItem(key, count);
+    if (count === 2) setShowNewsletter(true);
+  }, [slug]);
 
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const foundPost = await getPostById(id);
+      const foundPost = await getPostById(slug);
       console.log('📰 Noticia: Post carregado:', {
         id: foundPost?.id,
         title: foundPost?.title,
@@ -111,6 +119,7 @@ const Noticia = () => {
 
   return (
     <>
+      {showNewsletter && <NewsletterModal onClose={() => setShowNewsletter(false)} />}
       {/* Meta Tags para SEO e compartilhamento */}
       <MetaTags
         title={post?.title || 'Notícia - Jornal Santista'}
@@ -281,7 +290,17 @@ const Noticia = () => {
             {/* Informações do Autor */}
             <div className="card mb-4">
               <div className="card-body">
-                <h5 className="card-title">Sobre o Autor</h5>
+                {/* Removido o título 'Sobre o Autor' */}
+                {post.author === "Héric Moura" && (
+                  <div className="text-center mb-3">
+                    <img
+                      src="https://hericmr.github.io/me/imagens/heric.png"
+                      alt="Héric Moura"
+                      style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)' }}
+                      className="mb-2"
+                    />
+                  </div>
+                )}
                 <p className="card-text">
                   <strong>{post.author || 'Autor não informado'}</strong>
                 </p>

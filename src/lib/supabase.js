@@ -68,6 +68,24 @@ export const postsAPI = {
     return data
   },
 
+  // Buscar uma postagem por slug
+  async getPostBySlug(slug) {
+    console.log('🔍 Supabase: Buscando post por slug:', slug);
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    if (error) {
+      if (error.code === 'PGRST116') { // Not found
+        return null;
+      }
+      console.error('❌ Erro ao buscar post por slug:', error);
+      throw error;
+    }
+    return data;
+  },
+
   // Criar nova postagem
   async createPost(postData) {
     console.log('📝 Supabase: Criando nova postagem:', {

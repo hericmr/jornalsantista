@@ -106,7 +106,7 @@ const AdminNoticias = () => {
                     <td>
                       <div className="btn-group btn-group-sm">
                         <Link 
-                          to={`/noticia/${post.id}`} 
+                          to={`/noticia/${post.slug || post.id}`} 
                           className="btn btn-outline-info"
                           title="Visualizar"
                         >
