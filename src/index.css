@@ -12,10 +12,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
-.navbar-brand {
-  font-weight: 700;
-  letter-spacing: 1px;
-}
+
 
 /* Cards com aparência mais jornalística */
 .card {
@@ -220,19 +217,34 @@ h1, h2, h3, h4, h5, h6 {
   border: 2px solid #e9ecef;
 }
 
-/* Navbar mais elegante */
+/* Navbar mais elegante e compacta */
 .navbar {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 1rem;
+  min-height: 60px;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 1.25rem;
+  padding: 0.25rem 0;
 }
 
 .navbar-nav .nav-link {
   font-weight: 600;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   transition: color 0.2s ease;
+  font-size: 0.95rem;
 }
 
 .navbar-nav .nav-link:hover {
   color: #fff !important;
+}
+
+.navbar-toggler {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
 }
 
 /* Seções com bordas */
@@ -335,6 +347,20 @@ footer {
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .navbar {
+    padding: 0.25rem 0.5rem;
+    min-height: 50px;
+  }
+  
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+  
+  .navbar-nav .nav-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
   .card-title {
     font-size: 1.1rem;
   }
