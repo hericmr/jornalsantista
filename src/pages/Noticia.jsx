@@ -151,246 +151,229 @@ const Noticia = () => {
       <div className="container mt-4">
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-4">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/" className="text-decoration-none">Home</Link>
-          </li>
-          {post.categories && post.categories.length > 0 && (
+          <ol className="breadcrumb small">
             <li className="breadcrumb-item">
-              <Link to={`/categorias/${post.categories[0]}`} className="text-decoration-none">
-                {post.categories[0]}
-              </Link>
+              <Link to="/" className="text-decoration-none">Home</Link>
             </li>
-          )}
-          <li className="breadcrumb-item active" aria-current="page">
-            {post.title || 'Notícia'}
-          </li>
-        </ol>
-      </nav>
-
-      <article className="row">
-        {/* Conteúdo Principal */}
-        <div className="col-lg-8">
-          {/* Header da Notícia */}
-          <header className="mb-4">
-            {/* Categorias */}
-            <div className="mb-3">
-              {post.categories && post.categories.length > 0 ? (
-                post.categories.map((category, index) => (
-                  <Link 
-                    key={index} 
-                    to={`/categorias/${category}`} 
-                    className="badge bg-primary me-1 text-decoration-none"
-                  >
-                    {category}
-                  </Link>
-                ))
-              ) : (
-                <span className="badge bg-secondary">Sem categoria</span>
-              )}
-            </div>
-
-            {/* Título */}
-            <h1 className="display-4 fw-bold mb-3" style={{ lineHeight: '1.2' }}>
-              {post.title || 'Título não disponível'}
-            </h1>
-
-            {/* Meta informações */}
-            <div className="d-flex flex-wrap justify-content-between align-items-center text-muted mb-4">
-              <div>
-                <div className="fw-semibold mb-1">
-                  Por {post.author || 'Autor não informado'}
-                </div>
-                <div className="small">
-                  Publicado em {formatDate(post.published)}
-                </div>
-                {post.updated && post.updated !== post.published && (
-                  <div className="small">
-                    Atualizado em {formatDate(post.updated)}
-                  </div>
-                )}
-              </div>
-              
-              {/* Botões de compartilhamento */}
-              <div className="d-flex gap-2">
-                <button 
-                  onClick={() => shareOnSocialMedia('whatsapp')}
-                  className="btn btn-outline-success btn-sm"
-                  title="Compartilhar no WhatsApp"
-                >
-                  WhatsApp
-                </button>
-                <button 
-                  onClick={() => shareOnSocialMedia('facebook')}
-                  className="btn btn-outline-primary btn-sm"
-                  title="Compartilhar no Facebook"
-                >
-                  Facebook
-                </button>
-                <button 
-                  onClick={() => shareOnSocialMedia('twitter')}
-                  className="btn btn-outline-info btn-sm"
-                  title="Compartilhar no Twitter"
-                >
-                  Twitter
-                </button>
-              </div>
-            </div>
-          </header>
-
-          {/* Imagens do bucket (galeria/thumbnail) */}
-          {images.length > 0 && (
-            <div className="mb-4">
-              {images.map((image, idx) => (
-                <figure key={idx} className="mb-3 text-center">
-                  <img
-                    src={image}
-                    className="img-fluid rounded shadow-lg"
-                    alt={`${post.title || 'Notícia'} - Imagem ${idx + 1}`}
-                    title={post.title || 'Notícia'}
-                    style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
-                    onError={handleImageError}
-                    loading="lazy"
-                  />
-                  {/* Legenda opcional, se houver */}
-                  {/* <figcaption className="text-muted small mt-2">Legenda da imagem</figcaption> */}
-                </figure>
-              ))}
-            </div>
-          )}
-
-          {/* Texto da matéria */}
-          <div className="article-content mb-5">
-            {(post.text_content || post.content) ? (
-              <div 
-                dangerouslySetInnerHTML={{ 
-                  __html: processHtmlContent(post.text_content || post.content) 
-                }} 
-              />
-            ) : (
-              <p className="text-muted">Conteúdo não disponível.</p>
+            {post.categories && post.categories.length > 0 && (
+              <li className="breadcrumb-item">
+                <Link to={`/categorias/${post.categories[0]}`} className="text-decoration-none">
+                  {post.categories[0]}
+                </Link>
+              </li>
             )}
-          </div>
+            <li className="breadcrumb-item active" aria-current="page">
+              {post.title || 'Notícia'}
+            </li>
+          </ol>
+        </nav>
 
-          {/* Tags e Categorias */}
-          <div className="mb-4">
-            <h5>Tags:</h5>
-            <div>
-              {post.categories && post.categories.length > 0 ? (
-                post.categories.map((category, index) => (
-                  <Link 
-                    key={index} 
-                    to={`/categorias/${category}`} 
-                    className="badge bg-light text-dark me-1 mb-1 text-decoration-none"
-                  >
-                    #{category}
-                  </Link>
-                ))
-              ) : (
-                <span className="text-muted">Nenhuma tag disponível</span>
-              )}
-            </div>
-          </div>
-
-          {/* Navegação */}
-          <div className="border-top pt-4">
-            <Link to="/" className="btn btn-dark">
-              ← Voltar para Home
-            </Link>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="col-lg-4">
-          <div className="sticky-top" style={{ top: '2rem' }}>
-            {/* Informações do Autor */}
-            <div className="card mb-4">
-              <div className="card-body">
-                {/* Removido o título 'Sobre o Autor' */}
-                {post.author === "Héric Moura" && (
-                  <div className="text-center mb-3">
-                    <img
-                      src="https://hericmr.github.io/me/imagens/heric.png"
-                      alt="Héric Moura"
-                      style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)' }}
-                      className="mb-2"
-                    />
-                  </div>
+        <article className="row">
+          {/* Conteúdo Principal */}
+          <div className="col-lg-8">
+            {/* Header da Notícia */}
+            <header className="mb-4">
+              {/* Categorias */}
+              <div className="mb-3">
+                {post.categories && post.categories.length > 0 ? (
+                  post.categories.map((category, index) => (
+                    <Link 
+                      key={index} 
+                      to={`/categorias/${category}`} 
+                      className="badge bg-primary me-1 text-decoration-none"
+                    >
+                      {category}
+                    </Link>
+                  ))
+                ) : (
+                  <span className="badge bg-secondary">Sem categoria</span>
                 )}
-                <p className="card-text">
-                  <strong>{post.author || 'Autor não informado'}</strong>
-                </p>
-                <p className="card-text text-muted small">
-                  Jornalista do Jornal Santista
-                </p>
               </div>
-            </div>
 
-            {/* Compartilhar */}
-            <div className="card mb-4">
-              <div className="card-body">
-                <h5 className="card-title">Compartilhar</h5>
-                <div className="d-grid gap-2">
+              {/* Título */}
+              <h1 className="display-4 fw-bold mb-3" style={{ lineHeight: '1.2' }}>
+                {post.title || 'Título não disponível'}
+              </h1>
+
+              {/* Meta informações */}
+              <div className="d-flex flex-wrap justify-content-between align-items-center text-muted mb-4">
+                <div>
+                  <div className="fw-semibold mb-1">
+                    Por {post.author || 'Autor não informado'}
+                  </div>
+                  <div className="small">
+                    Publicado em {formatDate(post.published)}
+                  </div>
+                  {post.updated && post.updated !== post.published && (
+                    <div className="small">
+                      Atualizado em {formatDate(post.updated)}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Botões de compartilhamento */}
+                <div className="d-flex gap-2">
                   <button 
                     onClick={() => shareOnSocialMedia('whatsapp')}
-                    className="btn btn-success btn-sm"
+                    className="btn btn-outline-success btn-sm"
+                    title="Compartilhar no WhatsApp"
                   >
                     WhatsApp
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('facebook')}
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-outline-primary btn-sm"
+                    title="Compartilhar no Facebook"
                   >
                     Facebook
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('twitter')}
-                    className="btn btn-info btn-sm"
+                    className="btn btn-outline-info btn-sm"
+                    title="Compartilhar no Twitter"
                   >
                     Twitter
                   </button>
-                  <button 
-                    onClick={() => shareOnSocialMedia('telegram')}
-                    className="btn btn-secondary btn-sm"
-                  >
-                    Telegram
-                  </button>
                 </div>
+              </div>
+            </header>
+
+            {/* Imagem principal do bucket (galeria/thumbnail) */}
+            {images.length > 0 && (
+              <div className="mb-4">
+                <figure className="mb-3 text-center">
+                  <img
+                    src={images[0]}
+                    className="img-fluid rounded shadow-lg"
+                    alt={`${post.title || 'Notícia'} - Imagem 1`}
+                    title={post.title || 'Notícia'}
+                    style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+                    onError={handleImageError}
+                    loading="lazy"
+                  />
+                </figure>
+              </div>
+            )}
+
+            {/* Texto da matéria */}
+            <div className="article-content mb-5">
+              {(post.text_content || post.content) ? (
+                <div 
+                  dangerouslySetInnerHTML={{ 
+                    __html: processHtmlContent(post.text_content || post.content) 
+                  }} 
+                />
+              ) : (
+                <p className="text-muted">Conteúdo não disponível.</p>
+              )}
+            </div>
+
+            {/* Imagens extras após o texto */}
+            {images.length > 1 && (
+              <div className="mb-4">
+                {images.slice(1).map((image, idx) => (
+                  <figure key={idx + 1} className="mb-3 text-center">
+                    <img
+                      src={image}
+                      className="img-fluid rounded shadow-lg"
+                      alt={`${post.title || 'Notícia'} - Imagem ${idx + 2}`}
+                      title={post.title || 'Notícia'}
+                      style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+                      onError={handleImageError}
+                      loading="lazy"
+                    />
+                  </figure>
+                ))}
+              </div>
+            )}
+
+            {/* Tags e Categorias */}
+            <div className="mb-4">
+              <h5>Tags:</h5>
+              <div>
+                {post.categories && post.categories.length > 0 ? (
+                  post.categories.map((category, index) => (
+                    <Link 
+                      key={index} 
+                      to={`/categorias/${category}`} 
+                      className="badge bg-light text-dark me-1 mb-1 text-decoration-none"
+                    >
+                      #{category}
+                    </Link>
+                  ))
+                ) : (
+                  <span className="text-muted">Nenhuma tag disponível</span>
+                )}
               </div>
             </div>
 
-            {/* Informações da Matéria */}
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Informações</h5>
-                <ul className="list-unstyled">
-                  <li className="mb-2">
-                    <small className="text-muted">Publicado:</small><br />
-                    {formatDate(post.published)}
-                  </li>
-                  {post.updated && post.updated !== post.published && (
-                    <li className="mb-2">
-                      <small className="text-muted">Atualizado:</small><br />
-                      {formatDate(post.updated)}
-                    </li>
-                  )}
-                  <li className="mb-2">
-                    <small className="text-muted">Autor:</small><br />
-                    {post.author || 'Autor não informado'}
-                  </li>
-                  {post.categories && post.categories.length > 0 && (
-                    <li>
-                      <small className="text-muted">Categorias:</small><br />
-                      {post.categories.join(', ')}
-                    </li>
-                  )}
-                </ul>
-              </div>
+            {/* Navegação */}
+            <div className="border-top pt-4">
+              <Link to="/" className="btn btn-dark">
+                ← Voltar para Home
+              </Link>
             </div>
           </div>
-        </div>
-      </article>
-    </div>
+
+          {/* Sidebar */}
+          <div className="col-lg-4">
+            <div className="sticky-top" style={{ top: '2rem' }}>
+              {/* Informações do Autor */}
+              <div className="card mb-4 bg-dark text-light border-secondary">
+                <div className="card-body">
+                  {/* Removido o título 'Sobre o Autor' */}
+                  {post.author === "Héric Moura" && (
+                    <>
+                      <div className="text-center mb-3">
+                        <img
+                          src="https://hericmr.github.io/me/imagens/heric.png"
+                          alt="Héric Moura"
+                          style={{ width: '160px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                          className="mb-2 shadow"
+                        />
+                      </div>
+                      <p className="card-text mb-1">
+                        <strong>Héric Moura</strong>
+                      </p>
+                      <p className="card-text small mb-0">
+                        Integrante da equipe do Jornal Santista desde 2015. Atua na cobertura de temas ligados a meio ambiente, movimentos sociais, cultura e política local, com atenção especial às pautas que afetam diretamente a vida da população trabalhadora da região.
+                      </p>
+                    </>
+                  )}
+                  {post.author === "Walter Parreira" && (
+                    <>
+                      <div className="text-center mb-3">
+                        <img
+                          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif"
+                          alt="Walter Parreira"
+                          style={{ width: '160px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                          className="mb-2 shadow"
+                        />
+                      </div>
+                      <p className="card-text mb-1">
+                        <strong>Walter Parreira</strong>
+                      </p>
+                      <p className="card-text small mb-0">
+                        Jornalista do Jornal Santista. Especialista em temas sociais, cultura e história regional, com olhar atento às transformações da Baixada Santista.
+                      </p>
+                    </>
+                  )}
+                  {/* Remover parágrafos genéricos de autor */}
+                  {post.author !== "Héric Moura" && (
+                    <>
+                      {/* Aqui você pode manter outros autores, se desejar */}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Compartilhar removido */}
+
+              {/* Card de Informações removido */}
+            </div>
+          </div>
+        </article>
+      </div>
     </>
   );
 };

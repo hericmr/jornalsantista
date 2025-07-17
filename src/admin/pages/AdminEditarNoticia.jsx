@@ -241,6 +241,9 @@ const AdminEditarNoticia = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Editar Notícia</h2>
         <div>
+          <a href="/" className="btn btn-outline-dark me-2" target="_blank" rel="noopener noreferrer">
+            Voltar para o site
+          </a>
           <button 
             onClick={() => navigate('/admin/noticias')}
             className="btn btn-outline-secondary me-2"
