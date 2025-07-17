@@ -91,7 +91,7 @@ const PostItem = ({ post }) => {
 
         {/* Resumo */}
         <p className="news-card__excerpt">
-          {getExcerpt(post.text_content || post.content)}
+          {post.excerpt ? post.excerpt : getExcerpt(post.text_content || post.content)}
         </p>
 
         {/* Autor e Data */}

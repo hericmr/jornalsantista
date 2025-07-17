@@ -77,6 +77,10 @@ const Noticia = () => {
       case 'twitter':
         shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
         break;
+      case 'instagram':
+        // Instagram não permite compartilhamento direto de links via web, então pode abrir o perfil do Jornal ou mostrar um aviso
+        window.open('https://instagram.com/jornalsantista', '_blank');
+        return;
       case 'telegram':
         shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
         break;
@@ -170,7 +174,7 @@ const Noticia = () => {
 
         <article className="row">
           {/* Conteúdo Principal */}
-          <div className="col-lg-8">
+          <div className="col-lg-9">
             {/* Header da Notícia */}
             <header className="mb-4">
               {/* Categorias */}
@@ -210,29 +214,39 @@ const Noticia = () => {
                     </div>
                   )}
                 </div>
-                
-                {/* Botões de compartilhamento */}
+                {/* Botões de compartilhamento minimalistas */}
                 <div className="d-flex gap-2">
                   <button 
                     onClick={() => shareOnSocialMedia('whatsapp')}
-                    className="btn btn-outline-success btn-sm"
+                    className="d-flex align-items-center justify-content-center"
                     title="Compartilhar no WhatsApp"
+                    style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: '#25D366', border: 'none' }}
                   >
-                    WhatsApp
+                    <i className="bi bi-whatsapp" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('facebook')}
-                    className="btn btn-outline-primary btn-sm"
+                    className="d-flex align-items-center justify-content-center"
                     title="Compartilhar no Facebook"
+                    style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: '#1877F3', border: 'none' }}
                   >
-                    Facebook
+                    <i className="bi bi-facebook" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
                   </button>
                   <button 
                     onClick={() => shareOnSocialMedia('twitter')}
-                    className="btn btn-outline-info btn-sm"
+                    className="d-flex align-items-center justify-content-center"
                     title="Compartilhar no Twitter"
+                    style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: '#1DA1F2', border: 'none' }}
                   >
-                    Twitter
+                    <i className="bi bi-twitter" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
+                  </button>
+                  <button 
+                    onClick={() => shareOnSocialMedia('instagram')}
+                    className="d-flex align-items-center justify-content-center"
+                    title="Compartilhar no Instagram"
+                    style={{ width: 36, height: 36, borderRadius: '50%', padding: 0, background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)', border: 'none' }}
+                  >
+                    <i className="bi bi-instagram" style={{ fontSize: '1.2rem', color: '#fff' }}></i>
                   </button>
                 </div>
               </div>
@@ -311,7 +325,7 @@ const Noticia = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="col-lg-4">
+          <div className="col-lg-3">
             <div className="sticky-top" style={{ top: '2rem' }}>
               {/* Informações do Autor */}
               <div className="card mb-4 bg-dark text-light border-secondary">
@@ -353,8 +367,26 @@ const Noticia = () => {
                       </p>
                     </>
                   )}
+                  {post.author === "Marcos de Paula" && (
+                    <>
+                      <div className="text-center mb-3">
+                        <img
+                          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg"
+                          alt="Marcos de Paula"
+                          style={{ width: '160px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                          className="mb-2 shadow"
+                        />
+                      </div>
+                      <p className="card-text mb-1">
+                        <strong>Marcos de Paula</strong>
+                      </p>
+                      <p className="card-text small mb-0">
+                        Professor de Filosofia na Universidade Federal de São Paulo - Departamento de Saúde, Educação e Sociedade e militante antiproibicionista.
+                      </p>
+                    </>
+                  )}
                   {/* Remover parágrafos genéricos de autor */}
-                  {post.author !== "Héric Moura" && post.author !== "Walter Parreira" && post.author && (
+                  {post.author !== "Héric Moura" && post.author !== "Walter Parreira" && post.author !== "Marcos de Paula" && post.author && (
                     <>
                       <div className="text-center mb-3">
                         <i className="bi bi-person-circle" style={{ fontSize: '4rem', color: '#888' }}></i>

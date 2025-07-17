@@ -109,7 +109,6 @@ const Home = () => {
         {featuredPosts.length > 0 && (
           <section className="featured-section">
             <div className="container">
-              <h2 className="section-title">Destaques</h2>
               <div className="featured-grid">
                 {featuredPosts.map((post, index) => (
                   <div key={post.id} className={`featured-card ${index === 0? 'featured-card--main' : ''}`}>
