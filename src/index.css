@@ -45,11 +45,15 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.1rem;
   line-height: 1.8;
   font-family: 'Georgia', 'Times New Roman', serif;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .article-content p {
   text-align: justify;
   margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Estilos para conteúdo HTML do editor */

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPostById } from '../lib/postsService';
-import { stripHtml } from '../utils/textUtils';
+import { stripHtml, processHtmlContent } from '../utils/textUtils';
 
 const Noticia = () => {
   const { id } = useParams();
@@ -224,7 +224,7 @@ const Noticia = () => {
             {(post.text_content || post.content) ? (
               <div 
                 dangerouslySetInnerHTML={{ 
-                  __html: post.text_content || post.content 
+                  __html: processHtmlContent(post.text_content || post.content) 
                 }} 
               />
             ) : (

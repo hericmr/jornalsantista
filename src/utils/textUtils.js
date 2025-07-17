@@ -35,4 +35,21 @@ export const createExcerpt = (html, maxLength = 200) => {
 export const containsSearchTerm = (html, searchTerm) => {
   const plainText = stripHtml(html);
   return plainText.toLowerCase().includes(searchTerm.toLowerCase());
+};
+
+/**
+ * Processa conteúdo HTML preservando quebras de linha
+ * @param {string} html - Conteúdo HTML
+ * @returns {string} - HTML processado com quebras de linha preservadas
+ */
+export const processHtmlContent = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  
+  // Preservar quebras de linha convertendo \n para <br>
+  let processed = html.replace(/\n/g, '<br>');
+  
+  // Garantir que parágrafos tenham espaçamento adequado
+  processed = processed.replace(/<p>/g, '<p style="margin-bottom: 1.5rem;">');
+  
+  return processed;
 }; 

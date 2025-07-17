@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { createExcerpt } from '../utils/textUtils';
+import { createExcerpt, processHtmlContent } from '../utils/textUtils';
 
 const PostItem = ({ post }) => {
   const formatDate = (dateString) => {
