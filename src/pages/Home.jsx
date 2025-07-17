@@ -4,6 +4,7 @@ import PostItem from '../components/PostItem';
 import { getAllPosts } from '../lib/postsService';
 import SearchBar from '../components/SearchBar';
 import { createExcerpt, containsSearchTerm } from '../utils/textUtils';
+import MetaTags from '../components/MetaTags';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -79,9 +80,18 @@ const Home = () => {
   const remainingPosts = filteredPosts.slice(7);
 
   return (
-    <div className="container-fluid mt-4">
-      {/* Barra de busca */}
-      <div className="row mb-4">
+    <>
+      {/* Meta Tags para SEO */}
+      <MetaTags
+        title="Jornal Santista - Notícias Locais e Regionais"
+        description="Jornal Santista - Sua fonte de notícias locais e regionais. Fique por dentro das principais notícias da região."
+        type="website"
+        url={window.location.href}
+      />
+      
+      <div className="container-fluid mt-4">
+        {/* Barra de busca */}
+        <div className="row mb-4">
         <div className="col-lg-8 mx-auto">
           <SearchBar onSearch={handleSearch} />
         </div>
@@ -201,6 +211,7 @@ const Home = () => {
         </>
       )}
     </div>
+    </>
   );
 };
 

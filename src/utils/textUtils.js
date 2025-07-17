@@ -52,4 +52,22 @@ export const processHtmlContent = (html) => {
   processed = processed.replace(/<p>/g, '<p style="margin-bottom: 1.5rem;">');
   
   return processed;
+};
+
+/**
+ * Gera URL completa para imagem
+ * @param {string} imageUrl - URL da imagem
+ * @returns {string} - URL completa da imagem
+ */
+export const getFullImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // Se já é uma URL completa, retorna como está
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // Se é uma URL relativa, adiciona o domínio base
+  const baseUrl = window.location.origin;
+  return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
 }; 

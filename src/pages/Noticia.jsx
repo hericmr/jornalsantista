@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPostById } from '../lib/postsService';
-import { stripHtml, processHtmlContent } from '../utils/textUtils';
+import { stripHtml, processHtmlContent, createExcerpt, getFullImageUrl } from '../utils/textUtils';
+import MetaTags from '../components/MetaTags';
 
 const Noticia = () => {
   const { id } = useParams();
@@ -109,9 +110,22 @@ const Noticia = () => {
   }
 
   return (
-    <div className="container mt-4">
-      {/* Breadcrumb */}
-      <nav aria-label="breadcrumb" className="mb-4">
+    <>
+      {/* Meta Tags para SEO e compartilhamento */}
+      <MetaTags
+        title={post?.title || 'Notícia - Jornal Santista'}
+        description={post?.excerpt || createExcerpt(post?.text_content || post?.content || '', 160)}
+        image={post?.images && post.images.length > 0 ? getFullImageUrl(post.images[0]) : null}
+        url={window.location.href}
+        type="article"
+        author={post?.author}
+        publishedTime={post?.published}
+        modifiedTime={post?.updated}
+      />
+      
+      <div className="container mt-4">
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb" className="mb-4">
         <ol className="breadcrumb">
           <li className="breadcrumb-item">
             <Link to="/" className="text-decoration-none">Home</Link>
@@ -341,6 +355,7 @@ const Noticia = () => {
         </div>
       </article>
     </div>
+    </>
   );
 };
 
