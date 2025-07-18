@@ -88,21 +88,7 @@ const Home = () => {
         url={window.location.href}
       />
 
-      {/* Vídeo do YouTube logo após a navbar */}
-      <div className="video-full-mobile">
-        <div className="embed-responsive embed-responsive-16by9">
-          <iframe
-            className="embed-responsive-item"
-            src="https://www.youtube.com/embed/KvPW7w3DXUE?autoplay=1&mute=1"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            style={{ width: "100%", height: "56vw", maxHeight: "70vh", minHeight: "200px" }}
-          ></iframe>
-        </div>
-      </div>
-      <div className="video-gradient"></div>
+
       
       <div className="home-content">
         {/* Seção de Destaque */}

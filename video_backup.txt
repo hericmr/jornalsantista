@@ -1,0 +1,35 @@
+=== CÓDIGO DO VÍDEO REMOVIDO DA PÁGINA INICIAL ===
+Data: $(date)
+Local: src/pages/Home.jsx (linhas 91-103)
+
+Código HTML/JSX:
+{/* Vídeo do YouTube logo após a navbar */}
+<div className="video-full-mobile">
+  <div className="embed-responsive embed-responsive-16by9">
+    <iframe
+      className="embed-responsive-item"
+      src="https://www.youtube.com/embed/KvPW7w3DXUE?autoplay=1&mute=1"
+      title="YouTube video player"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+      style={{ width: "100%", height: "56vw", maxHeight: "70vh", minHeight: "200px" }}
+    ></iframe>
+  </div>
+</div>
+<div className="video-gradient"></div>
+
+Descrição:
+- Vídeo do YouTube ID: KvPW7w3DXUE
+- Configurações: autoplay=1, mute=1
+- Responsivo: altura de 56vw, máximo 70vh, mínimo 200px
+- Inclui gradiente overlay
+- Classe: video-full-mobile
+
+CSS Relacionado (se houver):
+.video-full-mobile { ... }
+.embed-responsive { ... }
+.embed-responsive-16by9 { ... }
+.video-gradient { ... }
+
+Para restaurar: copie este código de volta para src/pages/Home.jsx após as MetaTags 
