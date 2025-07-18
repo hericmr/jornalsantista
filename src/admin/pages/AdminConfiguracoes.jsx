@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSave, FaDatabase, FaUser, FaGlobe, FaMail, FaShieldAlt, FaCog } from 'react-icons/fa';
+import { FaSave, FaDatabase, FaUser, FaGlobe, FaEnvelope, FaShieldAlt, FaCog } from 'react-icons/fa';
 
 const AdminConfiguracoes = () => {
   const [config, setConfig] = useState({
@@ -88,7 +88,7 @@ const AdminConfiguracoes = () => {
 
   const tabs = [
     { id: 'geral', label: 'Geral', icon: <FaGlobe /> },
-    { id: 'email', label: 'Email', icon: <FaMail /> },
+    { id: 'email', label: 'Email', icon: <FaEnvelope /> },
     { id: 'seo', label: 'SEO', icon: <FaCog /> },
     { id: 'seguranca', label: 'Segurança', icon: <FaShieldAlt /> },
     { id: 'performance', label: 'Performance', icon: <FaDatabase /> },
