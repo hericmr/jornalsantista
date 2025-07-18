@@ -35,6 +35,33 @@ const AdminNovaNoticia = () => {
     setSelectedFiles(files);
   };
 
+  const uploadImageToSupabase = async (file) => {
+    const fileName = `${Date.now()}-${file.name}`;
+    console.log('Tentando enviar arquivo:', file);
+    const { data, error } = await supabase.storage
+      .from('noticias-imagens')
+      .upload(fileName, file);
+    
+    console.log('Resultado do upload:', data, error);
+    if (error) {
+      console.error('Erro detalhado do upload:', error);
+      alert('Erro ao enviar imagem: ' + error.message);
+      return null;
+    }
+    
+    const { data: publicUrlData, error: publicUrlError } = supabase.storage
+      .from('noticias-imagens')
+      .getPublicUrl(fileName);
+    
+    console.log('Resultado do getPublicUrl:', publicUrlData, publicUrlError);
+    if (publicUrlData && publicUrlData.publicUrl) {
+      return publicUrlData.publicUrl;
+    } else {
+      alert('Erro ao obter URL pública da imagem!');
+      return null;
+    }
+  };
+
   const handleUploadImages = async () => {
     if (selectedFiles.length === 0) return;
 
@@ -42,20 +69,14 @@ const AdminNovaNoticia = () => {
       const uploadedUrls = [];
       
       for (const file of selectedFiles) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        
-        const { data, error } = await supabase.storage
-          .from('images')
-          .upload(fileName, file);
+        const url = await uploadImageToSupabase(file);
+        if (url) uploadedUrls.push(url);
+      }
 
-        if (error) throw error;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(fileName);
-
-        uploadedUrls.push(publicUrl);
+      console.log('Imagens enviadas:', uploadedUrls);
+      if (uploadedUrls.length === 0) {
+        alert('Nenhuma imagem foi enviada com sucesso!');
+        return;
       }
 
       setPost(prev => ({
@@ -66,7 +87,6 @@ const AdminNovaNoticia = () => {
       setSelectedFiles([]);
       document.getElementById('images').value = '';
       
-      console.log('Imagens enviadas:', uploadedUrls);
     } catch (error) {
       console.error('Erro ao enviar imagens:', error);
       alert('Erro ao enviar imagens: ' + error.message);
