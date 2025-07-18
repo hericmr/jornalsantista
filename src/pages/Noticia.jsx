@@ -153,9 +153,11 @@ const Noticia = () => {
       />
       
       <div className="container mt-4">
-        <article className="row">
+        <article>
           {/* Conteúdo Principal */}
-          <div className="col-lg-9">
+          <div>
+            <div class="row justify-content-center">
+              <div class="col-lg-8">
             {/* Header da Notícia */}
             <header className="mb-4">
               {/* Título */}
@@ -286,11 +288,13 @@ const Noticia = () => {
             </div>
 
             {/* Navegação */}
+              </div>
+            </div>
           </div>
 
           {/* Sidebar */}
-          <div className="col-lg-3">
-            <div className="sticky-top" style={{ top: '2rem' }}>
+          <div className="mt-4">
+            <div style={{ top: '2rem' }}>
               {/* Informações do Autor */}
               <div className="card mb-4 bg-dark text-light border-secondary">
                 <div className="card-body">
