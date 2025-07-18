@@ -49,8 +49,8 @@ const Noticia = () => {
         return 'Data inválida';
       }
       return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
+        month: 'long',
+        day: 'numeric',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
@@ -167,18 +167,32 @@ const Noticia = () => {
 
               {/* Meta informações */}
               <div className="d-flex flex-wrap justify-content-between align-items-center text-muted mb-4">
-                <div>
-                  <div className="fw-semibold mb-1">
-                    Por {post.author || 'Autor não informado'}
-                  </div>
-                  <div className="small">
-                    Publicado em {formatDate(post.published)}
-                  </div>
-                  {post.updated && post.updated !== post.published && (
-                    <div className="small">
-                      Atualizado em {formatDate(post.updated)}
-                    </div>
+                <div className="d-flex align-items-center">
+                  {post.author === "Héric Moura" && (
+                    <img src="https://hericmr.github.io/me/imagens/heric.png" alt="Héric Moura" className="rounded-circle me-2" style={{ width: '60px', height: '60px', filter: 'grayscale(100%)' }} />
                   )}
+                  {post.author === "Walter Parreira" && (
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif" alt="Walter Parreira" className="rounded-circle me-2" style={{ width: '60px', height: '60px', filter: 'grayscale(100%)' }} />
+                  )}
+                  {post.author === "Marcos de Paula" && (
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg" alt="Marcos de Paula" className="rounded-circle me-2" style={{ width: '60px', height: '60px', filter: 'grayscale(100%)' }} />
+                  )}
+                  {post.author !== "Héric Moura" && post.author !== "Walter Parreira" && post.author !== "Marcos de Paula" && post.author && (
+                    <i className="bi bi-person-circle me-2" style={{ fontSize: '2rem' }}></i>
+                  )}
+                  <div>
+                    <div className="fw-semibold mb-1">
+                      Por {post.author || 'Autor não informado'}
+                    </div>
+                    <div className="small">
+                      {formatDate(post.published)}
+                    </div>
+                    {post.updated && post.updated !== post.published && (
+                      <div className="small">
+                        {formatDate(post.updated)}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {/* Botões de compartilhamento minimalistas */}
                 <div className="d-flex gap-2">
@@ -296,7 +310,9 @@ const Noticia = () => {
           <div className="mt-4">
             <div style={{ top: '2rem' }}>
               {/* Informações do Autor */}
-              <div className="card mb-4 bg-dark text-light border-secondary">
+              <div className="row justify-content-center">
+                <div className="col-md-8 col-lg-6">
+                  <div className="card mb-4 bg-dark text-light border-secondary">
                 <div className="card-body">
                   {/* Removido o título 'Sobre o Autor' */}
                   {post.author === "Héric Moura" && (
@@ -368,6 +384,8 @@ const Noticia = () => {
                     </>
                   )}
                 </div>
+              </div>
+            </div>
               </div>
 
               {/* Compartilhar removido */}
