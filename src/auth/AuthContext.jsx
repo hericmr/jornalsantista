@@ -30,9 +30,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      // Buscar usuários do arquivo JSON
-      const response = await fetch('/admin_users.json');
-      const data = await response.json();
+      // Buscar usuários das variáveis de ambiente
+      const adminUsersJson = import.meta.env.VITE_ADMIN_USERS;
+      
+      if (!adminUsersJson) {
+        console.error('VITE_ADMIN_USERS não configurada');
+        return { success: false, error: 'Configuração de usuários não encontrada' };
+      }
+      
+      const data = JSON.parse(adminUsersJson);
       
       const user = data.users.find(u => 
         u.username === username && u.password === password
