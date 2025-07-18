@@ -28,15 +28,15 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#1a1e23' }}>
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6 col-lg-4">
-            <div className="card shadow">
+            <div className="card shadow-lg border-0" style={{ backgroundColor: '#23272b', borderRadius: '12px' }}>
               <div className="card-body p-5">
                 <div className="text-center mb-4">
-                  <h2 className="fw-bold text-dark">Jornal Santista</h2>
-                  <p className="text-muted">Área Administrativa</p>
+                  <h2 className="fw-bold text-light">Jornal Santista</h2>
+                  <p className="text-light opacity-75">Área Administrativa</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
@@ -47,7 +47,7 @@ const AdminLogin = () => {
                   )}
 
                   <div className="mb-3">
-                    <label htmlFor="username" className="form-label">
+                    <label htmlFor="username" className="form-label text-light">
                       Usuário
                     </label>
                     <input
@@ -58,11 +58,16 @@ const AdminLogin = () => {
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       disabled={loading}
+                      style={{ 
+                        backgroundColor: '#181a1b', 
+                        border: '1px solid #343a40', 
+                        color: '#f8f9fa' 
+                      }}
                     />
                   </div>
 
                   <div className="mb-4">
-                    <label htmlFor="password" className="form-label">
+                    <label htmlFor="password" className="form-label text-light">
                       Senha
                     </label>
                     <input
@@ -73,13 +78,24 @@ const AdminLogin = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       disabled={loading}
+                      style={{ 
+                        backgroundColor: '#181a1b', 
+                        border: '1px solid #343a40', 
+                        color: '#f8f9fa' 
+                      }}
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="btn btn-dark w-100"
+                    className="btn w-100"
                     disabled={loading}
+                    style={{
+                      backgroundColor: '#0d6efd',
+                      borderColor: '#0d6efd',
+                      color: 'white',
+                      padding: '0.75rem'
+                    }}
                   >
                     {loading ? (
                       <>
@@ -93,7 +109,7 @@ const AdminLogin = () => {
                 </form>
 
                 <div className="text-center mt-4">
-                  <a href="/" className="text-decoration-none text-muted">
+                  <a href="/" className="text-decoration-none text-light opacity-75 hover-opacity-100">
                     ← Voltar para o site
                   </a>
                 </div>

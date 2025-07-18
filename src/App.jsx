@@ -15,6 +15,8 @@ import AdminLayout from './admin/components/AdminLayout';
 import AdminNoticias from './admin/pages/AdminNoticias';
 import AdminEditarNoticia from './admin/pages/AdminEditarNoticia';
 import AdminNovaNoticia from './admin/pages/AdminNovaNoticia';
+import AdminCategorias from './admin/pages/AdminCategorias';
+import AdminConfiguracoes from './admin/pages/AdminConfiguracoes';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -112,10 +114,7 @@ function App() {
           <Route path="/admin/categorias" element={
             <ProtectedRoute>
               <AdminLayout>
-                <div className="p-4">
-                  <h2>Gerenciar Categorias</h2>
-                  <p>Funcionalidade em desenvolvimento...</p>
-                </div>
+                <AdminCategorias />
               </AdminLayout>
             </ProtectedRoute>
           } />
@@ -132,10 +131,7 @@ function App() {
           <Route path="/admin/configuracoes" element={
             <ProtectedRoute>
               <AdminLayout>
-                <div className="p-4">
-                  <h2>Configurações</h2>
-                  <p>Funcionalidade em desenvolvimento...</p>
-                </div>
+                <AdminConfiguracoes />
               </AdminLayout>
             </ProtectedRoute>
           } />

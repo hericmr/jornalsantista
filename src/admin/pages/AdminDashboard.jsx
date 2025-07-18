@@ -95,7 +95,7 @@ const AdminDashboard = () => {
       {/* Cards de Estatísticas */}
       <div className="row g-4">
         <div className="col-md-6 col-lg-3">
-          <div className="card stat-card">
+          <div className="card stat-card bg-dark text-light border-secondary">
             <div className="card-body text-center">
               <div className="stat-icon">
                 <FaNewspaper />
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
         </div>
         
         <div className="col-md-6 col-lg-3">
-          <div className="card stat-card">
+          <div className="card stat-card bg-dark text-light border-secondary">
             <div className="card-body text-center">
               <div className="stat-icon">
                 <FaTags />
@@ -119,7 +119,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card stat-card">
+          <div className="card stat-card bg-dark text-light border-secondary">
             <div className="card-body text-center">
               <div className="stat-icon">
                 <FaCalendar />
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card stat-card">
+          <div className="card stat-card bg-dark text-light border-secondary">
             <div className="card-body text-center">
               <div className="stat-icon">
                 <FaDatabase />
@@ -157,7 +157,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card stat-card">
+          <div className="card stat-card bg-dark text-light border-secondary">
             <div className="card-body text-center">
               <div className="stat-icon">
                 <FaNewspaper />
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="col-md-6 col-lg-3">
-          <div className="card stat-card">
+          <div className="card stat-card bg-dark text-light border-secondary">
             <div className="card-body text-center">
               <div className="stat-icon">
                 <FaBolt />
@@ -184,14 +184,14 @@ const AdminDashboard = () => {
       {/* Notícias Recentes */}
       <div className="row">
         <div className="col-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Notícias Recentes</h5>
+          <div className="card bg-dark text-light border-secondary">
+            <div className="card-header bg-secondary">
+              <h5 className="mb-0 text-light">Notícias Recentes</h5>
             </div>
             <div className="card-body">
               {stats.recentNews.length > 0 ? (
                 <div className="table-responsive">
-                  <table className="table table-hover">
+                  <table className="table table-hover table-dark">
                     <thead>
                       <tr>
                         <th>Título</th>
@@ -252,7 +252,7 @@ const AdminDashboard = () => {
       <div className="row mt-4">
         <div className="col-md-4">
           <Link to="/admin/noticias" className="text-decoration-none">
-            <div className="card stat-card h-100 text-center hover-shadow">
+            <div className="card stat-card bg-dark text-light border-secondary h-100 text-center hover-shadow">
               <div className="card-body d-flex flex-column align-items-center justify-content-center">
                 <div className="stat-icon mb-2">
                   <FaNewspaper />
@@ -264,7 +264,7 @@ const AdminDashboard = () => {
         </div>
         <div className="col-md-4">
           <Link to="/admin/categorias" className="text-decoration-none">
-            <div className="card stat-card h-100 text-center hover-shadow">
+            <div className="card stat-card bg-dark text-light border-secondary h-100 text-center hover-shadow">
               <div className="card-body d-flex flex-column align-items-center justify-content-center">
                 <div className="stat-icon mb-2">
                   <FaTags />
@@ -276,7 +276,7 @@ const AdminDashboard = () => {
         </div>
         <div className="col-md-4">
           <Link to="/admin/configuracoes" className="text-decoration-none">
-            <div className="card stat-card h-100 text-center hover-shadow">
+            <div className="card stat-card bg-dark text-light border-secondary h-100 text-center hover-shadow">
               <div className="card-body d-flex flex-column align-items-center justify-content-center">
                 <div className="stat-icon mb-2">
                   <FaCog />

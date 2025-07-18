@@ -576,18 +576,19 @@ footer {
 /* Admin Layout Styles */
 .admin-layout {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #1a1e23;
 }
 
 .admin-sidebar {
   width: 250px;
-  background: #343a40;
+  background: #23272b;
   color: white;
-  height: 100vh;
+  height: calc(100vh - 56px); /* Altura da navbar */
   position: fixed;
   left: 0;
-  top: 0;
+  top: 56px; /* Altura da navbar */
   overflow-y: auto;
+  border-right: 1px solid #343a40;
 }
 
 .sidebar-header {
@@ -618,13 +619,10 @@ footer {
 
 .admin-content {
   padding: 2rem;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  background: #23272b;
+  margin-left: 250px; /* Espaço para sidebar */
+  min-height: calc(100vh - 56px); /* Altura da navbar */
+  background: #1a1e23;
   color: #f8f9fa;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
 }
 
 .admin-header {
@@ -674,10 +672,10 @@ footer {
 }
 
 .admin-noticias .table th {
-  background-color: #f8f9fa;
+  background-color: #343a40;
   border-top: none;
   font-weight: 600;
-  color: #495057;
+  color: #f8f9fa;
 }
 
 .admin-noticias .table td {
@@ -872,6 +870,69 @@ footer {
   border-radius: 0.5rem;
   padding: 1rem;
   margin: -1rem;
+}
+
+/* Estilos específicos para AdminCategorias */
+.admin-categorias {
+  padding: 2rem;
+}
+
+.admin-categorias .form-control:focus {
+  background-color: #23272b !important;
+  border-color: #0d6efd !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15) !important;
+}
+
+/* Estilos específicos para AdminConfiguracoes */
+.admin-configuracoes {
+  padding: 2rem;
+}
+
+.admin-configuracoes .form-control:focus {
+  background-color: #23272b !important;
+  border-color: #0d6efd !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15) !important;
+}
+
+.admin-configuracoes .form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.admin-configuracoes .form-check-input:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+}
+
+/* Melhorar botões e interações da área admin */
+.admin-layout .btn:focus,
+.admin-layout .btn:active {
+  box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25) !important;
+}
+
+.admin-layout .table-dark {
+  --bs-table-bg: #23272b;
+  --bs-table-striped-bg: #2c3034;
+  --bs-table-hover-bg: #2c3034;
+}
+
+/* Melhorias na responsividade da área admin */
+@media (max-width: 768px) {
+  .admin-categorias,
+  .admin-configuracoes {
+    padding: 1rem;
+  }
+  
+  .admin-configuracoes .col-md-3 {
+    margin-bottom: 1rem;
+  }
+  
+  .admin-configuracoes .list-group-item {
+    padding: 0.75rem 1rem;
+  }
 }
 
 .editor-toolbar .btn {

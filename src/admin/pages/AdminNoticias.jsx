@@ -54,17 +54,17 @@ const AdminNoticias = () => {
   return (
     <div className="admin-noticias">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gerenciar Notícias</h2>
+        <h2 className="text-light">Gerenciar Notícias</h2>
         <Link to="/admin/noticias/nova" className="btn btn-primary">
           <FaPlus className="me-2" />
           Nova Notícia
         </Link>
       </div>
 
-      <div className="card">
+      <div className="card bg-dark text-light border-secondary">
         <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-hover">
+            <table className="table table-hover table-dark">
               <thead>
                 <tr>
                   <th>Título</th>
