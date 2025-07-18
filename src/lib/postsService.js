@@ -95,33 +95,50 @@ export const getPostById = async (slugOrId) => {
 // Função para salvar post (sempre no Supabase)
 export const savePost = async (postData, isNew = false) => {
   try {
+    console.log('📝 savePost - Dados recebidos:', postData);
+    console.log('📝 savePost - isNew:', isNew);
+    
     // Remover campos que não devem ser enviados para o Supabase
     const { id, source, ...cleanPostData } = postData;
-    // Mapear text_content para content (campo esperado pelo Supabase)
+    
+    // Preparar dados para o Supabase (sem text_content duplicado)
     const supabaseData = {
       ...cleanPostData,
-      content: cleanPostData.text_content || cleanPostData.content || '',
-      text_content: undefined
+      // Mapear text_content para content se necessário
+      text_content: cleanPostData.text_content || cleanPostData.content || ''
     };
+    
+    // Remover campo content se text_content está sendo usado
+    if (supabaseData.text_content && supabaseData.content) {
+      delete supabaseData.content;
+    }
+    
+    console.log('📝 savePost - Dados para Supabase:', supabaseData);
     if (isNew) {
+      console.log('📝 savePost - Criando novo post...');
       const newPost = await postsAPI.createPost({
         ...supabaseData,
         created_at: new Date().toISOString()
       });
+      console.log('✅ savePost - Post criado com sucesso:', newPost);
       return { ...newPost, source: 'supabase' };
     } else {
       const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (isValidUUID.test(id)) {
+        console.log('📝 savePost - Atualizando post existente:', id);
         const updatedPost = await postsAPI.updatePost(id, {
           ...supabaseData,
           updated_at: new Date().toISOString()
         });
+        console.log('✅ savePost - Post atualizado com sucesso:', updatedPost);
         return { ...updatedPost, source: 'supabase' };
       } else {
+        console.log('📝 savePost - ID inválido, criando novo post...');
         const newPost = await postsAPI.createPost({
           ...supabaseData,
           created_at: new Date().toISOString()
         });
+        console.log('✅ savePost - Post criado com sucesso:', newPost);
         return { ...newPost, source: 'supabase' };
       }
     }

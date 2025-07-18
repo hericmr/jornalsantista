@@ -100,6 +100,38 @@ const AdminNovaNoticia = () => {
     }));
   };
 
+  const testSupabaseConnection = async () => {
+    try {
+      console.log('🧪 Testando conexão direta com Supabase...');
+      const testData = {
+        title: 'Teste de Conectividade',
+        text_content: 'Este é um post de teste para verificar a conectividade com o Supabase.',
+        categories: ['teste'],
+        authors: ['Admin'],
+        author: 'Admin',
+        published_at: new Date().toISOString(),
+        status: 'draft',
+        slug: 'teste-conectividade-' + Date.now()
+      };
+      
+      const { data, error } = await supabase
+        .from('posts')
+        .insert([testData])
+        .select();
+      
+      if (error) {
+        console.error('❌ Erro no teste direto:', error);
+        alert('Erro no teste: ' + error.message);
+      } else {
+        console.log('✅ Teste direto funcionou:', data);
+        alert('Teste de conectividade bem-sucedido! Post de teste criado.');
+      }
+    } catch (error) {
+      console.error('❌ Erro no teste:', error);
+      alert('Erro no teste: ' + error.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -182,6 +214,13 @@ const AdminNovaNoticia = () => {
           <a href="/" className="btn btn-outline-dark me-2" target="_blank" rel="noopener noreferrer">
             Voltar para o site
           </a>
+          <button 
+            onClick={testSupabaseConnection}
+            className="btn btn-outline-info me-2"
+            type="button"
+          >
+            🧪 Testar Supabase
+          </button>
           <button 
             onClick={() => navigate('/admin/noticias')}
             className="btn btn-outline-secondary me-2"
