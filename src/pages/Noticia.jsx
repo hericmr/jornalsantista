@@ -60,6 +60,49 @@ const Noticia = () => {
     }
   };
 
+  // Função para obter lista de autores (compatibilidade com formato antigo e novo)
+  const getAuthors = () => {
+    if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
+      // Filtrar valores vazios, null, undefined
+      const validAuthors = post.authors.filter(author => 
+        author && 
+        typeof author === 'string' && 
+        author.trim() !== ''
+      );
+      if (validAuthors.length > 0) {
+        return validAuthors;
+      }
+    }
+    if (post.author && typeof post.author === 'string' && post.author.trim() !== '') {
+      return [post.author];
+    }
+    return ['Autor não informado'];
+  };
+
+  // Função para verificar se um autor é um dos autores especiais
+  const isSpecialAuthor = (author) => {
+    const specialAuthors = ["Héric Moura", "Walter Parreira", "Marcos de Paula"];
+    return specialAuthors.includes(author) || 
+           (author && author.toLowerCase().includes("darlene regina"));
+  };
+
+  // Função para obter a imagem do autor
+  const getAuthorImage = (author) => {
+    if (author === "Héric Moura") {
+      return "https://hericmr.github.io/me/imagens/heric.png";
+    }
+    if (author === "Walter Parreira") {
+      return "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif";
+    }
+    if (author === "Marcos de Paula") {
+      return "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg";
+    }
+    if (author && author.toLowerCase().includes("darlene regina")) {
+      return "/darlene.jpeg";
+    }
+    return null;
+  };
+
   const shareOnSocialMedia = (platform) => {
     const url = window.location.href;
     const title = post?.title || 'Jornal Santista';
@@ -168,34 +211,86 @@ const Noticia = () => {
               {/* Meta informações */}
               <div className="d-flex flex-wrap justify-content-between align-items-center text-muted mb-4">
                 <div className="d-flex align-items-center">
-                  {post.author === "Héric Moura" && (
-                    <img src="https://hericmr.github.io/me/imagens/heric.png" alt="Héric Moura" className="rounded-circle me-2" style={{ width: '60px', height: '60px', filter: 'grayscale(100%)' }} />
-                  )}
-                  {post.author === "Walter Parreira" && (
-                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif" alt="Walter Parreira" className="rounded-circle me-2" style={{ width: '60px', height: '60px', filter: 'grayscale(100%)' }} />
-                  )}
-                  {post.author === "Marcos de Paula" && (
-                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg" alt="Marcos de Paula" className="rounded-circle me-2" style={{ width: '60px', height: '60px', filter: 'grayscale(100%)' }} />
-                  )}
-                  {post.author !== "Héric Moura" && post.author !== "Walter Parreira" && post.author !== "Marcos de Paula" && post.author && (
-                    <i className="bi bi-person-circle me-2" style={{ fontSize: '2rem' }}></i>
-                  )}
+                  {/* Exibir imagens dos autores */}
+                  <div className="d-flex me-2">
+                    {getAuthors().slice(0, 3).map((author, index) => {
+                      const authorImage = getAuthorImage(author);
+                      return authorImage ? (
+                        <img 
+                          key={index}
+                          src={authorImage} 
+                          alt={author} 
+                          className="rounded-circle"
+                          style={{ 
+                            width: '60px', 
+                            height: '60px', 
+                            filter: 'grayscale(100%)',
+                            marginLeft: index > 0 ? '-15px' : '0',
+                            border: '2px solid white',
+                            zIndex: 3 - index
+                          }} 
+                        />
+                      ) : (
+                        <div
+                          key={index}
+                          className="rounded-circle d-flex align-items-center justify-content-center"
+                          style={{
+                            width: '60px',
+                            height: '60px',
+                            backgroundColor: '#6c757d',
+                            marginLeft: index > 0 ? '-15px' : '0',
+                            border: '2px solid white',
+                            zIndex: 3 - index
+                          }}
+                        >
+                          <i className="bi bi-person-fill" style={{ fontSize: '1.5rem', color: 'white' }}></i>
+                        </div>
+                      );
+                    })}
+                    {getAuthors().length > 3 && (
+                      <div
+                        className="rounded-circle d-flex align-items-center justify-content-center"
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          backgroundColor: '#495057',
+                          marginLeft: '-15px',
+                          border: '2px solid white',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                          color: 'white'
+                        }}
+                      >
+                        +{getAuthors().length - 3}
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <div className="fw-semibold mb-1">
-                      Por {post.author || 'Autor não informado'}
+                      Por {(() => {
+                        const authors = getAuthors();
+                        if (authors.length === 1) {
+                          return authors[0];
+                        } else if (authors.length === 2) {
+                          return `${authors[0]} e ${authors[1]}`;
+                        } else if (authors.length > 2) {
+                          return `${authors.slice(0, -1).join(', ')} e ${authors[authors.length - 1]}`;
+                        }
+                        return 'Autor não informado';
+                      })()}
                     </div>
                     <div className="small">
                       {formatDate(post.published)}
                     </div>
                     {post.updated && post.updated !== post.published && (
                       <div className="small">
-                        {formatDate(post.updated)}
+                        Atualizado em {formatDate(post.updated)}
                       </div>
                     )}
                   </div>
                 </div>
                 {/* Botões de compartilhamento minimalistas */}
-                <div className="d-flex gap-2">
+                <div className="d-flex flex-wrap gap-2 justify-content-end justify-content-md-start">
                   <button 
                     onClick={() => shareOnSocialMedia('whatsapp')}
                     className="d-flex align-items-center justify-content-center"
@@ -283,7 +378,6 @@ const Noticia = () => {
 
             {/* Tags e Categorias */}
             <div className="mb-4">
-              <h5>Tags:</h5>
               <div>
                 {post.categories && post.categories.length > 0 ? (
                   post.categories.map((category, index) => (
@@ -313,79 +407,116 @@ const Noticia = () => {
               <div className="row justify-content-center">
                 <div className="col-md-8 col-lg-6">
                   <div className="card mb-4 bg-dark text-light border-secondary">
-                <div className="card-body">
-                  {/* Removido o título 'Sobre o Autor' */}
-                  {post.author === "Héric Moura" && (
-                    <>
-                      <div className="text-center mb-3">
-                        <img
-                          src="https://hericmr.github.io/me/imagens/heric.png"
-                          alt="Héric Moura"
-                          style={{ width: '160px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
-                          className="mb-2 shadow"
-                        />
-                      </div>
-                      <p className="card-text mb-1">
-                        <strong>Héric Moura</strong>
-                      </p>
-                      <p className="card-text small mb-0">
-                        Integrante da equipe do Jornal Santista desde 2015. Atua na cobertura de temas ligados a meio ambiente, movimentos sociais, cultura e política local, com atenção especial às pautas que afetam diretamente a vida da população trabalhadora da região.
-                      </p>
-                    </>
-                  )}
-                  {post.author === "Walter Parreira" && (
-                    <>
-                      <div className="text-center mb-3">
-                        <img
-                          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif"
-                          alt="Walter Parreira"
-                          style={{ width: '160px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
-                          className="mb-2 shadow"
-                        />
-                      </div>
-                      <p className="card-text mb-1">
-                        <strong>Walter Parreira</strong>
-                      </p>
-                      <p className="card-text small mb-0">
-                        Jornalista do Jornal Santista. Especialista em temas sociais, cultura e história regional, com olhar atento às transformações da Baixada Santista.
-                      </p>
-                    </>
-                  )}
-                  {post.author === "Marcos de Paula" && (
-                    <>
-                      <div className="text-center mb-3">
-                        <img
-                          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg"
-                          alt="Marcos de Paula"
-                          style={{ width: '160px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
-                          className="mb-2 shadow"
-                        />
-                      </div>
-                      <p className="card-text mb-1">
-                        <strong>Marcos de Paula</strong>
-                      </p>
-                      <p className="card-text small mb-0">
-                        Professor de Filosofia na Universidade Federal de São Paulo - Departamento de Saúde, Educação e Sociedade e militante antiproibicionista.
-                      </p>
-                    </>
-                  )}
-                  {/* Remover parágrafos genéricos de autor */}
-                  {post.author !== "Héric Moura" && post.author !== "Walter Parreira" && post.author !== "Marcos de Paula" && post.author && (
-                    <>
-                      <div className="text-center mb-3">
-                        <i className="bi bi-person-circle" style={{ fontSize: '4rem', color: '#888' }}></i>
-                      </div>
-                      <p className="card-text mb-1">
-                        <strong>{post.author}</strong>
-                      </p>
-                      <p className="card-text small mb-0">
-                        Autor(a) convidado(a) do Jornal Santista.
-                      </p>
-                    </>
-                  )}
+                    <div className="card-body">
+                      <h6 className="card-title mb-3">
+                        {getAuthors().length > 1 ? 'Sobre os Autores' : 'Sobre o Autor'}
+                      </h6>
+                      
+                      {getAuthors().map((author, index) => {
+                        const authorImage = getAuthorImage(author);
+                        
+                        return (
+                          <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
+                            {/* Héric Moura */}
+                            {author === "Héric Moura" && (
+                              <>
+                                <div className="text-center mb-3">
+                                  <img
+                                    src="https://hericmr.github.io/me/imagens/heric.png"
+                                    alt="Héric Moura"
+                                    style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                                    className="mb-2 shadow"
+                                  />
+                                </div>
+                                <p className="card-text mb-1">
+                                  <strong>Héric Moura</strong>
+                                </p>
+                                <p className="card-text small mb-0">
+                                  Integrante da equipe do Jornal Santista desde 2015. Atua na cobertura de temas ligados a meio ambiente, movimentos sociais, cultura e política local, com atenção especial às pautas que afetam diretamente a vida da população trabalhadora da região.
+                                </p>
+                              </>
+                            )}
+                            
+                            {/* Walter Parreira */}
+                            {author === "Walter Parreira" && (
+                              <>
+                                <div className="text-center mb-3">
+                                  <img
+                                    src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif"
+                                    alt="Walter Parreira"
+                                    style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                                    className="mb-2 shadow"
+                                  />
+                                </div>
+                                <p className="card-text mb-1">
+                                  <strong>Walter Parreira</strong>
+                                </p>
+                                <p className="card-text small mb-0">
+                                  Jornalista do Jornal Santista. Especialista em temas sociais, cultura e história regional, com olhar atento às transformações da Baixada Santista.
+                                </p>
+                              </>
+                            )}
+                            
+                            {/* Marcos de Paula */}
+                            {author === "Marcos de Paula" && (
+                              <>
+                                <div className="text-center mb-3">
+                                  <img
+                                    src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg"
+                                    alt="Marcos de Paula"
+                                    style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                                    className="mb-2 shadow"
+                                  />
+                                </div>
+                                <p className="card-text mb-1">
+                                  <strong>Marcos de Paula</strong>
+                                </p>
+                                <p className="card-text small mb-0">
+                                  Professor de Filosofia na Universidade Federal de São Paulo - Departamento de Saúde, Educação e Sociedade e militante antiproibicionista.
+                                </p>
+                              </>
+                            )}
+                            
+                            {/* Darlene Regina */}
+                            {(author && author.toLowerCase().includes("darlene regina")) && (
+                              <>
+                                <div className="text-center mb-3">
+                                  <img
+                                    src="/darlene.jpeg"
+                                    alt="Darlene Regina"
+                                    style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                                    className="mb-2 shadow"
+                                  />
+                                </div>
+                                <p className="card-text mb-1">
+                                  <strong>Darlene Regina</strong>
+                                </p>
+                                <p className="card-text small mb-0">
+                                  Autora brasileira, nascida em São Paulo, formada em Direito e apaixonada pelas artes e letras. Dedica-se desde jovem à escrita de poesias e contos, sendo autora dos livros "Bianca – Um amor que sobrevive aos séculos" (romance) e "Para um Doce Cavaleiro" (poesia), ambos pela Editora Clube de Autores, além de diversos contos publicados pelo Grupo Editorial Quimera. Colaboradora do Jornalsantista desde 2015, mantém o espaço "Devaneios e Poesias" para divulgação de seus textos, dicas literárias e promoção da cultura regional.
+                                </p>
+                              </>
+                            )}
+                            
+                            {/* Autor genérico */}
+                            {!isSpecialAuthor(author) && (
+                              <>
+                                <div className="text-center mb-3">
+                                  <i className="bi bi-person-circle" style={{ fontSize: '3rem', color: '#888' }}></i>
+                                </div>
+                                <p className="card-text mb-1">
+                                  <strong>{author}</strong>
+                                </p>
+                                <p className="card-text small mb-0">
+                                  Autor(a) convidado(a) do Jornal Santista.
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
               </div>
 
               {/* Compartilhar removido */}

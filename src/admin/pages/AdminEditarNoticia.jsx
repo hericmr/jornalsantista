@@ -15,12 +15,17 @@ const AdminEditarNoticia = () => {
     excerpt: '',
     content: '',
     categories: [],
-    author: '',
+    authors: [],
     published: '',
     images: [],
     tags: [],
     status: 'draft'
   });
+  
+  // Debug: log do estado do post sempre que authors mudar
+  useEffect(() => {
+    console.log('📊 AdminEdit - Post authors state changed:', post.authors);
+  }, [post.authors]);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => {
@@ -46,7 +51,19 @@ const AdminEditarNoticia = () => {
           excerpt: foundPost.excerpt || '',
           content: foundPost.text_content || foundPost.content || '', // Priorizar text_content
           categories: foundPost.categories || [],
-          author: foundPost.author || '',
+          authors: (() => {
+            // Lógica simplificada para carregar autores
+            if (Array.isArray(foundPost.authors) && foundPost.authors.length > 0) {
+              // Filtrar valores válidos do array authors
+              return foundPost.authors.filter(author => 
+                author && typeof author === 'string' && author.trim() !== ''
+              );
+            }
+            if (foundPost.author && typeof foundPost.author === 'string' && foundPost.author.trim() !== '') {
+              return [foundPost.author];
+            }
+            return [];
+          })(),
           published: foundPost.published_at || foundPost.published ? 
             new Date(foundPost.published_at || foundPost.published).toISOString().split('T')[0] : '',
           images: foundPost.images || [],
@@ -60,6 +77,7 @@ const AdminEditarNoticia = () => {
           content: foundPost.content,
           finalContent: postData.content
         });
+        console.log('🔄 AdminEdit - Setting post with authors:', postData.authors);
         setPost(postData);
       } else {
         alert('Notícia não encontrada');
@@ -144,18 +162,26 @@ const AdminEditarNoticia = () => {
     setSaving(true);
 
     try {
+      console.log('💾 AdminEdit - Saving post with authors:', post.authors);
+      
       const postData = {
         title: post.title,
         excerpt: post.excerpt,
         text_content: post.content, // Mapear content para text_content
         categories: post.categories,
-        author: post.author,
+        authors: post.authors,
+        author: post.authors.length > 0 ? post.authors.join(', ') : '', // Para compatibilidade
         published_at: post.published ? new Date(post.published).toISOString() : null,
         images: post.images,
         tags: post.tags,
         status: post.status,
         slug: slugify(post.title)
       };
+      
+      console.log('💾 AdminEdit - Final postData:', {
+        authors: postData.authors,
+        author: postData.author
+      });
 
       console.log('📝 Dados a serem salvos:', postData);
       console.log('📄 Conteúdo:', postData.text_content);
@@ -437,15 +463,101 @@ const AdminEditarNoticia = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="author" className="form-label">Autor</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="author"
-                    name="author"
-                    value={post.author}
-                    onChange={handleInputChange}
-                  />
+                  <label htmlFor="authors" className="form-label">Autores</label>
+                  <div className="multi-author-selector" key={`authors-selector-${post.authors.join('-')}`}>
+                    {/* Lista de autores selecionados */}
+                    <div className="selected-authors mb-2">
+                      {console.log('🎨 AdminEdit - Rendering badges for authors:', post.authors)}
+                      {post.authors && post.authors.length > 0 ? (
+                        post.authors.map((author, index) => (
+                          <span key={`author-${index}-${author}`} className="badge bg-primary me-1 mb-1">
+                            {author}
+                            <button
+                              type="button"
+                              className="btn-close btn-close-white ms-1"
+                              style={{ fontSize: '0.6rem' }}
+                              onClick={() => {
+                                console.log('🗑️ AdminEdit - Removing author:', author);
+                                const newAuthors = post.authors.filter((_, i) => i !== index);
+                                console.log('🗑️ AdminEdit - Authors after removal:', newAuthors);
+                                setPost(prev => ({ ...prev, authors: newAuthors }));
+                              }}
+                            ></button>
+                          </span>
+                        ))
+                      ) : (
+                        <div className="text-muted small">Nenhum autor selecionado</div>
+                      )}
+                    </div>
+                    
+                    {/* Seletor de autores predefinidos */}
+                    <select
+                      className="form-select mb-2"
+                      onChange={(e) => {
+                        console.log('🔧 AdminEdit - Select value:', e.target.value);
+                        console.log('🔧 AdminEdit - Current authors:', post.authors);
+                        
+                        if (e.target.value && !post.authors.includes(e.target.value)) {
+                          const newAuthors = [...post.authors, e.target.value];
+                          console.log('🔧 AdminEdit - New authors array:', newAuthors);
+                          
+                          setPost(prev => ({ 
+                            ...prev, 
+                            authors: newAuthors
+                          }));
+                        }
+                        e.target.value = '';
+                      }}
+                    >
+                      <option value="">Selecionar autor conhecido</option>
+                      <option value="Héric Moura">Héric Moura</option>
+                      <option value="Walter Parreira">Walter Parreira</option>
+                      <option value="Marcos de Paula">Marcos de Paula</option>
+                      <option value="Darlene Regina">Darlene Regina</option>
+                    </select>
+                    
+                    {/* Campo para adicionar novo autor */}
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Ou digite nome de novo autor"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const newAuthor = e.target.value.trim();
+                            if (newAuthor && !post.authors.includes(newAuthor)) {
+                              setPost(prev => ({ 
+                                ...prev, 
+                                authors: [...prev.authors, newAuthor] 
+                              }));
+                              e.target.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={(e) => {
+                          const input = e.target.previousElementSibling;
+                          const newAuthor = input.value.trim();
+                          if (newAuthor && !post.authors.includes(newAuthor)) {
+                            setPost(prev => ({ 
+                              ...prev, 
+                              authors: [...prev.authors, newAuthor] 
+                            }));
+                            input.value = '';
+                          }
+                        }}
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+                    <div className="form-text">
+                      Selecione autores da lista ou digite novos nomes. Pressione Enter ou clique em Adicionar.
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mb-3">

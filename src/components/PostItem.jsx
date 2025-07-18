@@ -95,8 +95,28 @@ const PostItem = ({ post }) => {
         </p>
 
         {/* Autor e Data */}
-        <div className="news-card__meta">   <span className="news-card__author">
-            {post.author || 'Autor não informado'}
+        <div className="news-card__meta">
+          <span className="news-card__author">
+            {(() => {
+              // Suporte para múltiplos autores
+              if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
+                // Filtrar valores vazios
+                const validAuthors = post.authors.filter(author => 
+                  author && 
+                  typeof author === 'string' && 
+                  author.trim() !== ''
+                );
+                
+                if (validAuthors.length === 1) {
+                  return validAuthors[0];
+                } else if (validAuthors.length === 2) {
+                  return `${validAuthors[0]} e ${validAuthors[1]}`;
+                } else if (validAuthors.length > 2) {
+                  return `${validAuthors.slice(0, -1).join(', ')} e ${validAuthors[validAuthors.length - 1]}`;
+                }
+              }
+              return post.author || 'Autor não informado';
+            })()}
           </span>
           <span className="news-card__date">
             {formatDate(post.published)}
