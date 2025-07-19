@@ -415,10 +415,6 @@ const Noticia = () => {
                 <div className="col-md-8 col-lg-6">
                   <div className="card mb-4 bg-dark text-light border-secondary">
                     <div className="card-body">
-                      <h6 className="card-title mb-3">
-                        {getAuthors().length > 1 ? 'Sobre os Autores' : 'Sobre o Autor'}
-                      </h6>
-                      
                       {getAuthors().map((author, index) => {
                         const authorImage = getAuthorImage(author);
                         
