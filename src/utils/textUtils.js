@@ -62,14 +62,21 @@ export const processHtmlContent = (html) => {
 export const getFullImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   
-  // Se já é uma URL completa, retorna como está
+  // Se já é uma URL completa (http/https), retorna como está
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     return imageUrl;
   }
   
-  // Se é uma URL relativa, adiciona o domínio base
+  // Se é uma URL do Supabase Storage (começando com /)
+  if (imageUrl.startsWith('/storage/')) {
+    // Remove a barra inicial se existir para evitar URLs duplas
+    return `${window.location.origin}${imageUrl}`;
+  }
+  
+  // Se é uma URL relativa simples, adiciona o domínio base
   const baseUrl = window.location.origin;
-  return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  const cleanUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+  return `${baseUrl}${cleanUrl}`;
 }; 
 
 /**

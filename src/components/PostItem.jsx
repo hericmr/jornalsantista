@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { createExcerpt, slugify } from '../utils/textUtils';
+import { createExcerpt, slugify, getFullImageUrl } from '../utils/textUtils';
 
 const PostItem = ({ post }) => {
   const formatDate = (dateString) => {
@@ -32,10 +32,21 @@ const PostItem = ({ post }) => {
 
   const getFeaturedImage = () => {
     try {
+      console.log('🖼️ PostItem: Raw images from post:', {
+        title: post.title,
+        type: typeof post.images,
+        value: post.images,
+        raw: JSON.stringify(post.images)
+      });
+      
       const images = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
-      return images && images.length > 0 ? images[0] : null;
+      const imageUrl = images && images.length > 0 ? images[0] : null;
+      const finalUrl = imageUrl ? (getFullImageUrl(imageUrl) || imageUrl) : null;
+      
+      console.log('🖼️ PostItem: Final image URL:', finalUrl);
+      return finalUrl;
     } catch (error) {
-      console.error("Error parsing images JSON:", error);
+      console.error("🖼️ Error parsing images JSON in PostItem:", error);
       return null;
     }
   };

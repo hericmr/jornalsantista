@@ -4,7 +4,30 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+// Validar variáveis de ambiente
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ ERRO: Variáveis de ambiente do Supabase não configuradas!');
+  console.error('VITE_SUPABASE_URL:', supabaseUrl ? 'Presente' : 'AUSENTE');
+  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Presente' : 'AUSENTE');
+  console.error('📋 Para corrigir:');
+  console.error('1. Crie/edite o arquivo .env na raiz do projeto');
+  console.error('2. Adicione as variáveis:');
+  console.error('   VITE_SUPABASE_URL=sua_url_do_supabase');
+  console.error('   VITE_SUPABASE_ANON_KEY=sua_chave_anonima');
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Testar conectividade na inicialização
+supabase.from('posts').select('count', { count: 'exact' }).then(({ count, error }) => {
+  if (error) {
+    console.error('❌ Erro de conectividade com Supabase:', error.message);
+  } else {
+    console.log('✅ Supabase conectado com sucesso. Posts disponíveis:', count);
+  }
+}).catch(err => {
+  console.error('❌ Falha ao testar conectividade:', err.message);
+});
 
 // Funções para gerenciar postagens
 export const postsAPI = {
@@ -13,6 +36,11 @@ export const postsAPI = {
     console.log('🔍 Supabase: Tentando buscar todas as postagens...');
     console.log('🔗 URL:', supabaseUrl);
     console.log('🔑 Anon Key:', supabaseAnonKey ? 'Presente' : 'Ausente');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('❌ Variáveis de ambiente do Supabase não configuradas');
+      throw new Error('Configuração do Supabase incompleta');
+    }
     
     const { data, error } = await supabase
       .from('posts')
@@ -45,6 +73,10 @@ export const postsAPI = {
   async getPostById(id) {
     console.log('🔍 Supabase: Buscando post por ID:', id);
     
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Configuração do Supabase incompleta');
+    }
+    
     const { data, error } = await supabase
       .from('posts')
       .select('*')
@@ -71,18 +103,36 @@ export const postsAPI = {
   // Buscar uma postagem por slug
   async getPostBySlug(slug) {
     console.log('🔍 Supabase: Buscando post por slug:', slug);
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Configuração do Supabase incompleta');
+    }
+    
     const { data, error } = await supabase
       .from('posts')
       .select('*')
       .eq('slug', slug)
       .single();
+      
     if (error) {
       if (error.code === 'PGRST116') { // Not found
+        console.log('ℹ️ Post não encontrado por slug:', slug);
         return null;
       }
       console.error('❌ Erro ao buscar post por slug:', error);
       throw error;
     }
+    
+    console.log('✅ Supabase: Post encontrado por slug:', {
+      id: data?.id,
+      title: data?.title,
+      slug: data?.slug,
+      hasContent: !!data?.content,
+      contentLength: data?.content?.length || 0,
+      hasTextContent: !!data?.text_content,
+      textContentLength: data?.text_content?.length || 0
+    });
+    
     return data;
   },
 

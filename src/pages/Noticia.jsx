@@ -139,6 +139,26 @@ const Noticia = () => {
     e.target.style.objectFit = 'cover';
   };
 
+  // Função para processar imagens - usando a mesma lógica que funciona no PostItem
+  const getProcessedImages = () => {
+    try {
+      console.log('🖼️ Noticia: Raw images from post:', {
+        type: typeof post.images,
+        value: post.images,
+        raw: JSON.stringify(post.images)
+      });
+      
+      const images = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
+      const processedImages = images && Array.isArray(images) ? images.filter(Boolean) : (images ? [images] : []);
+      
+      console.log('🖼️ Noticia: Processed images:', processedImages);
+      return processedImages;
+    } catch (error) {
+      console.error("🖼️ Error parsing images JSON in Noticia:", error);
+      return [];
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mt-5">
@@ -164,21 +184,8 @@ const Noticia = () => {
     );
   }
 
-  // Antes do render
-  let images = post.images;
-  if (!images) {
-    images = [];
-  } else if (typeof images === 'string') {
-    try {
-      images = JSON.parse(images);
-      if (!Array.isArray(images)) images = [images];
-    } catch {
-      images = images ? [images] : [];
-    }
-  } else if (!Array.isArray(images)) {
-    images = [images];
-  }
-  images = images.filter(Boolean).map(url => url && typeof url === 'string' ? getFullImageUrl(url) : url);
+  // Usar a nova função de processamento de imagens
+  const images = getProcessedImages();
 
   return (
     <>
@@ -187,7 +194,7 @@ const Noticia = () => {
       <MetaTags
         title={post?.title || 'Notícia - Jornal Santista'}
         description={post?.excerpt || createExcerpt(post?.text_content || post?.content || '', 160)}
-        image={images && images.length > 0 ? getFullImageUrl(images[0]) : null}
+        image={images && images.length > 0 ? (getFullImageUrl(images[0]) || images[0]) : null}
         url={window.location.href}
         type="article"
         author={post?.author}
@@ -332,7 +339,7 @@ const Noticia = () => {
               <div className="mb-4">
                 <figure className="mb-3 text-center">
                   <img
-                    src={images[0]}
+                    src={getFullImageUrl(images[0]) || images[0]}
                     className="img-fluid rounded shadow-lg"
                     alt={`${post.title || 'Notícia'} - Imagem 1`}
                     title={post.title || 'Notícia'}
@@ -363,7 +370,7 @@ const Noticia = () => {
                 {images.slice(1).map((image, idx) => (
                   <figure key={idx + 1} className="mb-3 text-center">
                     <img
-                      src={image}
+                      src={getFullImageUrl(image) || image}
                       className="img-fluid rounded shadow-lg"
                       alt={`${post.title || 'Notícia'} - Imagem ${idx + 2}`}
                       title={post.title || 'Notícia'}
@@ -379,7 +386,7 @@ const Noticia = () => {
             {/* Tags e Categorias */}
             <div className="mb-4">
               <div>
-                {post.categories && post.categories.length > 0 ? (
+                {post.categories && Array.isArray(post.categories) && post.categories.length > 0 ? (
                   post.categories.map((category, index) => (
                     <Link 
                       key={index} 

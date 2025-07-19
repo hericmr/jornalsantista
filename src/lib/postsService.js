@@ -1,13 +1,70 @@
 import { postsAPI } from './supabase';
 import { slugify } from '../utils/textUtils';
 
+// Função helper para processar imagens de diferentes formatos
+const processImages = (images) => {
+  if (!images) {
+    return [];
+  }
+  
+  // Se já é um array, retorna como está
+  if (Array.isArray(images)) {
+    return images.filter(Boolean);
+  }
+  
+  // Se é uma string, tenta fazer parse JSON
+  if (typeof images === 'string') {
+    // Se é uma string vazia, retorna array vazio
+    if (images.trim() === '') {
+      return [];
+    }
+    
+    try {
+      const parsed = JSON.parse(images);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(Boolean);
+      }
+      // Se é um objeto ou string após parse, coloca em array
+      return [parsed].filter(Boolean);
+    } catch (e) {
+      // Se não conseguiu fazer parse, assume que é uma URL simples
+      return [images];
+    }
+  }
+  
+  // Se é um objeto, coloca em array
+  if (typeof images === 'object') {
+    return [images].filter(Boolean);
+  }
+  
+  // Caso padrão: retorna array vazio
+  return [];
+};
+
 // Função para carregar posts do Supabase
 const loadSupabasePosts = async () => {
   try {
     console.log('🔍 Tentando carregar posts do Supabase...');
     const posts = await postsAPI.getAllPosts();
-    console.log('📊 Posts do Supabase recebidos:', posts);
+    console.log('📊 Posts do Supabase recebidos:', posts?.length || 0);
+    
+    if (!posts || posts.length === 0) {
+      console.log('⚠️ Nenhum post encontrado no Supabase');
+      return [];
+    }
+    
     return posts.map(post => {
+      // Debug das imagens
+      console.log(`🖼️ Post "${post.title}" - Images:`, {
+        type: typeof post.images,
+        value: post.images,
+        raw: JSON.stringify(post.images)
+      });
+      
+      // Processar imagens de forma robusta
+      const processedImages = processImages(post.images);
+      console.log(`🖼️ Post "${post.title}" - Images processadas:`, processedImages);
+      
       // Mapear campos do Supabase para o formato esperado pelo frontend
       const mappedPost = {
         ...post,
@@ -17,7 +74,7 @@ const loadSupabasePosts = async () => {
         title: post.title || 'Título não disponível',
         author: post.author || 'Autor não informado',
         categories: post.categories || [],
-        images: post.images ? (typeof post.images === 'string' ? JSON.parse(post.images) : post.images) : [],
+        images: processedImages,
         slug: post.slug || slugify(post.title || post.id || '')
       };
       return mappedPost;
@@ -55,6 +112,14 @@ export const getPostById = async (slugOrId) => {
     try {
       const supabasePost = await postsAPI.getPostBySlug(slugOrId);
       if (supabasePost) {
+        console.log('🖼️ Images raw do post encontrado:', {
+          type: typeof supabasePost.images,
+          value: supabasePost.images
+        });
+        
+        const processedImages = processImages(supabasePost.images);
+        console.log('🖼️ Images processadas do post:', processedImages);
+        
         return {
           ...supabasePost,
           source: 'supabase',
@@ -63,15 +128,26 @@ export const getPostById = async (slugOrId) => {
           title: supabasePost.title || 'Título não disponível',
           author: supabasePost.author || 'Autor não informado',
           categories: supabasePost.categories || [],
-          images: supabasePost.images || [],
+          images: processedImages,
           slug: supabasePost.slug || slugify(supabasePost.title || supabasePost.id || '')
         };
       }
-    } catch (e) { /* ignora erro */ }
+    } catch (e) { 
+      console.log('⚠️ Erro ao buscar por slug:', e.message);
+    }
+    
     // 2. Buscar no Supabase pelo id (retrocompatibilidade)
     try {
       const supabasePost = await postsAPI.getPostById(slugOrId);
       if (supabasePost) {
+        console.log('🖼️ Images raw do post encontrado por ID:', {
+          type: typeof supabasePost.images,
+          value: supabasePost.images
+        });
+        
+        const processedImages = processImages(supabasePost.images);
+        console.log('🖼️ Images processadas do post por ID:', processedImages);
+        
         return {
           ...supabasePost,
           source: 'supabase',
@@ -80,11 +156,15 @@ export const getPostById = async (slugOrId) => {
           title: supabasePost.title || 'Título não disponível',
           author: supabasePost.author || 'Autor não informado',
           categories: supabasePost.categories || [],
-          images: supabasePost.images || [],
+          images: processedImages,
           slug: supabasePost.slug || slugify(supabasePost.title || supabasePost.id || '')
         };
       }
-    } catch (e) { /* ignora erro */ }
+    } catch (e) { 
+      console.log('⚠️ Erro ao buscar por ID:', e.message);
+    }
+    
+    console.log('❌ Post não encontrado:', slugOrId);
     return null;
   } catch (error) {
     console.error('Erro ao buscar post por slug ou ID:', error);
