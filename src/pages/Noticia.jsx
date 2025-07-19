@@ -187,7 +187,7 @@ const Noticia = () => {
       <MetaTags
         title={post?.title || 'Notícia - Jornal Santista'}
         description={post?.excerpt || createExcerpt(post?.text_content || post?.content || '', 160)}
-        image={post?.images && post.images.length > 0 ? getFullImageUrl(post.images[0]) : null}
+        image={images && images.length > 0 ? getFullImageUrl(images[0]) : null}
         url={window.location.href}
         type="article"
         author={post?.author}

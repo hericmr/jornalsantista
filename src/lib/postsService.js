@@ -17,7 +17,7 @@ const loadSupabasePosts = async () => {
         title: post.title || 'Título não disponível',
         author: post.author || 'Autor não informado',
         categories: post.categories || [],
-        images: post.images || [],
+        images: post.images ? (typeof post.images === 'string' ? JSON.parse(post.images) : post.images) : [],
         slug: post.slug || slugify(post.title || post.id || '')
       };
       return mappedPost;

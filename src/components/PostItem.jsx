@@ -31,7 +31,13 @@ const PostItem = ({ post }) => {
   };
 
   const getFeaturedImage = () => {
-    return post.images && post.images.length > 0 ? post.images[0] : null;
+    try {
+      const images = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
+      return images && images.length > 0 ? images[0] : null;
+    } catch (error) {
+      console.error("Error parsing images JSON:", error);
+      return null;
+    }
   };
 
   const getImageAlt = () => {
