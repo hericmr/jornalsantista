@@ -1,5 +1,6 @@
 import { postsAPI } from './supabase';
 import { slugify } from '../utils/textUtils';
+import { supabase } from './supabase';
 
 // Função helper para processar imagens de diferentes formatos
 const processImages = (images) => {
@@ -107,63 +108,50 @@ export const getAllPosts = async () => {
 // Função para buscar post por slug ou id (apenas Supabase)
 export const getPostById = async (slugOrId) => {
   try {
-    console.log('🔍 Buscando post por slug ou ID:', slugOrId);
-    // 1. Buscar no Supabase pelo slug
-    try {
-      const supabasePost = await postsAPI.getPostBySlug(slugOrId);
-      if (supabasePost) {
-        console.log('🖼️ Images raw do post encontrado:', {
-          type: typeof supabasePost.images,
-          value: supabasePost.images
-        });
-        
-        const processedImages = processImages(supabasePost.images);
-        console.log('🖼️ Images processadas do post:', processedImages);
-        
-        return {
-          ...supabasePost,
-          source: 'supabase',
-          text_content: supabasePost.content || supabasePost.text_content || '',
-          published: supabasePost.published || supabasePost.published_at,
-          title: supabasePost.title || 'Título não disponível',
-          author: supabasePost.author || 'Autor não informado',
-          categories: supabasePost.categories || [],
-          images: processedImages,
-          slug: supabasePost.slug || slugify(supabasePost.title || supabasePost.id || '')
-        };
+    // Se for número, busca por id; se não, busca por slug
+    if (!isNaN(Number(slugOrId)) && slugOrId !== '' && slugOrId !== null) {
+      // Buscar por id numérico
+      try {
+        const supabasePost = await postsAPI.getPostById(Number(slugOrId));
+        if (supabasePost) {
+          const processedImages = processImages(supabasePost.images);
+          return {
+            ...supabasePost,
+            source: 'supabase',
+            text_content: supabasePost.content || supabasePost.text_content || '',
+            published: supabasePost.published || supabasePost.published_at,
+            title: supabasePost.title || 'Título não disponível',
+            author: supabasePost.author || 'Autor não informado',
+            categories: supabasePost.categories || [],
+            images: processedImages,
+            slug: supabasePost.slug || slugify(supabasePost.title || supabasePost.id || '')
+          };
+        }
+      } catch (e) {
+        console.log('⚠️ Erro ao buscar por ID:', e.message);
       }
-    } catch (e) { 
-      console.log('⚠️ Erro ao buscar por slug:', e.message);
-    }
-    
-    // 2. Buscar no Supabase pelo id (retrocompatibilidade)
-    try {
-      const supabasePost = await postsAPI.getPostById(slugOrId);
-      if (supabasePost) {
-        console.log('🖼️ Images raw do post encontrado por ID:', {
-          type: typeof supabasePost.images,
-          value: supabasePost.images
-        });
-        
-        const processedImages = processImages(supabasePost.images);
-        console.log('🖼️ Images processadas do post por ID:', processedImages);
-        
-        return {
-          ...supabasePost,
-          source: 'supabase',
-          text_content: supabasePost.content || supabasePost.text_content || '',
-          published: supabasePost.published || supabasePost.published_at,
-          title: supabasePost.title || 'Título não disponível',
-          author: supabasePost.author || 'Autor não informado',
-          categories: supabasePost.categories || [],
-          images: processedImages,
-          slug: supabasePost.slug || slugify(supabasePost.title || supabasePost.id || '')
-        };
+    } else if (typeof slugOrId === 'string' && slugOrId.trim() !== '') {
+      // Buscar por slug
+      try {
+        const supabasePost = await postsAPI.getPostBySlug(slugOrId);
+        if (supabasePost) {
+          const processedImages = processImages(supabasePost.images);
+          return {
+            ...supabasePost,
+            source: 'supabase',
+            text_content: supabasePost.content || supabasePost.text_content || '',
+            published: supabasePost.published || supabasePost.published_at,
+            title: supabasePost.title || 'Título não disponível',
+            author: supabasePost.author || 'Autor não informado',
+            categories: supabasePost.categories || [],
+            images: processedImages,
+            slug: supabasePost.slug || slugify(supabasePost.title || supabasePost.id || '')
+          };
+        }
+      } catch (e) {
+        console.log('⚠️ Erro ao buscar por slug:', e.message);
       }
-    } catch (e) { 
-      console.log('⚠️ Erro ao buscar por ID:', e.message);
     }
-    
     console.log('❌ Post não encontrado:', slugOrId);
     return null;
   } catch (error) {
@@ -251,6 +239,22 @@ export const getPostsByCategory = async (category) => {
     });
   } catch (error) {
     console.error('Erro ao buscar posts por categoria:', error);
+    return [];
+  }
+}; 
+
+// Função para buscar todos os autores da tabela 'authors' do Supabase
+export const getAllAuthors = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('authors')
+      .select('*')
+      .order('name', { ascending: true });
+    if (error) throw error;
+    // Retorna apenas o nome dos autores
+    return data.map(author => author.name);
+  } catch (error) {
+    console.error('Erro ao buscar autores:', error);
     return [];
   }
 }; 

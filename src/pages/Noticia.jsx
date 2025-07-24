@@ -336,7 +336,7 @@ const Noticia = () => {
 
             {/* Imagem principal do bucket (galeria/thumbnail) */}
             {images.length > 0 && (
-              <div className="mb-4">
+              <div className="mb-4 img-full-mobile">
                 <figure className="mb-3 text-center">
                   <img
                     src={getFullImageUrl(images[0]) || images[0]}

@@ -51,6 +51,9 @@ const AdminNoticias = () => {
     );
   }
 
+  // Depuração: mostrar posts carregados
+  console.log('Posts para exibir:', posts);
+
   return (
     <div className="admin-noticias">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -75,62 +78,68 @@ const AdminNoticias = () => {
                 </tr>
               </thead>
               <tbody>
-                {posts.map((post) => (
-                  <tr key={post.id}>
-                    <td>
-                      <div>
-                        <div className="fw-semibold">{post.title}</div>
-                        <small className="text-muted">{post.excerpt}</small>
-                      </div>
-                    </td>
-                    <td>
-                      {post.categories && post.categories.length > 0 ? (
-                        post.categories.map((cat, index) => (
-                          <span key={index} className="badge bg-secondary me-1">
-                            {cat}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-muted">Sem categoria</span>
-                      )}
-                    </td>
-                    <td>{post.published_at ? new Date(post.published_at).toLocaleDateString('pt-BR') : 'Não publicado'}</td>
-                    <td>
-                      <span className={`badge ${
-                        post.status === 'published' ? 'bg-success' : 
-                        post.status === 'draft' ? 'bg-warning' : 'bg-secondary'
-                      }`}>
-                        {post.status === 'published' ? 'Publicado' : 
-                         post.status === 'draft' ? 'Rascunho' : 'Arquivado'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="btn-group btn-group-sm">
-                        <Link 
-                          to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} 
-                          className="btn btn-outline-info"
-                          title="Visualizar"
-                        >
-                          <FaEye />
-                        </Link>
-                        <Link 
-                          to={`/admin/noticias/editar/${post.id}`} 
-                          className="btn btn-outline-primary"
-                          title="Editar"
-                        >
-                          <FaEdit />
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(post.id)}
-                          className="btn btn-outline-danger"
-                          title="Excluir"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
+                {posts.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center text-muted">Nenhuma notícia encontrada.</td>
                   </tr>
-                ))}
+                ) : (
+                  posts.map((post) => (
+                    <tr key={post.id}>
+                      <td>
+                        <div>
+                          <div className="fw-semibold">{post.title}</div>
+                          <small className="text-muted">{post.excerpt}</small>
+                        </div>
+                      </td>
+                      <td>
+                        {Array.isArray(post.categories) && post.categories.length > 0 ? (
+                          post.categories.map((cat, index) => (
+                            <span key={index} className="badge bg-secondary me-1">
+                              {cat}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-muted">Sem categoria</span>
+                        )}
+                      </td>
+                      <td>{post.published_at ? new Date(post.published_at).toLocaleDateString('pt-BR') : 'Não publicado'}</td>
+                      <td>
+                        <span className={`badge ${
+                          post.status === 'published' ? 'bg-success' : 
+                          post.status === 'draft' ? 'bg-warning' : 'bg-secondary'
+                        }`}>
+                          {post.status === 'published' ? 'Publicado' : 
+                           post.status === 'draft' ? 'Rascunho' : 'Arquivado'}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="btn-group btn-group-sm">
+                          <Link 
+                            to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} 
+                            className="btn btn-outline-info"
+                            title="Visualizar"
+                          >
+                            <FaEye />
+                          </Link>
+                          <Link 
+                            to={`/admin/noticias/editar/${post.id}`} 
+                            className="btn btn-outline-primary"
+                            title="Editar"
+                          >
+                            <FaEdit />
+                          </Link>
+                          <button 
+                            onClick={() => handleDelete(post.id)}
+                            className="btn btn-outline-danger"
+                            title="Excluir"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

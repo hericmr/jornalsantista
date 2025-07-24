@@ -251,3 +251,21 @@
   border-radius: 8px;
   display: block;
 }
+
+/* Para mobile: imagem da notícia ocupa toda a largura */
+@media (max-width: 767px) {
+  .img-full-mobile {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .img-full-mobile img {
+    border-radius: 0 !important; /* Remove bordas arredondadas para um visual de ponta a ponta */
+  }
+}

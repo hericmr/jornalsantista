@@ -50,9 +50,8 @@ const AdminDashboard = () => {
       // Extrair categorias únicas
       const categories = new Set();
       news.forEach(post => {
-        if (post.categories) {
-          post.categories.forEach(cat => categories.add(cat));
-        }
+        const cats = Array.isArray(post.categories) ? post.categories : (post.categories ? [post.categories] : []);
+        cats.forEach(cat => categories.add(cat));
       });
 
       // Pegar notícias mais recentes
@@ -215,7 +214,7 @@ const AdminDashboard = () => {
                             {new Date(news.published).toLocaleDateString('pt-BR')}
                           </td>
                           <td>
-                            {news.categories && news.categories.length > 0 ? (
+                            {Array.isArray(news.categories) && news.categories.length > 0 ? (
                               news.categories.map((cat, index) => (
                                 <span key={index} className="badge bg-secondary me-1">
                                   {cat}

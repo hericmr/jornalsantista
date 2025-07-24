@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
-import { getPostById, savePost } from '../../lib/postsService';
+import { getPostById, savePost, getAllAuthors } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
 
@@ -27,11 +27,14 @@ const AdminEditarNoticia = () => {
     console.log('📊 AdminEdit - Post authors state changed:', post.authors);
   }, [post.authors]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [allAuthors, setAllAuthors] = useState([]);
 
   useEffect(() => {
     if (id) {
       loadPost();
     }
+    // Buscar autores do Supabase
+    getAllAuthors().then(setAllAuthors);
   }, [id]);
 
   useEffect(() => {
@@ -509,11 +512,10 @@ const AdminEditarNoticia = () => {
                         e.target.value = '';
                       }}
                     >
-                      <option value="">Selecionar autor conhecido</option>
-                      <option value="Héric Moura">Héric Moura</option>
-                      <option value="Walter Parreira">Walter Parreira</option>
-                      <option value="Marcos de Paula">Marcos de Paula</option>
-                      <option value="Darlene Regina">Darlene Regina</option>
+                      <option value="">Selecionar autor do Supabase</option>
+                      {allAuthors.map((author, idx) => (
+                        <option key={idx} value={author}>{author}</option>
+                      ))}
                     </select>
                     
                     {/* Campo para adicionar novo autor */}
