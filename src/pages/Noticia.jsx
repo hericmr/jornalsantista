@@ -97,6 +97,9 @@ const Noticia = () => {
     if (author === "Marcos de Paula") {
       return "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg";
     }
+    if (author === "Carla Clemente") {
+      return "/DSC00192-EDIT(1).jpg";
+    }
     if (author && author.toLowerCase().includes("darlene regina")) {
       return "/darlene.jpeg";
     }
@@ -418,10 +421,29 @@ const Noticia = () => {
                       {getAuthors().map((author, index) => {
                         const authorImage = getAuthorImage(author);
                         
-                        return (
-                          <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
-                            {/* Héric Moura */}
-                            {author === "Héric Moura" && (
+                        if (author === "Carla Clemente") {
+                          return (
+                            <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
+                              <div className="text-center mb-3">
+                                <img
+                                  src="/DSC00192-EDIT(1).jpg"
+                                  alt="Carla Clemente"
+                                  style={{ width: '120px', borderRadius: '50%', filter: 'grayscale(1)', background: '#222' }}
+                                  className="mb-2 shadow"
+                                />
+                              </div>
+                              <p className="card-text mb-1">
+                                <strong>Carla Clemente</strong>
+                              </p>
+                              <p className="card-text small mb-0">
+                                Carla Clemente é graduada e especializada em Filosofia e militante feminista.
+                              </p>
+                            </div>
+                          );
+                        }
+                        if (author === "Héric Moura") {
+                          return (
+                            <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
                               <>
                                 <div className="text-center mb-3">
                                   <img
@@ -438,10 +460,12 @@ const Noticia = () => {
                                   Integrante da equipe do Jornal Santista desde 2015. Atua na cobertura de temas ligados a meio ambiente, movimentos sociais, cultura e política local, com atenção especial às pautas que afetam diretamente a vida da população trabalhadora da região.
                                 </p>
                               </>
-                            )}
-                            
-                            {/* Walter Parreira */}
-                            {author === "Walter Parreira" && (
+                            </div>
+                          );
+                        }
+                        if (author === "Walter Parreira") {
+                          return (
+                            <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
                               <>
                                 <div className="text-center mb-3">
                                   <img
@@ -458,10 +482,12 @@ const Noticia = () => {
                                   Jornalista do Jornal Santista. Especialista em temas sociais, cultura e história regional, com olhar atento às transformações da Baixada Santista.
                                 </p>
                               </>
-                            )}
-                            
-                            {/* Marcos de Paula */}
-                            {author === "Marcos de Paula" && (
+                            </div>
+                          );
+                        }
+                        if (author === "Marcos de Paula") {
+                          return (
+                            <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
                               <>
                                 <div className="text-center mb-3">
                                   <img
@@ -478,10 +504,12 @@ const Noticia = () => {
                                   Professor de Filosofia na Universidade Federal de São Paulo - Departamento de Saúde, Educação e Sociedade e militante antiproibicionista.
                                 </p>
                               </>
-                            )}
-                            
-                            {/* Darlene Regina */}
-                            {(author && author.toLowerCase().includes("darlene regina")) && (
+                            </div>
+                          );
+                        }
+                        if (author && author.toLowerCase().includes("darlene regina")) {
+                          return (
+                            <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
                               <>
                                 <div className="text-center mb-3">
                                   <img
@@ -498,37 +526,21 @@ const Noticia = () => {
                                   Autora brasileira, nascida em São Paulo, formada em Direito e apaixonada pelas artes e letras. Dedica-se desde jovem à escrita de poesias e contos, sendo autora dos livros "Bianca – Um amor que sobrevive aos séculos" (romance) e "Para um Doce Cavaleiro" (poesia), ambos pela Editora Clube de Autores, além de diversos contos publicados pelo Grupo Editorial Quimera. Colaboradora do Jornalsantista desde 2015, mantém o espaço "Devaneios e Poesias" para divulgação de seus textos, dicas literárias e promoção da cultura regional.
                                 </p>
                               </>
-                            )}
-                            
-                            {/* Carla Clemente */}
-                            {author === "Carla Clemente" && (
-                              <>
-                                <div className="text-center mb-3">
-                                  <i className="bi bi-person-circle" style={{ fontSize: '3rem', color: '#888' }}></i>
-                                </div>
-                                <p className="card-text mb-1">
-                                  <strong>Carla Clemente</strong>
-                                </p>
-                                <p className="card-text small mb-0">
-                                  Carla Clemente é graduada e especializada em Filosofia e militante feminista.
-                                </p>
-                              </>
-                            )}
-                            
-                            {/* Autor genérico */}
-                            {!isSpecialAuthor(author) && (
-                              <>
-                                <div className="text-center mb-3">
-                                  <i className="bi bi-person-circle" style={{ fontSize: '3rem', color: '#888' }}></i>
-                                </div>
-                                <p className="card-text mb-1">
-                                  <strong>{author}</strong>
-                                </p>
-                                <p className="card-text small mb-0">
-                                  Autor(a) convidado(a) do Jornal Santista.
-                                </p>
-                              </>
-                            )}
+                            </div>
+                          );
+                        }
+                        // Autor genérico (apenas se não for Carla Clemente)
+                        return (
+                          <div key={index} className={`author-info ${index > 0 ? 'mt-4 pt-3 border-top border-secondary' : ''}`}>
+                            <div className="text-center mb-3">
+                              <i className="bi bi-person-circle" style={{ fontSize: '3rem', color: '#888' }}></i>
+                            </div>
+                            <p className="card-text mb-1">
+                              <strong>{author}</strong>
+                            </p>
+                            <p className="card-text small mb-0">
+                              Autor(a) convidado(a) do Jornal Santista.
+                            </p>
                           </div>
                         );
                       })}
