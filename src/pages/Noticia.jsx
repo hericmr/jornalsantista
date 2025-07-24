@@ -500,6 +500,21 @@ const Noticia = () => {
                               </>
                             )}
                             
+                            {/* Carla Clemente */}
+                            {author === "Carla Clemente" && (
+                              <>
+                                <div className="text-center mb-3">
+                                  <i className="bi bi-person-circle" style={{ fontSize: '3rem', color: '#888' }}></i>
+                                </div>
+                                <p className="card-text mb-1">
+                                  <strong>Carla Clemente</strong>
+                                </p>
+                                <p className="card-text small mb-0">
+                                  Carla Clemente é graduada e especializada em Filosofia e militante feminista.
+                                </p>
+                              </>
+                            )}
+                            
                             {/* Autor genérico */}
                             {!isSpecialAuthor(author) && (
                               <>
