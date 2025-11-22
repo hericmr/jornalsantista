@@ -75,9 +75,6 @@ const Home = () => {
     );
   }
 
-  const featuredPosts = filteredPosts.slice(0, 2); // Duas matérias em destaque
-  const otherPosts = filteredPosts.slice(2); // Demais matérias
-
   return (
     <>
       {/* Meta Tags para SEO */}
@@ -88,31 +85,13 @@ const Home = () => {
         url={window.location.href}
       />
 
-
-      
       <div className="home-content">
-        {/* Seção de Destaque */}
-        {featuredPosts.length > 0 && (
-          <section className="featured-section">
-            <div className="container">
-              <div className="featured-grid">
-                {featuredPosts.map((post, index) => (
-                  <div key={post.id} className={`featured-card ${index === 0? 'featured-card--main' : ''}`}>
-                    <PostItem post={post} featured={index === 0} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Seção de Outras Notícias */}
-        {otherPosts.length > 0 && (
-          <section className="news-section">
-            <div className="container">
-              <h2 className="section-title">Últimas Notícias</h2>
-              <div className="news-grid">
-                {otherPosts.map(post => (
+        {/* Lista de Artigos - Layout similar ao site de referência */}
+        {filteredPosts.length > 0 && (
+          <section className="articles-list-section">
+            <div className="articles-container">
+              <div className="articles-list">
+                {filteredPosts.map(post => (
                   <PostItem key={post.id} post={post} />
                 ))}
               </div>
@@ -122,8 +101,8 @@ const Home = () => {
 
         {/* Estado vazio */}
         {filteredPosts.length === 0 && (
-          <div className="container mt-5">
-            <div className="text-center">
+          <div className="articles-container">
+            <div className="text-center mt-5">
               <h3>Nenhuma notícia encontrada</h3>
               <p className="text-muted">Tente ajustar os termos de busca.</p>
             </div>

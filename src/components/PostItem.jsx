@@ -4,22 +4,20 @@ import { createExcerpt, slugify, getFullImageUrl } from '../utils/textUtils';
 
 const PostItem = ({ post }) => {
   const formatDate = (dateString) => {
-    if (!dateString) return 'Data não disponível';
+    if (!dateString) return '';
     
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return 'Data inválida';
+        return '';
       }
       return date.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric'
       });
     } catch (error) {
-      return 'Data não disponível';
+      return '';
     }
   };
 
@@ -64,80 +62,92 @@ const PostItem = ({ post }) => {
     e.target.style.objectFit = 'cover';
   };
 
+  const getAuthorName = () => {
+    if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
+      const validAuthors = post.authors.filter(author => 
+        author && 
+        typeof author === 'string' && 
+        author.trim() !== ''
+      );
+      
+      if (validAuthors.length === 1) {
+        return validAuthors[0];
+      } else if (validAuthors.length === 2) {
+        return `${validAuthors[0]} e ${validAuthors[1]}`;
+      } else if (validAuthors.length > 2) {
+        return `${validAuthors.slice(0, -1).join(', ')} e ${validAuthors[validAuthors.length - 1]}`;
+      }
+    }
+    return post.author || 'Autor não informado';
+  };
+
+  // Garantir que categories seja um array
+  const getCategories = () => {
+    if (!post.categories) return [];
+    if (Array.isArray(post.categories)) return post.categories;
+    if (typeof post.categories === 'string') {
+      try {
+        const parsed = JSON.parse(post.categories);
+        return Array.isArray(parsed) ? parsed : [post.categories];
+      } catch {
+        return [post.categories];
+      }
+    }
+    return [];
+  };
+
+  const categories = getCategories();
+
+  const featuredImage = getFeaturedImage();
+
   return (
-    <article className="news-card">
-      {/* Imagem no topo */}
-      <div className="news-card__image-container">
-        {getFeaturedImage() ? (
-          <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="news-card__image-link">
-            <img 
-              src={getFeaturedImage()} 
-              className="news-card__image" 
-              alt={getImageAlt()}
-              onError={handleImageError}
-              loading="lazy"
-            />
-          </Link>
-        ) : (
-          <div className="news-card__image-placeholder">
-            <svg width="10" height="10" viewBox="0 0 0 0" fill="none" xmlns="http://www.w3.org/2000/svg">             <rect width="400" height="240" fill="#f8f9fa"/>
-              <text x="50%" y="50%" textAnchor="middle" dy=".3em" fill="#6757d" fontSize="16">                Imagem não disponível
-              </text>
-            </svg>
+    <article className="article-item">
+      <div className="article-item__content-wrapper">
+        {/* Imagem */}
+        {featuredImage && (
+          <div className="article-item__image-container">
+            <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="article-item__image-link">
+              <img 
+                src={featuredImage} 
+                className="article-item__image" 
+                alt={getImageAlt()}
+                onError={handleImageError}
+                loading="lazy"
+              />
+            </Link>
           </div>
         )}
-        
-        {/* Categoria sobreposta */}
-        {post.categories && post.categories.length > 0 && (
-          <div className="news-card__category">
-            <span className="news-card__category-badge">
-              {post.categories[0]}
-            </span>
+
+        <div className="article-item__text-content">
+          {/* Categoria */}
+          {categories.length > 0 && (
+            <div className="article-item__categories">
+              {categories.map((cat, idx) => (
+                <span key={idx} className="article-item__category">
+                  {cat}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Título */}
+          <h2 className="article-item__title">
+            <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="article-item__title-link">
+              {post.title || 'Título não disponível'}
+            </Link>
+          </h2>
+
+          {/* Data */}
+          {formatDate(post.published) && (
+            <div className="article-item__date">
+              {formatDate(post.published)}
+            </div>
+          )}
+
+          {/* Autor */}
+          <div className="article-item__author">
+            Por <strong>{getAuthorName()}</strong>
           </div>
-        )}
-      </div>
-
-      {/* Conteúdo do card */}
-      <div className="news-card__content">
-        {/* Título grande */}
-        <h3 className="news-card__title">
-          <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="news-card__title-link">
-            {post.title || 'Título não disponível'}
-          </Link>
-        </h3>
-
-        {/* Resumo */}
-        <p className="news-card__excerpt">
-          {post.excerpt ? post.excerpt : getExcerpt(post.text_content || post.content)}
-        </p>
-
-        {/* Autor e Data */}
-        <div className="news-card__meta">
-          <span className="news-card__author">
-            {(() => {
-              // Suporte para múltiplos autores
-              if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
-                // Filtrar valores vazios
-                const validAuthors = post.authors.filter(author => 
-                  author && 
-                  typeof author === 'string' && 
-                  author.trim() !== ''
-                );
-                
-                if (validAuthors.length === 1) {
-                  return validAuthors[0];
-                } else if (validAuthors.length === 2) {
-                  return `${validAuthors[0]} e ${validAuthors[1]}`;
-                } else if (validAuthors.length > 2) {
-                  return `${validAuthors.slice(0, -1).join(', ')} e ${validAuthors[validAuthors.length - 1]}`;
-                }
-              }
-              return post.author || 'Autor não informado';
-            })()}
-          </span>
-          <span className="news-card__date">
-            {formatDate(post.published)}
-          </span>
         </div>
       </div>
     </article>

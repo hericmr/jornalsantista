@@ -1,89 +1,166 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { FaBars, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes, FaChevronDown } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/categorias', label: 'Categorias' },
+    { to: '/', label: 'Início' },
     { to: '/sobre', label: 'Sobre' },
+    { 
+      label: 'Artigos',
+      children: [
+        { to: '/categorias', label: 'Todos Artigos' },
+        { to: '/categorias', label: 'Por Categoria' }
+      ]
+    },
     { to: '/contato', label: 'Contato' }
   ];
 
   const closeMenu = () => {
     setMenuOpen(false);
-    setShowSearch(false);
+    setActiveDropdown(null);
+  };
+
+  const toggleDropdown = (index) => {
+    setActiveDropdown(activeDropdown === index ? null : index);
   };
 
   return (
     <>
-      <header className="header-intercept shadow-sm bg-dark border-bottom">
-        <nav className="container d-flex align-items-center justify-content-between py-2">
-          {/* Logo */}
-          <Link to="/" className="navbar-brand d-flex align-items-center p-0 m-0">
-            <span className="fw-bold fs-2 journal-title text-uppercase" style={{ letterSpacing: '2px', fontFamily: 'Merriweather, serif' }}>
-              Jornal Santista
-            </span>
-          </Link>
-          
-          {/* Botão do menu */}
-          <button
-            className="btn border-0 bg-transparent text-white"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Abrir menu"
-          >
-            <FaBars size={24} />
-          </button>
-        </nav>
-      </header>
+      <header className="site-header">
+        {/* Logo Section - Top, Black Background, Centered */}
+        <div className="header-logo-section">
+          <div className="header-container">
+            <Link to="/" className="logo-link">
+              <span className="journal-title">Jornal Santista</span>
+              <span className="journal-subtitle">Mídia alternativa na Baixada</span>
+            </Link>
+          </div>
+        </div>
 
-      {/* Menu lateral */}
-      {menuOpen && (
-        <div className="menu-overlay" onClick={closeMenu}>
-          <div className="menu-sidebar" onClick={(e) => e.stopPropagation()}>
-            <div className="menu-header d-flex justify-content-between align-items-center p-3">
-              <h5 className="mb-0 text-white">Menu</h5>
-              <button
-                className="btn border-0 bg-transparent text-white"
-                onClick={closeMenu}
-                aria-label="Fechar menu"
-              >
-                <FaTimes size={20} />
-              </button>
-            </div>
-            
-            <div className="menu-content p-3">
-              {/* Busca */}
-              <div className="mb-4">
-                <SearchBar onSearch={() => {}} />
-              </div>
-              
-              {/* Navegação */}
-              <ul className="nav flex-column">
-                {navLinks.map(link => (
-                  <li key={link.to} className="nav-item">
-                    <NavLink
-                      to={link.to}
-                      className={({ isActive }) =>
-                        `nav-link text-uppercase fw-semibold py-2${isActive ? ' active' : ''}`
-                      }
-                      style={{ letterSpacing: '1px', fontSize: '1rem' }}
-                      onClick={closeMenu}
-                    >
-                      {link.label}
-                    </NavLink>
+        {/* Navigation Section - Bottom, White Background */}
+        <div className="header-nav-section">
+          <div className="header-container">
+            {/* Desktop Navigation */}
+            <nav className="header-nav desktop-nav">
+              <ul className="nav-menu">
+                {navLinks.map((link, index) => (
+                  <li key={index} className={`menu-item ${link.children ? 'menu-item-has-children' : ''}`}>
+                    {link.children ? (
+                      <>
+                        <a 
+                          href="#" 
+                          className="elementor-item elementor-item-anchor"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleDropdown(index);
+                          }}
+                        >
+                          {link.label}
+                          <FaChevronDown className="dropdown-icon" />
+                        </a>
+                        {activeDropdown === index && (
+                          <ul className="sub-menu">
+                            {link.children.map((child, childIndex) => (
+                              <li key={childIndex} className="menu-item">
+                                <NavLink 
+                                  to={child.to} 
+                                  className="elementor-sub-item"
+                                  onClick={closeMenu}
+                                >
+                                  {child.label}
+                                </NavLink>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    ) : (
+                      <NavLink
+                        to={link.to}
+                        className={({ isActive }) =>
+                          `elementor-item ${isActive ? 'elementor-item-active' : ''}`
+                        }
+                      >
+                        {link.label}
+                      </NavLink>
+                    )}
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className="mobile-menu-toggle"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Alternar menu"
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <FaTimes /> : <FaBars />}
+            </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {menuOpen && (
+            <nav className="header-nav mobile-nav">
+              <div className="header-container">
+                <ul className="nav-menu">
+                  {navLinks.map((link, index) => (
+                    <li key={index} className={`menu-item ${link.children ? 'menu-item-has-children' : ''}`}>
+                      {link.children ? (
+                        <>
+                          <a 
+                            href="#" 
+                            className="elementor-item"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleDropdown(index);
+                            }}
+                          >
+                            {link.label}
+                            <FaChevronDown className={`dropdown-icon ${activeDropdown === index ? 'rotated' : ''}`} />
+                          </a>
+                          {activeDropdown === index && (
+                            <ul className="sub-menu">
+                              {link.children.map((child, childIndex) => (
+                                <li key={childIndex} className="menu-item">
+                                  <NavLink 
+                                    to={child.to} 
+                                    className="elementor-sub-item"
+                                    onClick={closeMenu}
+                                  >
+                                    {child.label}
+                                  </NavLink>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </>
+                      ) : (
+                        <NavLink
+                          to={link.to}
+                          className={({ isActive }) =>
+                            `elementor-item ${isActive ? 'elementor-item-active' : ''}`
+                          }
+                          onClick={closeMenu}
+                        >
+                          {link.label}
+                        </NavLink>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </nav>
+          )}
         </div>
-      )}
+      </header>
     </>
   );
 };
