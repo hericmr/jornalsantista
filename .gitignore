@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 .vercel
 public/admin_users.json
+.env
 .env*.local
