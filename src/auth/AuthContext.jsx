@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -10,64 +11,72 @@ export const useAuth = () => {
   return context;
 };
 
+const loadAdminProfile = async (authUser) => {
+  if (!authUser) return null;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, role')
+    .eq('id', authUser.id)
+    .single();
+
+  if (error || !data || data.role !== 'admin') {
+    return null;
+  }
+
+  return {
+    id: authUser.id,
+    email: authUser.email,
+    role: data.role
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar se há um usuário salvo no localStorage
-    const savedUser = localStorage.getItem('adminUser');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
-        localStorage.removeItem('adminUser');
+    let active = true;
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const profile = await loadAdminProfile(session?.user);
+      if (active) {
+        setUser(profile);
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const profile = await loadAdminProfile(session?.user);
+      if (active) setUser(profile);
+    });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
-  const login = async (username, password) => {
-    try {
-      // Buscar usuários das variáveis de ambiente
-      const adminUsersJson = import.meta.env.VITE_ADMIN_USERS;
-      
-      if (!adminUsersJson) {
-        console.error('VITE_ADMIN_USERS não configurada');
-        return { success: false, error: 'Configuração de usuários não encontrada' };
-      }
-      
-      const data = JSON.parse(adminUsersJson);
-      
-      const user = data.users.find(u => 
-        u.username === username && u.password === password
-      );
+  const login = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (user) {
-        const userData = {
-          id: user.id,
-          username: user.username,
-          name: user.name,
-          email: user.email,
-          role: user.role
-        };
-        
-        setUser(userData);
-        localStorage.setItem('adminUser', JSON.stringify(userData));
-        return { success: true };
-      } else {
-        return { success: false, error: 'Credenciais inválidas' };
-      }
-    } catch (error) {
-      console.error('Erro no login:', error);
-      return { success: false, error: 'Erro ao fazer login' };
+    if (error) {
+      return { success: false, error: 'Credenciais inválidas' };
     }
+
+    const profile = await loadAdminProfile(data.user);
+    if (!profile) {
+      await supabase.auth.signOut();
+      return { success: false, error: 'Usuário sem permissão de administrador' };
+    }
+
+    setUser(profile);
+    return { success: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('adminUser');
   };
 
   const value = {
@@ -82,4 +91,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

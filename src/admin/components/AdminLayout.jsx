@@ -30,10 +30,10 @@ const AdminLayout = ({ children }) => {
             <div className="nav-item dropdown">
               <a className="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                 <span className="me-2"><FaUser /></span>
-                {user?.name || user?.username}
+                {user?.email}
               </a>
               <ul className="dropdown-menu dropdown-menu-end">
-                <li><span className="dropdown-item-text text-muted">Logado como: {user?.username}</span></li>
+                <li><span className="dropdown-item-text text-muted">Logado como: {user?.email}</span></li>
                 <li><hr className="dropdown-divider" /></li>
                 <li><button className="dropdown-item" onClick={handleLogout}>Sair</button></li>
               </ul>

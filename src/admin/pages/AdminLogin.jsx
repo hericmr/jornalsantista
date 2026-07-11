@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(username, password);
+    const result = await login(email, password);
     
     if (result.success) {
       navigate('/admin');
@@ -47,15 +47,15 @@ const AdminLogin = () => {
                   )}
 
                   <div className="mb-3">
-                    <label htmlFor="username" className="form-label text-light">
-                      Usuário
+                    <label htmlFor="email" className="form-label text-light">
+                      E-mail
                     </label>
                     <input
-                      type="text"
+                      type="email"
                       className="form-control"
-                      id="username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       disabled={loading}
                       style={{ 
