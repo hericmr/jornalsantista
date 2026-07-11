@@ -1,168 +1,89 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { FaBars, FaTimes, FaChevronDown } from 'react-icons/fa';
-import SearchBar from './SearchBar';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+
+const navLinks = [
+  { to: '/', label: 'Início' },
+  { to: '/sobre', label: 'Sobre' },
+  { to: '/categorias', label: 'Artigos' },
+  { to: '/contato', label: 'Contato' }
+];
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
-  const navLinks = [
-    { to: '/', label: 'Início' },
-    { to: '/sobre', label: 'Sobre' },
-    { 
-      label: 'Artigos',
-      children: [
-        { to: '/categorias', label: 'Todos Artigos' },
-        { to: '/categorias', label: 'Por Categoria' }
-      ]
-    },
-    { to: '/contato', label: 'Contato' }
-  ];
+  const closeMenu = () => setMenuOpen(false);
 
-  const closeMenu = () => {
-    setMenuOpen(false);
-    setActiveDropdown(null);
-  };
-
-  const toggleDropdown = (index) => {
-    setActiveDropdown(activeDropdown === index ? null : index);
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    navigate(term ? `/?q=${encodeURIComponent(term)}` : '/');
   };
 
   return (
     <>
-      <header className="site-header">
-        {/* Logo Section - Top, Black Background, Centered */}
-        <div className="header-logo-section">
-          <div className="header-container">
-            <Link to="/" className="logo-link">
-              <span className="journal-title">Jornal Santista</span>
-              <span className="journal-subtitle">Mídia alternativa na Baixada</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Navigation Section - Bottom, White Background */}
-        <div className="header-nav-section">
-          <div className="header-container">
-            {/* Desktop Navigation */}
-            <nav className="header-nav desktop-nav">
-              <ul className="nav-menu">
-                {navLinks.map((link, index) => (
-                  <li key={index} className={`menu-item ${link.children ? 'menu-item-has-children' : ''}`}>
-                    {link.children ? (
-                      <>
-                        <a 
-                          href="#" 
-                          className="elementor-item elementor-item-anchor"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleDropdown(index);
-                          }}
-                        >
-                          {link.label}
-                          <FaChevronDown className="dropdown-icon" />
-                        </a>
-                        {activeDropdown === index && (
-                          <ul className="sub-menu">
-                            {link.children.map((child, childIndex) => (
-                              <li key={childIndex} className="menu-item">
-                                <NavLink 
-                                  to={child.to} 
-                                  className="elementor-sub-item"
-                                  onClick={closeMenu}
-                                >
-                                  {child.label}
-                                </NavLink>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </>
-                    ) : (
-                      <NavLink
-                        to={link.to}
-                        className={({ isActive }) =>
-                          `elementor-item ${isActive ? 'elementor-item-active' : ''}`
-                        }
-                      >
-                        {link.label}
-                      </NavLink>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            {/* Mobile Menu Toggle */}
+      <header className="masthead">
+        <div className="masthead-inner">
+          <div className="masthead-left">
             <button
-              className="mobile-menu-toggle"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Alternar menu"
+              className="burger"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Abrir menu"
               aria-expanded={menuOpen}
             >
-              {menuOpen ? <FaTimes /> : <FaBars />}
+              <FaBars />
             </button>
+            <Link to="/" className="brand-name">Jornal Santista</Link>
           </div>
 
-          {/* Mobile Navigation */}
-          {menuOpen && (
-            <nav className="header-nav mobile-nav">
-              <div className="header-container">
-                <ul className="nav-menu">
-                  {navLinks.map((link, index) => (
-                    <li key={index} className={`menu-item ${link.children ? 'menu-item-has-children' : ''}`}>
-                      {link.children ? (
-                        <>
-                          <a 
-                            href="#" 
-                            className="elementor-item"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              toggleDropdown(index);
-                            }}
-                          >
-                            {link.label}
-                            <FaChevronDown className={`dropdown-icon ${activeDropdown === index ? 'rotated' : ''}`} />
-                          </a>
-                          {activeDropdown === index && (
-                            <ul className="sub-menu">
-                              {link.children.map((child, childIndex) => (
-                                <li key={childIndex} className="menu-item">
-                                  <NavLink 
-                                    to={child.to} 
-                                    className="elementor-sub-item"
-                                    onClick={closeMenu}
-                                  >
-                                    {child.label}
-                                  </NavLink>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </>
-                      ) : (
-                        <NavLink
-                          to={link.to}
-                          className={({ isActive }) =>
-                            `elementor-item ${isActive ? 'elementor-item-active' : ''}`
-                          }
-                          onClick={closeMenu}
-                        >
-                          {link.label}
-                        </NavLink>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </nav>
-          )}
+          <form className="header-search" onSubmit={handleSearchSubmit} role="search">
+            <span className="header-search-icon"><FaSearch /></span>
+            <input
+              type="text"
+              placeholder="Buscar"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Buscar notícias"
+            />
+          </form>
+
+          <div className="masthead-right">
+            <a href="https://instagram.com/jornalsantista" className="social-text" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="mailto:contato@jornalsantista.org" className="social-text">Contato</a>
+          </div>
         </div>
       </header>
+
+      {menuOpen && (
+        <>
+          <div className="menu-overlay" onClick={closeMenu} />
+          <div className="menu-sidebar">
+            <div className="menu-header d-flex justify-content-between align-items-center p-3">
+              <span className="brand-name" style={{ fontSize: '1rem' }}>Menu</span>
+              <button className="mobile-menu-toggle" onClick={closeMenu} aria-label="Fechar menu">
+                <FaTimes />
+              </button>
+            </div>
+            <nav className="menu-content px-3">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.to === '/'}
+                  className="nav-link d-block"
+                  onClick={closeMenu}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        </>
+      )}
     </>
   );
 };
 
-export default Header; 
+export default Header;

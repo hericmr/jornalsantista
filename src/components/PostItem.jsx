@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createExcerpt, slugify, getFullImageUrl } from '../utils/textUtils';
 
-const PostItem = ({ post }) => {
+const PostItem = ({ post, variant = 'regular' }) => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    
+
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
@@ -16,7 +16,7 @@ const PostItem = ({ post }) => {
         month: '2-digit',
         year: 'numeric'
       });
-    } catch (error) {
+    } catch {
       return '';
     }
   };
@@ -30,21 +30,10 @@ const PostItem = ({ post }) => {
 
   const getFeaturedImage = () => {
     try {
-      console.log('🖼️ PostItem: Raw images from post:', {
-        title: post.title,
-        type: typeof post.images,
-        value: post.images,
-        raw: JSON.stringify(post.images)
-      });
-      
       const images = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
       const imageUrl = images && images.length > 0 ? images[0] : null;
-      const finalUrl = imageUrl ? (getFullImageUrl(imageUrl) || imageUrl) : null;
-      
-      console.log('🖼️ PostItem: Final image URL:', finalUrl);
-      return finalUrl;
-    } catch (error) {
-      console.error("🖼️ Error parsing images JSON in PostItem:", error);
+      return imageUrl ? (getFullImageUrl(imageUrl) || imageUrl) : null;
+    } catch {
       return null;
     }
   };
@@ -57,19 +46,18 @@ const PostItem = ({ post }) => {
   };
 
   const handleImageError = (e) => {
-    // Se a imagem falhar ao carregar, substitui por um placeholder
     e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbSBuw6NvIGRpc3BvbsOtdmVsPC90ZXh0Pjwvc3ZnPg==';
     e.target.style.objectFit = 'cover';
   };
 
   const getAuthorName = () => {
     if (post.authors && Array.isArray(post.authors) && post.authors.length > 0) {
-      const validAuthors = post.authors.filter(author => 
-        author && 
-        typeof author === 'string' && 
+      const validAuthors = post.authors.filter(author =>
+        author &&
+        typeof author === 'string' &&
         author.trim() !== ''
       );
-      
+
       if (validAuthors.length === 1) {
         return validAuthors[0];
       } else if (validAuthors.length === 2) {
@@ -81,7 +69,6 @@ const PostItem = ({ post }) => {
     return post.author || 'Autor não informado';
   };
 
-  // Garantir que categories seja um array
   const getCategories = () => {
     if (!post.categories) return [];
     if (Array.isArray(post.categories)) return post.categories;
@@ -97,61 +84,75 @@ const PostItem = ({ post }) => {
   };
 
   const categories = getCategories();
-
   const featuredImage = getFeaturedImage();
+  const title = post.title || 'Título não disponível';
+  const author = getAuthorName();
+  const date = formatDate(post.published);
+  const linkTo = `/noticia/${post.slug || slugify(post.title || post.id || '')}`;
+
+  const MetaLine = () => (
+    <p className="meta-line">
+      <strong>{author}</strong>
+      {date && <><span className="dot">·</span>{date}</>}
+    </p>
+  );
+
+  if (variant === 'hero') {
+    return (
+      <Link to={linkTo} className="hero-card">
+        {featuredImage && (
+          <span className="hero-media">
+            <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" />
+          </span>
+        )}
+        {categories[0] && <span className="kicker">{categories[0]}</span>}
+        <h2 className="hero-title">{title}</h2>
+        <MetaLine />
+      </Link>
+    );
+  }
+
+  if (variant === 'feature') {
+    return (
+      <article className="feed-feature">
+        <Link to={linkTo}>
+          {featuredImage && (
+            <span className="feature-media">
+              <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" />
+            </span>
+          )}
+          <div className="feature-split">
+            <div>
+              {categories[0] && <span className="kicker">{categories[0]}</span>}
+              <h2 className="feature-title">{title}</h2>
+            </div>
+            <div>
+              <p className="feature-excerpt">{getExcerpt(post.text_content || post.content, 220)}</p>
+              <MetaLine />
+            </div>
+          </div>
+        </Link>
+      </article>
+    );
+  }
 
   return (
-    <article className="article-item">
-      <div className="article-item__content-wrapper">
-        {/* Imagem */}
+    <article className="feed-item">
+      <Link to={linkTo} className="feed-item-link">
         {featuredImage && (
-          <div className="article-item__image-container">
-            <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="article-item__image-link">
-              <img 
-                src={featuredImage} 
-                className="article-item__image" 
-                alt={getImageAlt()}
-                onError={handleImageError}
-                loading="lazy"
-              />
-            </Link>
-          </div>
+          <span className="feed-media">
+            <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" />
+          </span>
         )}
-
-        <div className="article-item__text-content">
-          {/* Categoria */}
-          {categories.length > 0 && (
-            <div className="article-item__categories">
-              {categories.map((cat, idx) => (
-                <span key={idx} className="article-item__category">
-                  {cat}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Título */}
-          <h2 className="article-item__title">
-            <Link to={`/noticia/${post.slug || slugify(post.title || post.id || '')}`} className="article-item__title-link">
-              {post.title || 'Título não disponível'}
-            </Link>
-          </h2>
-
-          {/* Data */}
-          {formatDate(post.published) && (
-            <div className="article-item__date">
-              {formatDate(post.published)}
-            </div>
-          )}
-
-          {/* Autor */}
-          <div className="article-item__author">
-            Por <strong>{getAuthorName()}</strong>
-          </div>
+        <div className="feed-body">
+          {categories[0] && <span className="kicker">{categories[0]}</span>}
+          <h3 className="feed-title">{title}</h3>
+          <MetaLine />
+          <p className="feed-excerpt">{getExcerpt(post.text_content || post.content, 160)}</p>
         </div>
-      </div>
+      </Link>
     </article>
   );
 };
 
-export default PostItem; 
+export default PostItem;
