@@ -37,14 +37,29 @@ export const containsSearchTerm = (html, searchTerm) => {
   return plainText.toLowerCase().includes(searchTerm.toLowerCase());
 };
 
+// Detecta se a string já vem como HTML estruturado (parágrafos, figuras, listas…).
+const BLOCK_MARKUP_RE =
+  /<(p|div|figure|section|article|ul|ol|li|h[1-6]|blockquote|table|pre)[\s/>]/i;
+
 /**
- * Processa conteúdo HTML preservando quebras de linha.
- * O espaçamento de parágrafos fica por conta do CSS (`.article-content p`).
- * @param {string} html - Conteúdo HTML
- * @returns {string} - HTML com quebras de linha preservadas
+ * Prepara o conteúdo para injeção no artigo.
+ *
+ * - Conteúdo estruturado (HTML do editor ou colado no banco com marcação
+ *   semântica): as quebras de linha entre as tags são só indentação e não
+ *   devem virar <br>. Removê-las evita parágrafos "furados" e <br> soltos
+ *   dentro de <figure>/<ul>. O espaçamento fica por conta do CSS.
+ * - Texto puro (sem tags de bloco): aí sim cada \n vira <br>.
+ *
+ * @param {string} html - Conteúdo bruto
+ * @returns {string} - HTML pronto para sanitizar
  */
 export const processHtmlContent = (html) => {
   if (!html || typeof html !== 'string') return '';
+  if (BLOCK_MARKUP_RE.test(html)) {
+    // remove só a indentação entre tags (espaços que contêm quebra de linha);
+    // um espaço inline de verdade — ex.: "</a> <a>" — não tem \n e é preservado.
+    return html.replace(/>[ \t]*\n[ \t\n]*</g, '><').trim();
+  }
   return html.replace(/\n/g, '<br>');
 };
 

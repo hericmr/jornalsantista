@@ -109,14 +109,21 @@ export const savePost = async (postData, isNew = false) => {
       delete supabaseData.content;
     }
 
-    const isValidUUID =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    // Atualiza sempre que não for criação e houver um id — numérico ou UUID.
+    // (A tabela `posts` usa ids inteiros; o teste de UUID antigo caía sempre
+    // no `else` e criava uma cópia a cada edição.)
+    const hasId = id !== undefined && id !== null && String(id).trim() !== '';
 
-    if (!isNew && isValidUUID.test(id)) {
+    if (!isNew && hasId) {
       const updatedPost = await postsAPI.updatePost(id, {
         ...supabaseData,
         updated_at: new Date().toISOString()
       });
+      if (!updatedPost) {
+        throw new Error(
+          `Nenhuma matéria foi atualizada (id ${id}). Verifique o id e as permissões.`
+        );
+      }
       return { ...updatedPost, source: 'supabase' };
     }
 

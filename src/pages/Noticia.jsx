@@ -30,7 +30,7 @@ const getAuthorImage = (author) => {
     return 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjq8IpFqpYweRnLpCzLH8szo7Qw6VkhIFSWX92iTLn8S9dWe-gODvCpBa2aby9B-2Wo2KjUxTthS9BRsy9ZDbFRyYk3PxxHrFy50NqMKqfw2qbhUGW6IvhHsPeD3zHu1nzg329NOSk9n4OX5Wa2N8HC4OFmM5q0r3-hWT5-ple6N7NE7CGTklyRzYu-/w200-h200/servletrecuperafoto.gif';
   if (author === 'Marcos de Paula')
     return 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDaaiv_fPSoxaDv3_KFFpE5JAYAbLj1tiu-dtN8HbqxkZNH0y4B2Qc5vpZheWXpRcegMMIfbYddakmju4h7YhAwzFIj527M4-hajHBwPIp0QMvLWbq2VPOYs5oWoTEr7wNpC3HnR3EX887gW0z3go0d-40juBLlm7yWKaZRuESrWDB8IG4Fu75pA49cLU/w200-h200/Marcos-De-Paula-3.jpg';
-  if (author === 'Carla Clemente') return '/DSC00192-EDIT(1).jpg';
+  if (author === 'Carla Clemente') return '/carla-clemente.jpg';
   if (author && author.toLowerCase().includes('darlene regina')) return '/darlene.jpeg';
   return null;
 };

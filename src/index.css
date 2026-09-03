@@ -1216,6 +1216,17 @@ a:hover {
 /* Feed editorial - estilo Intercept */
 .shell { max-width: 1320px; margin: 0 auto; padding: 2.5rem 2rem 0; }
 
+/* Faixa preta dos Destaques - continuação do navbar (teste) */
+.hero-band { background: #111; padding: 2.25rem 0 3rem; }
+.hero-band-inner { max-width: 1320px; margin: 0 auto; padding: 0 2rem; }
+.hero-band .section-label { color: #fff; margin-bottom: 24px; }
+.hero-band .section-label::after { background: #3a3a3a; }
+.hero-band .hero-row { border-bottom: none; padding-bottom: 0; }
+.hero-band .hero-title { color: #fff; }
+.hero-band .meta-line { color: #9a9a9a; }
+.hero-band .meta-line strong { color: #fff; }
+.hero-band .kicker { color: #8f80ff; }
+
 .section-label {
   font-family: 'Archivo', sans-serif; font-size: 0.76rem; font-weight: 700;
   letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent);

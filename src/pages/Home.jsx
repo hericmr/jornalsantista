@@ -78,6 +78,19 @@ const Home = () => {
       />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
 
+      {hero.length > 0 && (
+        <section className="hero-band">
+          <div className="hero-band-inner">
+            <h2 className="section-label">Destaques</h2>
+            <div className="hero-row">
+              {hero.map((post) => (
+                <PostItem key={post.id} post={post} variant="hero" />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="shell">
         {posts.length === 0 ? (
           <div className="text-center mt-5 mb-5">
@@ -85,20 +98,9 @@ const Home = () => {
           </div>
         ) : (
           <>
-            {hero.length > 0 && (
-              <>
-                <h2 className="section-label">Destaques</h2>
-                <div className="hero-row">
-                  {hero.map((post) => (
-                    <PostItem key={post.id} post={post} variant="hero" />
-                  ))}
-                </div>
-              </>
-            )}
-
             {rest.length > 0 && (
               <>
-                <h2 className="section-label" style={{ marginTop: '46px' }}>Últimas notícias</h2>
+                <h2 className="section-label">Últimas notícias</h2>
                 <div className="feed-list">
                   {rest.map((post, idx) => (
                     <PostItem

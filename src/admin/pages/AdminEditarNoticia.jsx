@@ -188,16 +188,15 @@ const AdminEditarNoticia = () => {
       console.log('📄 Conteúdo:', postData.text_content);
       console.log('📏 Tamanho do conteúdo:', postData.text_content?.length || 0);
 
-      // Verificar se o ID é um UUID válido (formato do Supabase)
-      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      
-      if (id && isValidUUID.test(id)) {
-        // Atualizar postagem existente do Supabase
-        console.log('🔄 Atualizando post existente com ID:', id);
-        await savePost({ ...postData, id }, false);
+      // Usa o id real da matéria carregada (state), não o parâmetro da rota —
+      // que pode ser slug. Se existe id, é edição: UPDATE. Senão, criação.
+      const existingId = post.id ?? id;
+
+      if (existingId) {
+        console.log('🔄 Atualizando post existente com ID:', existingId);
+        await savePost({ ...postData, id: existingId }, false);
         alert('Notícia atualizada com sucesso!');
       } else {
-        // Criar nova postagem no Supabase
         console.log('🆕 Criando nova postagem');
         await savePost(postData, true);
         alert('Notícia criada com sucesso!');
