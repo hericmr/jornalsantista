@@ -4,6 +4,8 @@ import PostItem from '../components/PostItem';
 import { getAllPosts } from '../lib/postsService';
 import { containsSearchTerm } from '../utils/textUtils';
 import MetaTags from '../components/MetaTags';
+import JsonLd from '../components/JsonLd';
+import { organizationSchema, websiteSchema } from '../lib/structuredData';
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -62,11 +64,12 @@ const Home = () => {
   return (
     <>
       <MetaTags
-        title="Jornal Santista - Notícias Locais e Regionais"
-        description="Jornal Santista - Sua fonte de notícias locais e regionais. Fique por dentro das principais notícias da região."
+        title="Jornal Santista – Mídia alternativa na Baixada"
+        description="Mídia independente com olhar crítico sobre a Baixada Santista. Informação com opinião, denúncias, cultura e debate sob a ótica dos trabalhadores."
         type="website"
         url={window.location.href}
       />
+      <JsonLd data={[organizationSchema(), websiteSchema()]} />
 
       <div className="shell">
         {query.trim() && (

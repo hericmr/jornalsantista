@@ -1,8 +1,16 @@
 import React from 'react';
+import MetaTags from '../components/MetaTags';
+import { SITE } from '../config/site';
 
 const Contato = () => {
   return (
-    <div className="container mt-4">
+    <>
+      <MetaTags
+        title={`Contato — ${SITE.name}`}
+        description={`Fale com a redação do ${SITE.name}: sugestões, denúncias e colaborações.`}
+        url={typeof window !== 'undefined' ? window.location.href : undefined}
+      />
+      <div className="container mt-4">
       <div className="row justify-content-center">
         <div className="col-lg-8">
           <div className="text-center mb-5">
@@ -101,8 +109,9 @@ const Contato = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
-export default Contato; 
+export default Contato;

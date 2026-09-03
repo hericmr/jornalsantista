@@ -5,7 +5,10 @@ import { processHtmlContent, createExcerpt } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
 import { sanitizeHtml } from '../lib/sanitize';
 import MetaTags from '../components/MetaTags';
+import JsonLd from '../components/JsonLd';
 import NewsletterModal from '../components/NewsletterModal';
+import { newsArticleSchema, breadcrumbSchema } from '../lib/structuredData';
+import { SITE } from '../config/site';
 
 const Noticia = () => {
   const { slug } = useParams();
@@ -157,22 +160,48 @@ const Noticia = () => {
   }
 
   const images = resolvePostImages(post.images);
+  const pageUrl = window.location.href;
+  const metaDescription = post?.excerpt || createExcerpt(post?.text_content || post?.content || '', 160);
+  const metaImage = images.length > 0 ? toImageSrc(images[0]) : null;
+  const realAuthors = getAuthors().filter((name) => name && name !== 'Autor não informado');
+  const section = Array.isArray(post?.categories) && post.categories.length > 0 ? post.categories[0] : undefined;
+  const publishedTime = post?.published || post?.published_at;
+  const modifiedTime = post?.updated_at || post?.updated;
 
   return (
     <>
       {showNewsletter && <NewsletterModal onClose={() => setShowNewsletter(false)} />}
       {/* Meta Tags para SEO e compartilhamento */}
       <MetaTags
-        title={post?.title || 'Notícia - Jornal Santista'}
-        description={post?.excerpt || createExcerpt(post?.text_content || post?.content || '', 160)}
-        image={images.length > 0 ? toImageSrc(images[0]) : null}
-        url={window.location.href}
+        title={post?.title || `Notícia — ${SITE.name}`}
+        description={metaDescription}
+        image={metaImage}
+        url={pageUrl}
         type="article"
-        author={post?.author}
-        publishedTime={post?.published}
-        modifiedTime={post?.updated}
+        author={realAuthors[0]}
+        publishedTime={publishedTime}
+        modifiedTime={modifiedTime}
       />
-      
+      <JsonLd
+        data={[
+          newsArticleSchema({
+            title: post?.title,
+            description: metaDescription,
+            url: pageUrl,
+            image: metaImage,
+            authors: realAuthors,
+            publishedTime,
+            modifiedTime,
+            section
+          }),
+          breadcrumbSchema([
+            { name: 'Início', url: SITE.url },
+            ...(section ? [{ name: section, url: `${SITE.url}/categorias/${encodeURIComponent(section)}` }] : []),
+            { name: post?.title || 'Notícia' }
+          ])
+        ]}
+      />
+
       <div className="container mt-4">
         <article>
           {/* Conteúdo Principal */}

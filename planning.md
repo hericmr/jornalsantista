@@ -93,13 +93,13 @@ Deploy: Vercel (SPA, rewrite tudo para `index.html`).
 
 **Objetivo:** aparecer bem no Google/Google News e em links de WhatsApp/Facebook.
 
-- [ ] **3.1** `<MetaTags>` em todas as páginas públicas (Categorias, Sobre, Contato, 404) (B15)
-- [ ] **3.2** `<link rel="canonical">` por rota
-- [ ] **3.3** JSON-LD: `NewsArticle` na notícia, `BreadcrumbList`, `WebSite`+`SearchAction` na Home, `Organization` global (B18)
-- [ ] **3.4** `sitemap.xml` dinâmico (script de build que lê o Supabase ou função serverless) + `robots.txt` referenciando ele
-- [ ] **3.5** Feed RSS/Atom em `/feed.xml`
-- [ ] **3.6** Decisão documentada: prerender/SSR — opções (a) `vite-react-ssg`, (b) função serverless na Vercel que injeta OG tags para `/noticia/:slug`, (c) migração Astro. Escolher e abrir fase própria.
-- [ ] **3.7** Validar com Rich Results Test / Facebook Sharing Debugger
+- [x] **3.1** `<MetaTags>` em todas as páginas públicas — Contato ganhou; Home/Sobre/Categorias/404 já tinham. Título/descrição da Home padronizados.
+- [x] **3.2** `<link rel="canonical">` — emitido pelo `MetaTags` a partir do `url`; todas as páginas passam `window.location.href`.
+- [x] **3.3** JSON-LD (`src/components/JsonLd.jsx` + `src/lib/structuredData.js`): `NewsMediaOrganization` + `WebSite`/`SearchAction` na Home; `NewsArticle` + `BreadcrumbList` na notícia.
+- [x] **3.4** `sitemap.xml` — função serverless `api/sitemap.js` (lê `posts` do Supabase) + rewrite em `vercel.json`; `robots.txt` já aponta para ele. Corrigido também o header de cache (`/static/` → `/assets/`, que é o dir real do Vite).
+- [x] **3.5** Feed RSS 2.0 — `api/feed.js` (30 posts) + rewrite; `<link rel="alternate">` no `index.html`.
+- [x] **3.6** **Decisão: opção (b)** — hoje o JSON-LD/meta são injetados no cliente; para os previews de link (WhatsApp/Facebook, que não rodam JS) a rota `/noticia/:slug` precisa de HTML server-rendered. Caminho escolhido: **função serverless/Edge Middleware na Vercel** que intercepta `/noticia/:slug`, busca o post e injeta `<title>`/OG/JSON-LD no HTML antes de servir — sem reescrever o app. `vite-react-ssg` fica como plano B; migração para Astro só se o volume editorial crescer muito. **Abre a Fase 9** (implementação do middleware + exportar `og-default.png` raster).
+- [~] **3.7** Validação com Rich Results Test / Facebook Sharing Debugger / `curl /sitemap.xml` e `/feed.xml` — **pendente**: precisa do deploy no ar e das env vars do Supabase disponíveis às funções no projeto Vercel.
 
 ---
 
@@ -168,10 +168,27 @@ Deploy: Vercel (SPA, rewrite tudo para `index.html`).
 
 ---
 
+## Fase 9 — HTML server-rendered para previews de link (decisão 3.6)
+
+**Objetivo:** WhatsApp/Facebook/Twitter mostram título, descrição e imagem
+corretos ao compartilhar uma notícia (crawlers desses previews não executam JS).
+
+- [ ] **9.1** Edge Middleware / função na Vercel que intercepta `/noticia/:slug`,
+  detecta bots de preview (ou aplica a todos), busca o post no Supabase e injeta
+  `<title>`, OG/Twitter tags e o JSON-LD `NewsArticle` no `index.html` servido
+- [ ] **9.2** Exportar `public/og-default.png` (1200×630 raster) e trocar a
+  constante em `MetaTags.jsx` (hoje aponta para SVG, que o WhatsApp ignora)
+- [ ] **9.3** OG image por notícia: usar a 1ª imagem do post (já disponível) e,
+  se não houver, cair no `og-default.png`
+- [ ] **9.4** Testar no Facebook Sharing Debugger e no WhatsApp real
+
+---
+
 ## Registro de progresso
 
 | Data | Fase/Item | Commit | Observações |
 |------|-----------|--------|-------------|
 | 2026-09-03 | Plano criado | — | Levantamento inicial e definição das fases |
 | 2026-09-03 | Fase 1 (1.1–1.8) | 96eee49 | MetaTags UTF-8; `class`→`className` na Notícia; `public/` (favicon.svg, og-default.svg, robots.txt); Sobre e Categorias migrados para fora do `blog_posts.json` (Sobre = estático, Categorias = Supabase); rota 404 + `NotFound.jsx`; NewsletterModal sem envio para lista de terceiros; `src/config/site.js` unifica e-mail/redes. Build verde. Teste visual pendente (1.9). |
-| 2026-09-03 | Fase 2 (2.1–2.9) | _a commitar_ | `PublicLayout` com `<Outlet/>` (App.jsx enxuto); `src/lib/images.js` (`resolvePostImages`/`toImageSrc`/`handleImageError`/placeholder) elimina parsing duplicado; `src/lib/sanitize.js` (DOMPurify) no HTML do artigo; `getPostById`→`getPostBySlugOrId` (frontend + admin); `postsService`/`supabase.js` reescritos sem `console.log` e sem teste de conexão no import; `ArticleHeader.jsx` e `SearchBar.jsx` removidos; deps `jsonwebtoken`/`bcryptjs` removidas; `processHtmlContent` simplificado. Build verde (142 módulos). |
+| 2026-09-03 | Fase 2 (2.1–2.9) | 0204a33 | `PublicLayout` com `<Outlet/>` (App.jsx enxuto); `src/lib/images.js` (`resolvePostImages`/`toImageSrc`/`handleImageError`/placeholder) elimina parsing duplicado; `src/lib/sanitize.js` (DOMPurify) no HTML do artigo; `getPostById`→`getPostBySlugOrId` (frontend + admin); `postsService`/`supabase.js` reescritos sem `console.log` e sem teste de conexão no import; `ArticleHeader.jsx` e `SearchBar.jsx` removidos; deps `jsonwebtoken`/`bcryptjs` removidas; `processHtmlContent` simplificado. Build verde (142 módulos). |
+| 2026-09-03 | Fase 3 (3.1–3.6) | _a commitar_ | `JsonLd.jsx` + `structuredData.js` (Organization/WebSite na Home, NewsArticle/BreadcrumbList na notícia); `MetaTags` no Contato; funções serverless `api/sitemap.js` e `api/feed.js` + rewrites em `vercel.json`; `<link rel=alternate>` do RSS; header de cache corrigido para `/assets/`. Decisão 3.6 → Fase 9 (middleware de preview). Build verde (144 módulos). Validação 3.7 pendente (pós-deploy). |
