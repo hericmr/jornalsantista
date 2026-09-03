@@ -81,7 +81,6 @@ const Home = () => {
       {hero.length > 0 && (
         <section className="hero-band">
           <div className="hero-band-inner">
-            <h2 className="section-label">Destaques</h2>
             <div className="hero-row">
               {hero.map((post) => (
                 <PostItem key={post.id} post={post} variant="hero" />
@@ -99,18 +98,15 @@ const Home = () => {
         ) : (
           <>
             {rest.length > 0 && (
-              <>
-                <h2 className="section-label">Últimas notícias</h2>
-                <div className="feed-list">
-                  {rest.map((post, idx) => (
-                    <PostItem
-                      key={post.id}
-                      post={post}
-                      variant={idx % 4 === 1 ? 'feature' : 'regular'}
-                    />
-                  ))}
-                </div>
-              </>
+              <div className="feed-list">
+                {rest.map((post, idx) => (
+                  <PostItem
+                    key={post.id}
+                    post={post}
+                    variant={idx % 4 === 1 ? 'feature' : 'regular'}
+                  />
+                ))}
+              </div>
             )}
 
             {hasMore && (
