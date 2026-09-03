@@ -99,15 +99,15 @@ export const getPostBySlugOrId = async (slugOrId) => {
 // Salva um post (sempre no Supabase).
 export const savePost = async (postData, isNew = false) => {
   try {
-    const { id, source, ...cleanPostData } = postData;
+    // `source` e as duas colunas de corpo saem do spread de propósito.
+    const { id, source: _source, content, text_content, ...rest } = postData;
 
-    const supabaseData = {
-      ...cleanPostData,
-      text_content: cleanPostData.text_content || cleanPostData.content || ''
-    };
-    if (supabaseData.text_content && supabaseData.content) {
-      delete supabaseData.content;
-    }
+    // A tabela `posts` tem duas colunas de corpo: `content` (legada) e
+    // `text_content`. Todos os leitores (mapPost, middleware, feed) usam
+    // `content || text_content`, então gravamos as duas com o mesmo valor
+    // para nunca servir o corpo defasado depois de uma edição.
+    const body = text_content ?? content ?? '';
+    const supabaseData = { ...rest, content: body, text_content: body };
 
     // Atualiza sempre que não for criação e houver um id — numérico ou UUID.
     // (A tabela `posts` usa ids inteiros; o teste de UUID antigo caía sempre

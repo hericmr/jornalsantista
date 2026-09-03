@@ -232,6 +232,52 @@ _hero_ e o `og:image` (usado pelo `middleware.js` nos previews de link).
 
 ---
 
+### Fase I — Snapshot estático de conteúdo (track paralelo)
+
+**Objetivo:** o site abre sem depender de uma ida ao Supabase em runtime. O
+conteúdo é buscado **no build** e servido como arquivos estáticos junto do
+deploy; a app lê o estático primeiro e só vai ao Supabase para o que falta ou
+está mais novo (ou quando é o admin/preview).
+
+**Por que:** Home e matéria abrem instantâneo; o site sobrevive a lentidão/queda
+do Supabase; menos requests (limites/custo); conteúdo versionável = backup.
+
+**Não é sobre o editor** — é um track de arquitetura em paralelo às Fases A–H.
+Liga com o item 3.6 / 8.5 do `planning.md` (decisão de SSR/prerender pendente).
+
+- [ ] **I1** `scripts/build-content.js` (Node, roda no `prebuild` — o Vite executa
+  `prebuild` antes do `build`): usa `@supabase/supabase-js` e escreve em
+  `public/data/`:
+  - `index.json` — lista de matérias, **só metadados** (id, slug, título, resumo,
+    categorias, autores, capa, datas). Sem o corpo.
+  - `posts/<slug>.json` — uma por matéria, com o corpo completo.
+  - `categorias.json` / `autores.json` (opcional).
+- [ ] **I2** `postsService.js`: ler o estático primeiro (`fetch('/data/…')`), cair
+  para o Supabase se faltar, estiver mais novo, ou em contexto admin/preview.
+  Feed da Home e página de matéria passam pelo estático; o CDN cacheia.
+- [ ] **I3** **Não commitar** `public/data/` no git (`.gitignore`). É gerado no
+  build e entregue no deploy. Um bot que faz `git push` a cada build pode entrar
+  em loop e sujar o histórico. Backup em git, se quiser, é job separado e
+  agendado.
+- [ ] **I4** Frescor do conteúdo: Database Webhook do Supabase na tabela `posts` →
+  Deploy Hook da Vercel (rebuild automático ao publicar/editar). Alternativas:
+  botão "Republicar site" no admin; cron diário.
+- [ ] **I5** Preview de rascunho continua lendo o Supabase ao vivo (o rascunho não
+  entra no snapshot) — casa com a Fase E2.
+- [ ] **I6** _(opcional)_ `api/sitemap.js` e `api/feed.js` podem passar a ler o
+  `index.json` local em vez do Supabase, reduzindo acoplamento.
+- [ ] **I7** Fallback: sem `/data/index.json` (1º deploy, build sem env), a app
+  usa o Supabase normalmente — o estático é otimização, não dependência dura.
+
+**Decisões em aberto (Fase I):**
+- Chave no build: `anon` (RLS libera o que é público) vs. `service_role` como env
+  var só de build.
+- Gatilho de rebuild: webhook Supabase→Vercel (automático) vs. botão manual vs.
+  cron.
+- `api/*` migram para ler o snapshot ou ficam como estão.
+
+---
+
 ## 4. Mudanças no Supabase (resumo)
 
 | Fase | Mudança | Obrigatória? |
@@ -242,6 +288,7 @@ _hero_ e o `og:image` (usado pelo `middleware.js` nos previews de link).
 | E2 | Token/policy para preview de rascunho | Só se E2 cobrir rascunho |
 | F4 | `post_drafts` ou coluna `draft_content` | Opcional |
 | G1 | Índices para busca/filtros em `posts` (status, published_at) | Recomendado |
+| I4 | Database Webhook em `posts` → Deploy Hook da Vercel (rebuild ao publicar) | Sim para I4 |
 | — | Consolidar seletor de autores na tabela `authors` (E17) | Recomendado |
 
 ---
@@ -261,19 +308,27 @@ _hero_ e o `og:image` (usado pelo `middleware.js` nos previews de link).
    bucket + limpeza agendada.
 5. **Autosave no servidor (F4):** entra no MVP ou fica para depois? Recomendação:
    local (F1) no MVP, servidor depois.
+6. **Snapshot estático (Fase I):** track paralelo. Decidido: fazer **depois** dos
+   passos 1–3 da Fase A (quando o `savePost`/`text_content` estiver estável),
+   porque as duas frentes mexem em `postsService.js`.
 
 ---
 
 ## 6. Ordem de entrega recomendada
 
-**MVP "editor profissional":** Fase A → Fase B → Fase C (C1–C3, C5–C6) →
-E1 + E3 → F1 + F2.
-Isso já resolve E1–E10, E18, E21, E22 e a maior parte de E2/E3/E7.
+**Track 1 — editor (principal):** Fase A → Fase B → Fase C (C1–C3, C5–C6) →
+E1 + E3 → F1 + F2. Isso já resolve E1–E10, E18, E21, E22 e a maior parte de
+E2/E3/E7. Depois: Fase D (mídia) → Fase E4/E2 → Fase G (lista) → Fase H →
+opcionais (F4, H4).
 
-**Depois:** Fase D (mídia) → Fase E4/E2 (checklist + preview de rascunho) →
-Fase G (lista) → Fase H → itens opcionais (F4, H4).
+**Track 2 — snapshot estático (paralelo):** entra **depois dos passos 1–3 da
+Fase A** (limpeza + `savePost`/`text_content` estáveis). Fase I num bloco
+próprio: I1 → I2 → I3 → I7 (MVP: site lê estático com fallback ao Supabase),
+depois I4 (rebuild automático) e I5/I6. Os dois tracks compartilham
+`postsService.js` — por isso a Fase I espera o A4.
 
-Cada item marcável acima vira um commit pequeno com `build` verde.
+Cada item marcável acima vira um commit pequeno com `build` verde + deploy;
+o usuário testa no site online antes do próximo passo.
 
 ---
 
@@ -282,3 +337,5 @@ Cada item marcável acima vira um commit pequeno com `build` verde.
 | Data | Fase/Item | Commit | Observações |
 |------|-----------|--------|-------------|
 | 2026-09-03 | Plano criado | — | Levantamento das telas `AdminNovaNoticia`/`AdminEditarNoticia` e do fluxo de publicação; 25 problemas catalogados (E1–E25); 8 fases (A–H). |
+| 2026-09-03 | Fase A · passo 1 (A3) | c5d28d6 | Removido o botão "Testar Supabase" (inseria posts de teste na tabela real em produção), o `<select>` "Categoria" morto da tela Editar e todos os `console.log` de debug das duas telas. Sem mudança de comportamento. Build verde (145 módulos). |
+| 2026-09-03 | Fase I planejada | — | Track paralelo de snapshot estático de conteúdo adicionado ao plano (I1–I7). Ordem: depois dos passos 1–3 da Fase A. |
