@@ -395,8 +395,9 @@ a:hover {
   cursor: pointer; padding: 0.25rem; display: flex; align-items: center;
 }
 .brand-name {
-  font-family: 'Archivo', sans-serif; font-weight: 800; color: #fff;
-  font-size: 1.1rem; letter-spacing: 0.3px; text-transform: uppercase;
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-weight: 700; color: #fff;
+  font-size: 1.4rem; letter-spacing: 0; text-transform: none;
   text-decoration: none;
 }
 .header-search {
@@ -414,6 +415,8 @@ a:hover {
 .masthead-right { display: flex; align-items: center; gap: 1.1rem; }
 .social-text { font-size: 0.72rem; color: #b7b7b7; letter-spacing: 0.3px; text-decoration: none; }
 .social-text:hover { color: #fff; }
+.social-icon { color: #b7b7b7; font-size: 1.05rem; display: flex; align-items: center; text-decoration: none; }
+.social-icon:hover { color: #fff; }
 
 @media (max-width: 768px) {
   .masthead-right { display: none; }

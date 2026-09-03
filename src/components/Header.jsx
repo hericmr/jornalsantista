@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaBars, FaTimes, FaInstagram } from 'react-icons/fa';
 import { SITE } from '../config/site';
 
 const navLinks = [
@@ -51,7 +51,9 @@ const Header = () => {
           </form>
 
           <div className="masthead-right">
-            <a href={SITE.social.instagram} className="social-text" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href={SITE.social.instagram} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <FaInstagram />
+            </a>
             <a href={`mailto:${SITE.email}`} className="social-text">Contato</a>
           </div>
         </div>
