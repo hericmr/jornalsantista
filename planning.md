@@ -132,11 +132,11 @@ em serifa grande (`Newsreader`), coluna estreita, trilha de compartilhamento.
 - [x] **5.3** `<time dateTime>` com ISO + formato "27 de ago de 2026, 17h30". _(Data relativa "há X horas" fica para depois.)_
 - [x] **5.4** Tempo estimado de leitura (200 wpm sobre o texto sem HTML).
 - [x] **5.5** Barra de progresso de leitura fixa no topo (`.reading-progress`).
-- [x] **5.6** Avatar e link de perfil dos autores vêm da tabela `authors` do Supabase (`getAuthorProfiles` com `.in('name', …)`); o mapa local `AUTHOR_BIOS`/`getAuthorImage` fica só como fallback. Nome do autor vira link para `profile_url` quando existe. _Bio ainda no código: a tabela `authors` não tem coluna `bio` (só `name`, `avatar_url`, `profile_url`)._
-- [x] **5.7** Bloco "Leia também" ao final da matéria: `getRelatedPosts({category, excludeSlug})` — mesma editoria primeiro, completado com as mais recentes; renderiza `PostItem`. Some se não houver relacionadas.
+- [~] **5.6** Bloco de autores redesenhado (avatar + nome + bio, layout horizontal) e cadeia de `if` movida para o mapa `AUTHOR_BIOS`/`getAuthorImage` no topo do arquivo. **Ainda hardcoded** — migrar para a tabela `authors` do Supabase continua pendente.
+- [ ] **5.7** Bloco "Leia também" ao final — **pendente** (precisa de `getPostsByCategory` já pronto + query "mais recentes").
 - [x] **5.8** Compartilhar: WhatsApp / Facebook / X / copiar link, com `aria-label`; trilha vertical sticky no desktop, linha horizontal no mobile. _(`navigator.share` nativo: pendente.)_
 - [x] **5.9** Breadcrumb no topo da coluna (desktop + mobile); removido o breadcrumb duplicado do rodapé mobile. JSON-LD `BreadcrumbList` já vinha da Fase 3.
-- [x] **5.10** Newsletter: modal bloqueante → `NewsletterBar` (faixa fixa no rodapé, dispensável, com snooze de 30 dias em `localStorage`). `NewsletterModal.jsx` removido.
+- [ ] **5.10** Newsletter: faixa inferior dispensável — **pendente**.
 - [x] **hero** — imagem de destaque agora ocupa a largura toda (`min(72vh,760px)`), com kicker + `<h1>` sobre o gradiente; sem imagem, cai num header simples.
 
 ---
@@ -208,5 +208,3 @@ corretos ao compartilhar uma notícia (crawlers desses previews não executam JS
 | 2026-09-03 | Fase 9 (9.1–9.3) | _a commitar_ | `middleware.js` (Edge da Vercel) injeta título/OG/Twitter/JSON-LD por matéria para crawlers de preview (WhatsApp etc.), buscando o post no Supabase via REST; humanos passam direto. `public/og-default.png` 1200×630 gerado; `MetaTags` resolve `og:image` absoluta. Falta 9.4 (validar no ar). |
 | 2026-09-03 | Incidentes encerrados | — | Backend verificado 100% OK (curl da query exata + `/sitemap.xml` com 128 artigos). O que restava era **cache do navegador** servindo JS de um deploy intermediário quebrado (`3373f8b`). Confirmado funcionando em janela anônima (feed + admin). Lição: (1) validar mudanças na camada de dados contra o Supabase real antes do deploy; (2) evitar vários pushes seguidos — cada deploy intermediário quebrado pode ficar em cache. |
 | 2026-09-03 | Fase 4 (4.1–4.4, 4.7) | 3373f8b | Feed público paginado (`getPostsPage`/`.range()`); `getPostsByCategory` e `getCategoryNames` no servidor; Home com "Carregar mais"; nova página `/busca` server-side (`Busca.jsx`); fontes em 1 `<link>` com `swap`; `React.lazy` no admin (8 chunks); LCP da notícia (`fetchPriority`, sem `lazy`, `width/height`) + `decoding="async"` nas imagens; `@tiptap/*` removido (sem uso). Build verde (145 módulos, bundle 130 kB gzip). 4.5/4.6(srcset)/4.8 adiados. |
-| 2026-09-03 | Fase 9 (9.1–9.3) + fixes | 6997309, 850209b, a050697 | Middleware de preview no ar e **verificado** (WhatsApp/FB/Twitter recebem título/descrição/imagem da matéria). Ajustes: sem `og:image:width/height` forçado na imagem da matéria; "Resumo" do editor usado inteiro no `og:description`. |
-| 2026-09-03 | Fase 5 (5.6, 5.7, 5.10) | _a commitar_ | Autores: avatar/link vêm da tabela `authors` (`getAuthorProfiles`), mapa local vira fallback. "Leia também" ao final (`getRelatedPosts`, mesma editoria + recentes). Newsletter: `NewsletterBar` (faixa dispensável no rodapé, snooze 30 dias); `NewsletterModal.jsx` removido. Build verde. |
