@@ -123,16 +123,21 @@ Deploy: Vercel (SPA, rewrite tudo para `index.html`).
 
 **Objetivo:** a tela mais importante do site.
 
-- [ ] **5.1** Coluna de leitura com medida ~65–75ch, alinhamento à esquerda (remover `text-align: justify` e `white-space: pre-wrap` do `.article-content`)
-- [ ] **5.2** Tipografia de corpo revisada (tamanho, entrelinha, ritmo de parágrafos, listas, citações)
-- [ ] **5.3** `<time datetime>` semântico + data relativa ("há 2 horas") com fallback absoluto
-- [ ] **5.4** Tempo estimado de leitura
-- [ ] **5.5** Barra de progresso de leitura (fina, no topo)
-- [ ] **5.6** Autores a partir da tabela `authors` do Supabase (`bio`, `avatar_url`, `slug`) — remover cadeia de `if (author === "...")` e imagens hardcoded
-- [ ] **5.7** Bloco "Leia também" ao final: 3–4 notas da mesma categoria / mais recentes
-- [ ] **5.8** Compartilhar: `navigator.share` no mobile + botão "copiar link"; rótulos `aria-label`; "X" no lugar de "Twitter"
-- [ ] **5.9** Breadcrumb no topo (desktop e mobile), com JSON-LD (ligado à 3.3)
-- [ ] **5.10** Newsletter: trocar modal bloqueante por faixa fixa inferior dispensável; contador robusto (B9)
+Referência de estilo (fornecida pelo usuário): página de matéria do Intercept
+Brasil — hero de imagem cheia com kicker + título sobre gradiente escuro, corpo
+em serifa grande (`Newsreader`), coluna estreita, trilha de compartilhamento.
+
+- [x] **5.1** `.article-content` reescrito: sem `justify`, sem `pre-wrap`, coluna de leitura `max-width: 720px`.
+- [x] **5.2** Tipografia: corpo em **Newsreader** (Google Fonts, opsz 6..72) ~1.27rem / 1.75; títulos internos em Archivo; links, citações e legendas revisados.
+- [x] **5.3** `<time dateTime>` com ISO + formato "27 de ago de 2026, 17h30". _(Data relativa "há X horas" fica para depois.)_
+- [x] **5.4** Tempo estimado de leitura (200 wpm sobre o texto sem HTML).
+- [x] **5.5** Barra de progresso de leitura fixa no topo (`.reading-progress`).
+- [~] **5.6** Bloco de autores redesenhado (avatar + nome + bio, layout horizontal) e cadeia de `if` movida para o mapa `AUTHOR_BIOS`/`getAuthorImage` no topo do arquivo. **Ainda hardcoded** — migrar para a tabela `authors` do Supabase continua pendente.
+- [ ] **5.7** Bloco "Leia também" ao final — **pendente** (precisa de `getPostsByCategory` já pronto + query "mais recentes").
+- [x] **5.8** Compartilhar: WhatsApp / Facebook / X / copiar link, com `aria-label`; trilha vertical sticky no desktop, linha horizontal no mobile. _(`navigator.share` nativo: pendente.)_
+- [x] **5.9** Breadcrumb no topo da coluna (desktop + mobile); removido o breadcrumb duplicado do rodapé mobile. JSON-LD `BreadcrumbList` já vinha da Fase 3.
+- [ ] **5.10** Newsletter: faixa inferior dispensável — **pendente**.
+- [x] **hero** — imagem de destaque agora ocupa a largura toda (`min(72vh,760px)`), com kicker + `<h1>` sobre o gradiente; sem imagem, cai num header simples.
 
 ---
 
@@ -195,5 +200,6 @@ corretos ao compartilhar uma notícia (crawlers desses previews não executam JS
 | 2026-09-03 | Fase 3 (3.1–3.6) | 20400d3 | `JsonLd.jsx` + `structuredData.js` (Organization/WebSite na Home, NewsArticle/BreadcrumbList na notícia); `MetaTags` no Contato; funções serverless `api/sitemap.js` e `api/feed.js` + rewrites em `vercel.json`; `<link rel=alternate>` do RSS; header de cache corrigido para `/assets/`. Decisão 3.6 → Fase 9 (middleware de preview). Build verde (144 módulos). Validação 3.7 pendente (pós-deploy). |
 | 2026-09-03 | Hotfix feed | 6cff845 | Feed público parou de carregar em produção: `count:'exact'` + `.range()` → `PGRST103` quando o `anon` via 0 linhas. Removido `count`; `hasMore` derivado de `pageSize+1`. Confirmado OK pelo usuário. |
 | 2026-09-03 | Hotfix admin | b0f7f68 | `/admin` não abria após o lazy-loading da Fase 4.7. Revertido para import estático (App.jsx). Resto da Fase 4 mantido. |
+| 2026-09-03 | Fase 5 (parcial) | _a commitar_ | Redesign da página de notícia: hero de imagem cheia com kicker+título sobre gradiente; corpo em `Newsreader` (nova fonte no `<link>`); coluna de leitura 720px; trilha de compartilhamento (sticky no desktop); `<time>` semântico; tempo de leitura; barra de progresso; breadcrumb no topo; bloco de autores redesenhado (bios no mapa `AUTHOR_BIOS`). Pendentes: 5.6 (autores via Supabase), 5.7 ("Leia também"), 5.10 (newsletter). Build verde. Teste visual pendente (sem navegador nesta sessão). |
 | 2026-09-03 | Incidentes encerrados | — | Backend verificado 100% OK (curl da query exata + `/sitemap.xml` com 128 artigos). O que restava era **cache do navegador** servindo JS de um deploy intermediário quebrado (`3373f8b`). Confirmado funcionando em janela anônima (feed + admin). Lição: (1) validar mudanças na camada de dados contra o Supabase real antes do deploy; (2) evitar vários pushes seguidos — cada deploy intermediário quebrado pode ficar em cache. |
 | 2026-09-03 | Fase 4 (4.1–4.4, 4.7) | 3373f8b | Feed público paginado (`getPostsPage`/`.range()`); `getPostsByCategory` e `getCategoryNames` no servidor; Home com "Carregar mais"; nova página `/busca` server-side (`Busca.jsx`); fontes em 1 `<link>` com `swap`; `React.lazy` no admin (8 chunks); LCP da notícia (`fetchPriority`, sem `lazy`, `width/height`) + `decoding="async"` nas imagens; `@tiptap/*` removido (sem uso). Build verde (145 módulos, bundle 130 kB gzip). 4.5/4.6(srcset)/4.8 adiados. |
