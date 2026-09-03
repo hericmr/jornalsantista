@@ -209,8 +209,8 @@ const Noticia = () => {
         <article>
           {/* Conteúdo Principal */}
           <div>
-            <div class="row justify-content-center">
-              <div class="col-lg-8">
+            <div className="row justify-content-center">
+              <div className="col-lg-8">
             {/* Header da Notícia */}
             <header className="mb-4">
               {/* Título */}

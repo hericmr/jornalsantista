@@ -1,4 +1,5 @@
 import React from 'react';
+import { SITE } from '../config/site';
 
 const Footer = () => {
   return (
@@ -26,16 +27,16 @@ const Footer = () => {
           <div className="footer-section">
             <h6 className="footer-section-title">Redes Sociais</h6>
             <div className="footer-social">
-              <a href="mailto:contato@jornalsantista.org" className="social-link" title="E-mail">
+              <a href={`mailto:${SITE.email}`} className="social-link" title="E-mail" aria-label="E-mail">
                 <i className="bi bi-envelope-fill"></i>
               </a>
-              <a href="https://facebook.com/jornalsantista" className="social-link" target="_blank" rel="noopener noreferrer" title="Facebook">
+              <a href={SITE.social.facebook} className="social-link" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook">
                 <i className="bi bi-facebook"></i>
               </a>
-              <a href="https://twitter.com/jornalsantista" className="social-link" target="_blank" rel="noopener noreferrer" title="Twitter">
+              <a href={SITE.social.twitter} className="social-link" target="_blank" rel="noopener noreferrer" title="Twitter" aria-label="Twitter">
                 <i className="bi bi-twitter"></i>
               </a>
-              <a href="https://instagram.com/jornalsantista" className="social-link" target="_blank" rel="noopener noreferrer" title="Instagram">
+              <a href={SITE.social.instagram} className="social-link" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
                 <i className="bi bi-instagram"></i>
               </a>
             </div>

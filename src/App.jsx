@@ -7,6 +7,7 @@ import Noticia from './pages/Noticia';
 import Categorias from './pages/Categorias';
 import Sobre from './pages/Sobre';
 import Contato from './pages/Contato';
+import NotFound from './pages/NotFound';
 import { AuthProvider } from './auth/AuthContext';
 import ProtectedRoute from './auth/ProtectedRoute';
 import AdminLogin from './admin/pages/AdminLogin';
@@ -134,6 +135,17 @@ function App() {
                 <AdminConfiguracoes />
               </AdminLayout>
             </ProtectedRoute>
+          } />
+
+          {/* 404 */}
+          <Route path="*" element={
+            <div className="d-flex flex-column min-vh-100">
+              <Header />
+              <main className="flex-grow-1">
+                <NotFound />
+              </main>
+              <Footer />
+            </div>
           } />
         </Routes>
       </Router>

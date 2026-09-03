@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+import { SITE } from '../config/site';
 
 const navLinks = [
   { to: '/', label: 'Início' },
@@ -50,8 +51,8 @@ const Header = () => {
           </form>
 
           <div className="masthead-right">
-            <a href="https://instagram.com/jornalsantista" className="social-text" target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href="mailto:contato@jornalsantista.org" className="social-text">Contato</a>
+            <a href={SITE.social.instagram} className="social-text" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href={`mailto:${SITE.email}`} className="social-text">Contato</a>
           </div>
         </div>
       </header>
