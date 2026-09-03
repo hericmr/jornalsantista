@@ -4,22 +4,29 @@ const SITE_NAME = 'Jornal Santista';
 const DEFAULT_TITLE = 'Jornal Santista – Mídia alternativa na Baixada';
 const DEFAULT_DESCRIPTION =
   'Mídia independente com olhar crítico sobre a Baixada Santista. Informação com opinião, denúncias, cultura e debate sob a ótica dos trabalhadores.';
-// TODO(Fase 3): exportar versão raster 1200x630 (og-default.png/webp) — WhatsApp
-// não gera preview de SVG. Trocar a constante quando o arquivo existir.
-const DEFAULT_IMAGE = '/og-default.svg';
+const SITE_ORIGIN = 'https://www.jornalsantista.com.br';
+const DEFAULT_IMAGE = `${SITE_ORIGIN}/og-default.png`;
 const DEFAULT_KEYWORDS =
   'jornal santista, mídia alternativa, baixada santista, jornalismo independente, denúncia, crítica social, cultura, política, trabalhadores';
+
+// og:image precisa ser URL absoluta para os crawlers.
+const absolute = (src) => {
+  if (!src) return DEFAULT_IMAGE;
+  if (/^https?:\/\//i.test(src)) return src;
+  return `${SITE_ORIGIN}${src.startsWith('/') ? '' : '/'}${src}`;
+};
 
 const MetaTags = ({
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
-  image = DEFAULT_IMAGE,
-  url = typeof window !== 'undefined' ? window.location.href : 'https://jornalsantista.com.br',
+  image,
+  url = typeof window !== 'undefined' ? window.location.href : SITE_ORIGIN,
   type = 'website',
   author,
   publishedTime,
   modifiedTime
 }) => {
+  const ogImage = absolute(image);
   return (
     <>
       {/* Meta padrão */}
@@ -35,7 +42,7 @@ const MetaTags = ({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={url} />
       <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:locale" content="pt_BR" />
@@ -47,7 +54,7 @@ const MetaTags = ({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={ogImage} />
 
       {/* PWA e extras */}
       <meta name="theme-color" content="#000000" />

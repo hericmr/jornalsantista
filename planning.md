@@ -179,14 +179,17 @@ em serifa grande (`Newsreader`), coluna estreita, trilha de compartilhamento.
 **Objetivo:** WhatsApp/Facebook/Twitter mostram título, descrição e imagem
 corretos ao compartilhar uma notícia (crawlers desses previews não executam JS).
 
-- [ ] **9.1** Edge Middleware / função na Vercel que intercepta `/noticia/:slug`,
-  detecta bots de preview (ou aplica a todos), busca o post no Supabase e injeta
-  `<title>`, OG/Twitter tags e o JSON-LD `NewsArticle` no `index.html` servido
-- [ ] **9.2** Exportar `public/og-default.png` (1200×630 raster) e trocar a
-  constante em `MetaTags.jsx` (hoje aponta para SVG, que o WhatsApp ignora)
-- [ ] **9.3** OG image por notícia: usar a 1ª imagem do post (já disponível) e,
-  se não houver, cair no `og-default.png`
-- [ ] **9.4** Testar no Facebook Sharing Debugger e no WhatsApp real
+- [x] **9.1** `middleware.js` (Edge Middleware da Vercel, `matcher: /noticia/:slug*`):
+  detecta crawler pelo `User-Agent` (WhatsApp, facebookexternalhit, Twitterbot,
+  Telegram, Googlebot, LinkedIn, Slack, …); busca o post via REST do Supabase
+  (por slug, com fallback por id numérico); injeta `<title>`, OG/Twitter e o
+  JSON-LD `NewsArticle` no `index.html` e devolve com `s-maxage=600`.
+  Humano → `return` vazio, SPA normal sem overhead.
+- [x] **9.2** `public/og-default.png` (1200×630) gerado; `MetaTags.jsx` e o
+  middleware apontam para ele. `MetaTags` agora resolve `og:image` para URL absoluta.
+- [x] **9.3** OG image por notícia: 1ª imagem do post (`firstImage()` normaliza
+  array/JSON/caminho relativo); sem imagem → `og-default.png`.
+- [ ] **9.4** Testar no Facebook Sharing Debugger e no WhatsApp real — **pendente** (pós-deploy).
 
 ---
 
@@ -200,6 +203,8 @@ corretos ao compartilhar uma notícia (crawlers desses previews não executam JS
 | 2026-09-03 | Fase 3 (3.1–3.6) | 20400d3 | `JsonLd.jsx` + `structuredData.js` (Organization/WebSite na Home, NewsArticle/BreadcrumbList na notícia); `MetaTags` no Contato; funções serverless `api/sitemap.js` e `api/feed.js` + rewrites em `vercel.json`; `<link rel=alternate>` do RSS; header de cache corrigido para `/assets/`. Decisão 3.6 → Fase 9 (middleware de preview). Build verde (144 módulos). Validação 3.7 pendente (pós-deploy). |
 | 2026-09-03 | Hotfix feed | 6cff845 | Feed público parou de carregar em produção: `count:'exact'` + `.range()` → `PGRST103` quando o `anon` via 0 linhas. Removido `count`; `hasMore` derivado de `pageSize+1`. Confirmado OK pelo usuário. |
 | 2026-09-03 | Hotfix admin | b0f7f68 | `/admin` não abria após o lazy-loading da Fase 4.7. Revertido para import estático (App.jsx). Resto da Fase 4 mantido. |
-| 2026-09-03 | Fase 5 (parcial) | _a commitar_ | Redesign da página de notícia: hero de imagem cheia com kicker+título sobre gradiente; corpo em `Newsreader` (nova fonte no `<link>`); coluna de leitura 720px; trilha de compartilhamento (sticky no desktop); `<time>` semântico; tempo de leitura; barra de progresso; breadcrumb no topo; bloco de autores redesenhado (bios no mapa `AUTHOR_BIOS`). Pendentes: 5.6 (autores via Supabase), 5.7 ("Leia também"), 5.10 (newsletter). Build verde. Teste visual pendente (sem navegador nesta sessão). |
+| 2026-09-03 | Fase 5 (parcial) | eb24333 | Redesign da página de notícia: hero de imagem cheia com kicker+título sobre gradiente; corpo em `Newsreader` (nova fonte no `<link>`); coluna de leitura 720px; trilha de compartilhamento (sticky no desktop); `<time>` semântico; tempo de leitura; barra de progresso; breadcrumb no topo; bloco de autores redesenhado (bios no mapa `AUTHOR_BIOS`). Pendentes: 5.6 (autores via Supabase), 5.7 ("Leia também"), 5.10 (newsletter). Build verde. Teste visual pendente (sem navegador nesta sessão). |
+| 2026-09-03 | Navbar | 02775ac | Nome do site em `Newsreader` (serif); "Instagram" vira ícone (`FaInstagram`). |
+| 2026-09-03 | Fase 9 (9.1–9.3) | _a commitar_ | `middleware.js` (Edge da Vercel) injeta título/OG/Twitter/JSON-LD por matéria para crawlers de preview (WhatsApp etc.), buscando o post no Supabase via REST; humanos passam direto. `public/og-default.png` 1200×630 gerado; `MetaTags` resolve `og:image` absoluta. Falta 9.4 (validar no ar). |
 | 2026-09-03 | Incidentes encerrados | — | Backend verificado 100% OK (curl da query exata + `/sitemap.xml` com 128 artigos). O que restava era **cache do navegador** servindo JS de um deploy intermediário quebrado (`3373f8b`). Confirmado funcionando em janela anônima (feed + admin). Lição: (1) validar mudanças na camada de dados contra o Supabase real antes do deploy; (2) evitar vários pushes seguidos — cada deploy intermediário quebrado pode ficar em cache. |
 | 2026-09-03 | Fase 4 (4.1–4.4, 4.7) | 3373f8b | Feed público paginado (`getPostsPage`/`.range()`); `getPostsByCategory` e `getCategoryNames` no servidor; Home com "Carregar mais"; nova página `/busca` server-side (`Busca.jsx`); fontes em 1 `<link>` com `swap`; `React.lazy` no admin (8 chunks); LCP da notícia (`fetchPriority`, sem `lazy`, `width/height`) + `decoding="async"` nas imagens; `@tiptap/*` removido (sem uso). Build verde (145 módulos, bundle 130 kB gzip). 4.5/4.6(srcset)/4.8 adiados. |
