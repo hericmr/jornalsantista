@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPostBySlugOrId } from '../lib/postsService';
+import { getPostBySlugOrId, getAuthorProfiles, getRelatedPosts } from '../lib/postsService';
 import { processHtmlContent, createExcerpt, stripHtml } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
 import { sanitizeHtml } from '../lib/sanitize';
 import MetaTags from '../components/MetaTags';
 import JsonLd from '../components/JsonLd';
-import NewsletterModal from '../components/NewsletterModal';
+import NewsletterBar from '../components/NewsletterBar';
+import PostItem from '../components/PostItem';
 import { newsArticleSchema, breadcrumbSchema } from '../lib/structuredData';
 import { SITE } from '../config/site';
 
@@ -37,7 +38,7 @@ const getAuthorImage = (author) => {
 
 const getAuthorBio = (author) => {
   if (author && author.toLowerCase().includes('darlene regina')) return DARLENE_BIO;
-  return AUTHOR_BIOS[author] || 'Colaborador(a) convidado(a) do Jornal Santista.';
+  return AUTHOR_BIOS[author] || 'Colaborador(a) do Jornal Santista.';
 };
 
 const joinAuthors = (authors) => {
@@ -66,13 +67,16 @@ const Noticia = () => {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showNewsletter, setShowNewsletter] = useState(false);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [authorProfiles, setAuthorProfiles] = useState({});
+  const [related, setRelated] = useState([]);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setAuthorProfiles({});
+    setRelated([]);
     getPostBySlugOrId(slug)
       .then((found) => {
         if (active) setPost(found);
@@ -82,20 +86,33 @@ const Noticia = () => {
         if (active) setLoading(false);
       });
 
-    // Controle de leitura de matérias (dispara a newsletter na 2ª leitura)
-    try {
-      const key = 'noticias_lidas';
-      const count = parseInt(localStorage.getItem(key) || '0', 10) + 1;
-      localStorage.setItem(key, String(count));
-      if (count === 2) setShowNewsletter(true);
-    } catch {
-      /* localStorage indisponível */
-    }
-
     return () => {
       active = false;
     };
   }, [slug]);
+
+  // Perfis dos autores + matérias relacionadas (depois que o post carrega)
+  useEffect(() => {
+    if (!post) return;
+    let active = true;
+
+    const names = (Array.isArray(post.authors) ? post.authors : [])
+      .concat(post.author ? [post.author] : [])
+      .filter(Boolean);
+    getAuthorProfiles(names).then((map) => {
+      if (active) setAuthorProfiles(map);
+    });
+
+    const category =
+      Array.isArray(post.categories) && post.categories.length ? post.categories[0] : null;
+    getRelatedPosts({ category, excludeSlug: post.slug, limit: 3 }).then((rows) => {
+      if (active) setRelated(rows);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [post]);
 
   // Barra de progresso de leitura
   useEffect(() => {
@@ -179,6 +196,11 @@ const Noticia = () => {
   const modifiedTime = post.updated_at || post.updated;
   const authorsLabel = authors.length > 0 ? joinAuthors(authors) : 'Redação';
 
+  // avatar/link do autor: tabela `authors` do Supabase primeiro, depois o
+  // mapa local como fallback.
+  const avatarFor = (name) => authorProfiles[name]?.avatar_url || getAuthorImage(name);
+  const profileFor = (name) => authorProfiles[name]?.profile_url || null;
+
   const renderShare = (variant) => (
     <div className={variant === 'rail' ? 'article-share-rail' : 'article-share-inline'}>
       <button type="button" className="share-btn" onClick={() => shareOnSocialMedia('whatsapp')} aria-label="Compartilhar no WhatsApp">
@@ -201,7 +223,7 @@ const Noticia = () => {
   const renderAvatars = () => (
     <div className="article-byline-avatars">
       {displayAuthors.slice(0, 3).map((author, i) => {
-        const img = getAuthorImage(author);
+        const img = avatarFor(author);
         return img ? (
           <img key={i} src={img} alt={author} loading="lazy" onError={handleImageError} />
         ) : (
@@ -215,7 +237,7 @@ const Noticia = () => {
 
   return (
     <>
-      {showNewsletter && <NewsletterModal onClose={() => setShowNewsletter(false)} />}
+      <NewsletterBar />
 
       <MetaTags
         title={post.title || `Notícia — ${SITE.name}`}
@@ -339,6 +361,17 @@ const Noticia = () => {
             </div>
           )}
 
+          {related.length > 0 && (
+            <section className="article-related">
+              <h2>Leia também</h2>
+              <div className="feed-list">
+                {related.map((rp) => (
+                  <PostItem key={rp.id} post={rp} />
+                ))}
+              </div>
+            </section>
+          )}
+
           {section && Array.isArray(post.categories) && post.categories.length > 0 && (
             <div className="article-tags">
               {post.categories.map((category) => (
@@ -352,7 +385,13 @@ const Noticia = () => {
           <section className="article-authors">
             <h2>Quem escreveu</h2>
             {displayAuthors.map((author) => {
-              const img = getAuthorImage(author);
+              const img = avatarFor(author);
+              const profile = profileFor(author);
+              const name = profile ? (
+                <a href={profile} target="_blank" rel="noopener noreferrer">{author}</a>
+              ) : (
+                author
+              );
               return (
                 <div className="author-bio" key={author}>
                   {img ? (
@@ -363,7 +402,7 @@ const Noticia = () => {
                     </span>
                   )}
                   <div>
-                    <p className="author-bio-name">{author}</p>
+                    <p className="author-bio-name">{name}</p>
                     <p className="author-bio-text">
                       {author === 'Redação'
                         ? 'Equipe do Jornal Santista.'

@@ -1676,3 +1676,97 @@ a:hover {
   .article-content { font-size: 1.16rem; line-height: 1.7; }
   .article-layout { margin-top: 1.5rem; }
 }
+
+/* "Leia também" ao final da matéria */
+.article-related {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #111;
+}
+.article-related h2 {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+/* Faixa de newsletter (dispensável, fixa no rodapé) */
+.newsletter-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1090;
+  background: #111;
+  color: #fff;
+  border-top: 3px solid var(--accent);
+  animation: newsletter-slide-up 0.35s ease;
+}
+@keyframes newsletter-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.newsletter-bar-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.newsletter-bar-text {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.9rem;
+  color: #ddd;
+  flex: 1 1 220px;
+}
+.newsletter-bar-text strong { color: #fff; }
+.newsletter-bar-form {
+  display: flex;
+  gap: 0.5rem;
+  flex: 0 1 auto;
+}
+.newsletter-bar-form input {
+  background: #1c1c1c;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  min-width: 200px;
+}
+.newsletter-bar-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.newsletter-bar-form button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.1rem;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.newsletter-bar-form button:hover { background: var(--accent-hover); }
+.newsletter-bar-close {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+.newsletter-bar-close:hover { color: #fff; }
+@media (max-width: 640px) {
+  .newsletter-bar-inner { padding: 0.7rem 1rem; gap: 0.6rem; }
+  .newsletter-bar-form { flex: 1 1 100%; }
+  .newsletter-bar-form input { min-width: 0; flex: 1; }
+  .newsletter-bar-close { position: absolute; top: 0.4rem; right: 0.5rem; }
+}
