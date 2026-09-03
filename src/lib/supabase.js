@@ -31,50 +31,59 @@ export const postsAPI = {
     return data
   },
 
-  // Página de posts (feed público). Retorna { rows, total }.
+  // Página de posts (feed público). Retorna { rows, hasMore }.
+  // Busca pageSize+1 linhas: se vier a linha extra, existe página seguinte.
+  // (Evita `count: 'exact'`, que já causou erro de range em produção.)
   async getPostsPage({ page = 0, pageSize = 12 } = {}) {
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Configuração do Supabase incompleta')
     }
     const from = page * pageSize
-    const to = from + pageSize - 1
+    const to = from + pageSize // inclusivo => pageSize + 1 linhas
 
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from('posts')
-      .select('*', { count: 'exact' })
+      .select('*')
       .order('published_at', { ascending: false })
       .range(from, to)
 
     if (error) {
+      // range além do fim da tabela: trata como "sem mais resultados"
+      if (error.code === 'PGRST103') return { rows: [], hasMore: false }
       console.error('Erro ao buscar página de posts:', error)
       throw error
     }
-    return { rows: data || [], total: count ?? 0 }
+
+    const rows = data || []
+    return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize }
   },
 
-  // Busca textual server-side. Retorna { rows, total }.
+  // Busca textual server-side. Retorna { rows, hasMore }.
   async searchPosts(term, { page = 0, pageSize = 12 } = {}) {
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Configuração do Supabase incompleta')
     }
     const from = page * pageSize
-    const to = from + pageSize - 1
+    const to = from + pageSize
     const like = `%${term}%`
 
     // Busca em title/excerpt/author. (Busca no corpo do texto fica para uma
     // fase futura, com índice full-text no Postgres.)
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from('posts')
-      .select('*', { count: 'exact' })
+      .select('*')
       .or(`title.ilike.${like},excerpt.ilike.${like},author.ilike.${like}`)
       .order('published_at', { ascending: false })
       .range(from, to)
 
     if (error) {
+      if (error.code === 'PGRST103') return { rows: [], hasMore: false }
       console.error('Erro na busca:', error)
       throw error
     }
-    return { rows: data || [], total: count ?? 0 }
+
+    const rows = data || []
+    return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize }
   },
 
   // Nomes de categorias distintos (para o menu de editorias).

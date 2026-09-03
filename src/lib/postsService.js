@@ -35,29 +35,29 @@ export const getAllPosts = async () => {
   }
 };
 
-// Carrega uma página do feed público. Retorna { posts, total, ok }.
+// Carrega uma página do feed público. Retorna { posts, hasMore, ok }.
 export const getPostsPage = async (opts) => {
   try {
-    const { rows, total } = await postsAPI.getPostsPage(opts);
-    return { posts: rows.map(mapPost), total, ok: true };
+    const { rows, hasMore } = await postsAPI.getPostsPage(opts);
+    return { posts: rows.map(mapPost), hasMore, ok: true };
   } catch (error) {
     console.error('Erro ao carregar posts:', error);
-    return { posts: [], total: 0, ok: false };
+    return { posts: [], hasMore: false, ok: false };
   }
 };
 
-// Busca textual server-side. Retorna { posts, total }.
+// Busca textual server-side. Retorna { posts, hasMore, ok }.
 export const searchPosts = async (term, opts) => {
   const q = (term || '').trim();
-  if (!q) return { posts: [], total: 0 };
+  if (!q) return { posts: [], hasMore: false, ok: true };
   try {
     // vírgulas e parênteses quebram a sintaxe de filtro do PostgREST
     const safe = q.replace(/[,()]/g, ' ');
-    const { rows, total } = await postsAPI.searchPosts(safe, opts);
-    return { posts: rows.map(mapPost), total };
+    const { rows, hasMore } = await postsAPI.searchPosts(safe, opts);
+    return { posts: rows.map(mapPost), hasMore, ok: true };
   } catch (error) {
     console.error('Erro na busca:', error);
-    return { posts: [], total: 0 };
+    return { posts: [], hasMore: false, ok: false };
   }
 };
 

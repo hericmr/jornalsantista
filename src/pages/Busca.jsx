@@ -13,7 +13,7 @@ const Busca = () => {
   const [input, setInput] = useState(query);
 
   const [posts, setPosts] = useState([]);
-  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
   const [status, setStatus] = useState('idle'); // idle | loading | ready
   const [loadingMore, setLoadingMore] = useState(false);
@@ -21,14 +21,14 @@ const Busca = () => {
   const runSearch = useCallback(async (term) => {
     if (!term.trim()) {
       setPosts([]);
-      setTotal(0);
+      setHasMore(false);
       setStatus('idle');
       return;
     }
     setStatus('loading');
-    const { posts: rows, total: count } = await searchPosts(term, { page: 0, pageSize: PAGE_SIZE });
+    const { posts: rows, hasMore: more } = await searchPosts(term, { page: 0, pageSize: PAGE_SIZE });
     setPosts(rows);
-    setTotal(count);
+    setHasMore(more);
     setPage(0);
     setStatus('ready');
   }, []);
@@ -47,13 +47,12 @@ const Busca = () => {
   const loadMore = async () => {
     const next = page + 1;
     setLoadingMore(true);
-    const { posts: rows } = await searchPosts(query, { page: next, pageSize: PAGE_SIZE });
+    const { posts: rows, hasMore: more } = await searchPosts(query, { page: next, pageSize: PAGE_SIZE });
     setPosts((prev) => [...prev, ...rows]);
+    setHasMore(more);
     setPage(next);
     setLoadingMore(false);
   };
-
-  const hasMore = posts.length < total;
 
   return (
     <>
@@ -90,7 +89,8 @@ const Busca = () => {
         {status === 'ready' && (
           <>
             <p className="section-label">
-              {total} {total === 1 ? 'resultado' : 'resultados'} para “{query}”
+              {posts.length}
+              {hasMore ? '+' : ''} {posts.length === 1 ? 'resultado' : 'resultados'} para “{query}”
             </p>
             {posts.length === 0 ? (
               <div className="text-center my-5">

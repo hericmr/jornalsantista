@@ -9,20 +9,20 @@ const PAGE_SIZE = 12;
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
-  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [loadingMore, setLoadingMore] = useState(false);
 
   const loadFirstPage = useCallback(async () => {
     setStatus('loading');
-    const { posts: rows, total: count, ok } = await getPostsPage({ page: 0, pageSize: PAGE_SIZE });
+    const { posts: rows, hasMore: more, ok } = await getPostsPage({ page: 0, pageSize: PAGE_SIZE });
     if (!ok) {
       setStatus('error');
       return;
     }
     setPosts(rows);
-    setTotal(count);
+    setHasMore(more);
     setPage(0);
     setStatus('ready');
   }, []);
@@ -34,8 +34,9 @@ const Home = () => {
   const loadMore = async () => {
     const next = page + 1;
     setLoadingMore(true);
-    const { posts: rows } = await getPostsPage({ page: next, pageSize: PAGE_SIZE });
+    const { posts: rows, hasMore: more } = await getPostsPage({ page: next, pageSize: PAGE_SIZE });
     setPosts((prev) => [...prev, ...rows]);
+    setHasMore(more);
     setPage(next);
     setLoadingMore(false);
   };
@@ -66,7 +67,6 @@ const Home = () => {
 
   const hero = posts.slice(0, 2);
   const rest = posts.slice(2);
-  const hasMore = posts.length < total;
 
   return (
     <>
