@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaQuoteLeft } from 'react-icons/fa';
-import { getPostById, savePost, getAllAuthors } from '../../lib/postsService';
+import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
 
@@ -43,10 +43,8 @@ const AdminEditarNoticia = () => {
 
   const loadPost = async () => {
     try {
-      const foundPost = await getPostById(id);
-      
-      console.log('Post encontrado:', foundPost); // Debug
-      
+      const foundPost = await getPostBySlugOrId(id);
+
       if (foundPost) {
         const postData = {
           id: foundPost.id,

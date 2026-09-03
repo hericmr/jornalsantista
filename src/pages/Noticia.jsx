@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPostById } from '../lib/postsService';
-import { stripHtml, processHtmlContent, createExcerpt, getFullImageUrl } from '../utils/textUtils';
+import { getPostBySlugOrId } from '../lib/postsService';
+import { processHtmlContent, createExcerpt } from '../utils/textUtils';
+import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
+import { sanitizeHtml } from '../lib/sanitize';
 import MetaTags from '../components/MetaTags';
 import NewsletterModal from '../components/NewsletterModal';
 
@@ -24,14 +26,7 @@ const Noticia = () => {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const foundPost = await getPostById(slug);
-      console.log('📰 Noticia: Post carregado:', {
-        id: foundPost?.id,
-        title: foundPost?.title,
-        hasTextContent: !!foundPost?.text_content,
-        textContentLength: foundPost?.text_content?.length || 0,
-        source: foundPost?.source
-      });
+      const foundPost = await getPostBySlugOrId(slug);
       setPost(foundPost);
     } catch (error) {
       console.error('Erro ao carregar post:', error);
@@ -136,32 +131,6 @@ const Noticia = () => {
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
-  const handleImageError = (e) => {
-    // Se a imagem falhar ao carregar, substitui por um placeholder
-    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbSBuw6NvIGRpc3BvbsOtdmVsPC90ZXh0Pjwvc3ZnPg==';
-    e.target.style.objectFit = 'cover';
-  };
-
-  // Função para processar imagens - usando a mesma lógica que funciona no PostItem
-  const getProcessedImages = () => {
-    try {
-      console.log('🖼️ Noticia: Raw images from post:', {
-        type: typeof post.images,
-        value: post.images,
-        raw: JSON.stringify(post.images)
-      });
-      
-      const images = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
-      const processedImages = images && Array.isArray(images) ? images.filter(Boolean) : (images ? [images] : []);
-      
-      console.log('🖼️ Noticia: Processed images:', processedImages);
-      return processedImages;
-    } catch (error) {
-      console.error("🖼️ Error parsing images JSON in Noticia:", error);
-      return [];
-    }
-  };
-
   if (loading) {
     return (
       <div className="container mt-5">
@@ -187,8 +156,7 @@ const Noticia = () => {
     );
   }
 
-  // Usar a nova função de processamento de imagens
-  const images = getProcessedImages();
+  const images = resolvePostImages(post.images);
 
   return (
     <>
@@ -197,7 +165,7 @@ const Noticia = () => {
       <MetaTags
         title={post?.title || 'Notícia - Jornal Santista'}
         description={post?.excerpt || createExcerpt(post?.text_content || post?.content || '', 160)}
-        image={images && images.length > 0 ? (getFullImageUrl(images[0]) || images[0]) : null}
+        image={images.length > 0 ? toImageSrc(images[0]) : null}
         url={window.location.href}
         type="article"
         author={post?.author}
@@ -342,7 +310,7 @@ const Noticia = () => {
               <div className="mb-4 img-full-mobile">
                 <figure className="mb-3 text-center">
                   <img
-                    src={getFullImageUrl(images[0]) || images[0]}
+                    src={toImageSrc(images[0])}
                     className="img-fluid rounded shadow-lg"
                     alt={`${post.title || 'Notícia'} - Imagem 1`}
                     title={post.title || 'Notícia'}
@@ -357,10 +325,10 @@ const Noticia = () => {
             {/* Texto da matéria */}
             <div className="article-content mb-5">
               {(post.text_content || post.content) ? (
-                <div 
-                  dangerouslySetInnerHTML={{ 
-                    __html: processHtmlContent(post.text_content || post.content) 
-                  }} 
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(processHtmlContent(post.text_content || post.content))
+                  }}
                 />
               ) : (
                 <p className="text-muted">Conteúdo não disponível.</p>
@@ -373,7 +341,7 @@ const Noticia = () => {
                 {images.slice(1).map((image, idx) => (
                   <figure key={idx + 1} className="mb-3 text-center">
                     <img
-                      src={getFullImageUrl(image) || image}
+                      src={toImageSrc(image)}
                       className="img-fluid rounded shadow-lg"
                       alt={`${post.title || 'Notícia'} - Imagem ${idx + 2}`}
                       title={post.title || 'Notícia'}

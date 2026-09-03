@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { createExcerpt, slugify, getFullImageUrl } from '../utils/textUtils';
+import { createExcerpt, slugify } from '../utils/textUtils';
+import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
 
 const PostItem = ({ post, variant = 'regular' }) => {
   const formatDate = (dateString) => {
@@ -28,26 +29,13 @@ const PostItem = ({ post, variant = 'regular' }) => {
     return createExcerpt(text, maxLength);
   };
 
-  const getFeaturedImage = () => {
-    try {
-      const images = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
-      const imageUrl = images && images.length > 0 ? images[0] : null;
-      return imageUrl ? (getFullImageUrl(imageUrl) || imageUrl) : null;
-    } catch {
-      return null;
-    }
-  };
+  const getFeaturedImage = () => toImageSrc(resolvePostImages(post.images)[0]);
 
   const getImageAlt = () => {
     let alt = '';
     if (post.title) alt += post.title;
     if (post.categories && post.categories.length > 0) alt += ` - ${post.categories[0]}`;
     return alt || 'Imagem da notícia';
-  };
-
-  const handleImageError = (e) => {
-    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlbSBuw6NvIGRpc3BvbsOtdmVsPC90ZXh0Pjwvc3ZnPg==';
-    e.target.style.objectFit = 'cover';
   };
 
   const getAuthorName = () => {

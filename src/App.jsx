@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import PublicLayout from './layouts/PublicLayout';
 import Home from './pages/Home';
 import Noticia from './pages/Noticia';
 import Categorias from './pages/Categorias';
@@ -26,63 +25,18 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Rotas Públicas */}
-          <Route path="/" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <Home />
-              </main>
-              <Footer />
-            </div>
-          } />
-          <Route path="/noticia/:slug" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <Noticia />
-              </main>
-              <Footer />
-            </div>
-          } />
-          <Route path="/categorias" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <Categorias />
-              </main>
-              <Footer />
-            </div>
-          } />
-          <Route path="/categorias/:categoria" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <Categorias />
-              </main>
-              <Footer />
-            </div>
-          } />
-          <Route path="/sobre" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <Sobre />
-              </main>
-              <Footer />
-            </div>
-          } />
-          <Route path="/contato" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <Contato />
-              </main>
-              <Footer />
-            </div>
-          } />
+          {/* Rotas públicas */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/noticia/:slug" element={<Noticia />} />
+            <Route path="/categorias" element={<Categorias />} />
+            <Route path="/categorias/:categoria" element={<Categorias />} />
+            <Route path="/sobre" element={<Sobre />} />
+            <Route path="/contato" element={<Contato />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
 
-          {/* Rotas Administrativas */}
+          {/* Rotas administrativas */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={
             <ProtectedRoute>
@@ -135,17 +89,6 @@ function App() {
                 <AdminConfiguracoes />
               </AdminLayout>
             </ProtectedRoute>
-          } />
-
-          {/* 404 */}
-          <Route path="*" element={
-            <div className="d-flex flex-column min-vh-100">
-              <Header />
-              <main className="flex-grow-1">
-                <NotFound />
-              </main>
-              <Footer />
-            </div>
           } />
         </Routes>
       </Router>

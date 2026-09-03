@@ -83,8 +83,9 @@ Deploy: Vercel (SPA, rewrite tudo para `index.html`).
 - [x] **2.4** Renomear `getPostById` → `getPostBySlugOrId` e ajustar chamadas (B12)
 - [x] **2.5** Remover `ArticleHeader.jsx` e `SearchBar.jsx` se não usados, ou integrá-los (B13)
 - [x] **2.6** Extrair helper `resolvePostImages` + placeholder SVG para um único módulo
-- [x] **2.7** Adicionar `sanitize-html` (ou `dompurify`) e sanitizar todo HTML de artigo/sobre (B7) — _nova dep_
-- [x] **2.8** Build verde + smoke test
+- [x] **2.7** Adicionar `dompurify` (`src/lib/sanitize.js`) e sanitizar o HTML do artigo em `Noticia.jsx` (B7) — _nova dep_. `Sobre.jsx` virou estático na Fase 1, sem `dangerouslySetInnerHTML`.
+- [x] **2.9** Remover deps mortas `jsonwebtoken` e `bcryptjs` (resquício do login client-side antigo; nenhum import no código)
+- [~] **2.8** `npm run build` verde ✅ (142 módulos). Bundle JS +10 kB gzip (DOMPurify) — será mitigado na 4.7 (code splitting do admin). Smoke test visual pendente (mesmo bloqueio da 1.9).
 
 ---
 
@@ -172,4 +173,5 @@ Deploy: Vercel (SPA, rewrite tudo para `index.html`).
 | Data | Fase/Item | Commit | Observações |
 |------|-----------|--------|-------------|
 | 2026-09-03 | Plano criado | — | Levantamento inicial e definição das fases |
-| 2026-09-03 | Fase 1 (1.1–1.8) | _a commitar_ | MetaTags UTF-8; `class`→`className` na Notícia; `public/` (favicon.svg, og-default.svg, robots.txt); Sobre e Categorias migrados para fora do `blog_posts.json` (Sobre = estático, Categorias = Supabase); rota 404 + `NotFound.jsx`; NewsletterModal sem envio para lista de terceiros; `src/config/site.js` unifica e-mail/redes. Build verde. Teste visual pendente (1.9). |
+| 2026-09-03 | Fase 1 (1.1–1.8) | 96eee49 | MetaTags UTF-8; `class`→`className` na Notícia; `public/` (favicon.svg, og-default.svg, robots.txt); Sobre e Categorias migrados para fora do `blog_posts.json` (Sobre = estático, Categorias = Supabase); rota 404 + `NotFound.jsx`; NewsletterModal sem envio para lista de terceiros; `src/config/site.js` unifica e-mail/redes. Build verde. Teste visual pendente (1.9). |
+| 2026-09-03 | Fase 2 (2.1–2.9) | _a commitar_ | `PublicLayout` com `<Outlet/>` (App.jsx enxuto); `src/lib/images.js` (`resolvePostImages`/`toImageSrc`/`handleImageError`/placeholder) elimina parsing duplicado; `src/lib/sanitize.js` (DOMPurify) no HTML do artigo; `getPostById`→`getPostBySlugOrId` (frontend + admin); `postsService`/`supabase.js` reescritos sem `console.log` e sem teste de conexão no import; `ArticleHeader.jsx` e `SearchBar.jsx` removidos; deps `jsonwebtoken`/`bcryptjs` removidas; `processHtmlContent` simplificado. Build verde (142 módulos). |

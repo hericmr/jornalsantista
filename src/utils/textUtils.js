@@ -38,20 +38,14 @@ export const containsSearchTerm = (html, searchTerm) => {
 };
 
 /**
- * Processa conteúdo HTML preservando quebras de linha
+ * Processa conteúdo HTML preservando quebras de linha.
+ * O espaçamento de parágrafos fica por conta do CSS (`.article-content p`).
  * @param {string} html - Conteúdo HTML
- * @returns {string} - HTML processado com quebras de linha preservadas
+ * @returns {string} - HTML com quebras de linha preservadas
  */
 export const processHtmlContent = (html) => {
   if (!html || typeof html !== 'string') return '';
-  
-  // Preservar quebras de linha convertendo \n para <br>
-  let processed = html.replace(/\n/g, '<br>');
-  
-  // Garantir que parágrafos tenham espaçamento adequado
-  processed = processed.replace(/<p>/g, '<p style="margin-bottom: 1.5rem;">');
-  
-  return processed;
+  return html.replace(/\n/g, '<br>');
 };
 
 /**
