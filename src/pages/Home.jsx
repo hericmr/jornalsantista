@@ -1,52 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import PostItem from '../components/PostItem';
-import { getAllPosts } from '../lib/postsService';
-import { containsSearchTerm } from '../utils/textUtils';
+import { getPostsPage } from '../lib/postsService';
 import MetaTags from '../components/MetaTags';
 import JsonLd from '../components/JsonLd';
 import { organizationSchema, websiteSchema } from '../lib/structuredData';
 
+const PAGE_SIZE = 12;
+
 const Home = () => {
   const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const [status, setStatus] = useState('loading'); // loading | ready | error
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => {
-    fetchPosts();
+  const loadFirstPage = useCallback(async () => {
+    setStatus('loading');
+    const { posts: rows, total: count, ok } = await getPostsPage({ page: 0, pageSize: PAGE_SIZE });
+    if (!ok) {
+      setStatus('error');
+      return;
+    }
+    setPosts(rows);
+    setTotal(count);
+    setPage(0);
+    setStatus('ready');
   }, []);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setFilteredPosts(posts);
-      return;
-    }
+    loadFirstPage();
+  }, [loadFirstPage]);
 
-    const filtered = posts.filter((post) =>
-      post.title?.toLowerCase().includes(query.toLowerCase()) ||
-      containsSearchTerm(post.text_content || post.content || '', query) ||
-      post.author?.toLowerCase().includes(query.toLowerCase())
-    );
-
-    setFilteredPosts(filtered);
-  }, [query, posts]);
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const data = await getAllPosts();
-      setPosts(data);
-      setFilteredPosts(data);
-    } catch (error) {
-      console.error('Erro ao carregar posts:', error);
-    } finally {
-      setLoading(false);
-    }
+  const loadMore = async () => {
+    const next = page + 1;
+    setLoadingMore(true);
+    const { posts: rows } = await getPostsPage({ page: next, pageSize: PAGE_SIZE });
+    setPosts((prev) => [...prev, ...rows]);
+    setPage(next);
+    setLoadingMore(false);
   };
 
-  if (loading) {
+  if (status === 'loading') {
     return (
       <div className="container mt-5">
         <div className="text-center">
@@ -58,8 +52,21 @@ const Home = () => {
     );
   }
 
-  const hero = filteredPosts.slice(0, 2);
-  const rest = filteredPosts.slice(2);
+  if (status === 'error') {
+    return (
+      <div className="container mt-5 text-center">
+        <h3>Não foi possível carregar as notícias</h3>
+        <p className="text-muted">Verifique sua conexão e tente novamente.</p>
+        <button className="btn btn-dark" onClick={loadFirstPage}>
+          Tentar novamente
+        </button>
+      </div>
+    );
+  }
+
+  const hero = posts.slice(0, 2);
+  const rest = posts.slice(2);
+  const hasMore = posts.length < total;
 
   return (
     <>
@@ -72,20 +79,15 @@ const Home = () => {
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
 
       <div className="shell">
-        {query.trim() && (
-          <p className="section-label">Resultados para "{query}"</p>
-        )}
-
-        {filteredPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="text-center mt-5 mb-5">
-            <h3>Nenhuma notícia encontrada</h3>
-            <p className="text-muted">Tente ajustar os termos de busca.</p>
+            <h3>Nenhuma notícia publicada ainda</h3>
           </div>
         ) : (
           <>
             {hero.length > 0 && (
               <>
-                <p className="section-label">Destaques</p>
+                <h2 className="section-label">Destaques</h2>
                 <div className="hero-row">
                   {hero.map((post) => (
                     <PostItem key={post.id} post={post} variant="hero" />
@@ -96,7 +98,7 @@ const Home = () => {
 
             {rest.length > 0 && (
               <>
-                <p className="section-label" style={{ marginTop: '46px' }}>Últimas notícias</p>
+                <h2 className="section-label" style={{ marginTop: '46px' }}>Últimas notícias</h2>
                 <div className="feed-list">
                   {rest.map((post, idx) => (
                     <PostItem
@@ -107,6 +109,14 @@ const Home = () => {
                   ))}
                 </div>
               </>
+            )}
+
+            {hasMore && (
+              <div className="text-center mt-4 mb-2">
+                <button className="btn btn-dark" onClick={loadMore} disabled={loadingMore}>
+                  {loadingMore ? 'Carregando…' : 'Carregar mais'}
+                </button>
+              </div>
             )}
           </>
         )}

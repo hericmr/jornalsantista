@@ -2,14 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PostItem from '../components/PostItem';
 import MetaTags from '../components/MetaTags';
-import { getAllPosts } from '../lib/postsService';
+import { getCategoryNames, getPostsByCategory, getPostsPage } from '../lib/postsService';
 import { SITE } from '../config/site';
 
 const Categorias = () => {
   const { categoria } = useParams();
-  const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
+
+  useEffect(() => {
+    let active = true;
+    getCategoryNames().then((names) => {
+      if (active) setCategories(names);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -17,18 +27,20 @@ const Categorias = () => {
     const load = async () => {
       setStatus('loading');
       try {
-        const data = await getAllPosts();
-        if (!active) return;
-        setPosts(data);
-        const uniqueCategories = [
-          ...new Set(data.flatMap((post) => post.categories || []))
-        ].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-        setCategories(uniqueCategories);
-        setStatus('ready');
+        if (categoria) {
+          const rows = await getPostsByCategory(categoria);
+          if (active) {
+            setPosts(rows);
+            setStatus('ready');
+          }
+        } else {
+          const { posts: rows, ok } = await getPostsPage({ page: 0, pageSize: 30 });
+          if (!active) return;
+          setPosts(rows);
+          setStatus(ok ? 'ready' : 'error');
+        }
       } catch (error) {
-        if (!active) return;
-        console.error('Erro ao carregar categorias:', error);
-        setStatus('error');
+        if (active) setStatus('error');
       }
     };
 
@@ -36,11 +48,7 @@ const Categorias = () => {
     return () => {
       active = false;
     };
-  }, []);
-
-  const filteredPosts = categoria
-    ? posts.filter((post) => (post.categories || []).includes(categoria))
-    : posts;
+  }, [categoria]);
 
   if (status === 'loading') {
     return (
@@ -69,9 +77,7 @@ const Categorias = () => {
   return (
     <>
       <MetaTags
-        title={
-          categoria ? `${categoria} — ${SITE.name}` : `Editorias — ${SITE.name}`
-        }
+        title={categoria ? `${categoria} — ${SITE.name}` : `Editorias — ${SITE.name}`}
         description={
           categoria
             ? `Notícias e artigos sobre ${categoria} no ${SITE.name}.`
@@ -111,14 +117,13 @@ const Categorias = () => {
 
           <div className="col-md-9">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h2 className="mb-0">{categoria ? categoria : 'Todas as editorias'}</h2>
+              <h1 className="h3 mb-0">{categoria ? categoria : 'Todas as editorias'}</h1>
               <span className="text-muted">
-                {filteredPosts.length}{' '}
-                {filteredPosts.length === 1 ? 'notícia' : 'notícias'}
+                {posts.length} {posts.length === 1 ? 'notícia' : 'notícias'}
               </span>
             </div>
 
-            {filteredPosts.length === 0 ? (
+            {posts.length === 0 ? (
               <div className="text-center mt-5">
                 <h3>Nenhuma notícia encontrada</h3>
                 <p className="text-muted">
@@ -132,7 +137,7 @@ const Categorias = () => {
               </div>
             ) : (
               <div className="feed-list">
-                {filteredPosts.map((post) => (
+                {posts.map((post) => (
                   <PostItem key={post.id} post={post} />
                 ))}
               </div>

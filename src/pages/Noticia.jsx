@@ -343,9 +343,12 @@ const Noticia = () => {
                     className="img-fluid rounded shadow-lg"
                     alt={`${post.title || 'Notícia'} - Imagem 1`}
                     title={post.title || 'Notícia'}
-                    style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+                    width="1200"
+                    height="675"
+                    style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'cover' }}
                     onError={handleImageError}
-                    loading="lazy"
+                    fetchPriority="high"
+                    decoding="async"
                   />
                 </figure>
               </div>
@@ -374,9 +377,12 @@ const Noticia = () => {
                       className="img-fluid rounded shadow-lg"
                       alt={`${post.title || 'Notícia'} - Imagem ${idx + 2}`}
                       title={post.title || 'Notícia'}
-                      style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+                      width="1200"
+                      height="675"
+                      style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'cover' }}
                       onError={handleImageError}
                       loading="lazy"
+                      decoding="async"
                     />
                   </figure>
                 ))}

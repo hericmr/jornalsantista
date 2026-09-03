@@ -107,14 +107,14 @@ Deploy: Vercel (SPA, rewrite tudo para `index.html`).
 
 **Objetivo:** carregamento rápido no 3G/celular (público de jornal local é mobile).
 
-- [ ] **4.1** `getAllPosts` com paginação (`.range()`) e `select` só dos campos de listagem (sem `content`) (B17)
-- [ ] **4.2** Home: "carregar mais" / scroll infinito; seções ("Últimas", "Mais lidas" se houver métrica)
-- [ ] **4.3** Busca server-side: `ilike`/full-text no Supabase + página dedicada `/busca?q=` com destaque e estado "sem resultados" (B16)
-- [ ] **4.4** Fontes: `preconnect`, remover `@import` em cascata, 2 famílias, `font-display: swap` (idealmente self-host)
-- [ ] **4.5** Ícones: manter só um conjunto (`react-icons` **ou** `bootstrap-icons`)
-- [ ] **4.6** Imagens: `width`/`height` explícitos, `srcset`/`sizes`, transforms do Supabase Storage para thumbnails; hero sem `lazy` + `fetchpriority="high"` (B20)
-- [ ] **4.7** `vite build` com code splitting por rota (`React.lazy` nas páginas admin)
-- [ ] **4.8** Medir antes/depois com Lighthouse (mobile) e anotar números
+- [x] **4.1** `postsAPI.getPostsPage({page,pageSize})` com `.range()` + `count:'exact'`; `searchPosts`; `getCategoryNames` (só a coluna `categories`); `getPostsByCategory` agora filtra no servidor (`.contains`). `getAllPosts` (completo) fica só para o admin.
+- [x] **4.2** Home paginada (12/página) com botão "Carregar mais"; estados loading/erro/vazio distintos; `section-label` virou `<h2>`. Busca client-side removida da Home.
+- [x] **4.3** Página dedicada `/busca?q=` (`src/pages/Busca.jsx`) com busca server-side (`ilike` em title/excerpt/author), "carregar mais" e estado "nada encontrado". Header aponta para `/busca`. _Busca no corpo do texto e destaque de termos: fase futura (índice full-text)._
+- [x] **4.4** 3 `@import` em cascata → 1 `<link>` combinado com `display=swap` no `index.html` (preconnect já existia).
+- [~] **4.5** Ícones: **adiado**. `@tiptap/*` (9 pacotes) removido — não era importado em lugar nenhum. Unificar `react-icons`/`bootstrap-icons` fica para depois (font fica em cache após o 1º load; ganho pequeno vs. risco).
+- [~] **4.6** Feito: hero da notícia sem `lazy` + `fetchPriority="high"` + `width/height`; `decoding="async"` em todas as imagens; card `hero` do feed com `loading="eager"`. **Pendente:** `srcset`/`sizes` e transforms do Supabase Storage (transform exige plano Pro — validar antes).
+- [x] **4.7** `React.lazy` + `<Suspense>` nas 8 páginas do admin → 8 chunks separados fora do bundle inicial. Bundle público: 139 → 130 kB gzip (o editor do admin era custom, não Tiptap, daí o ganho menor).
+- [~] **4.8** Lighthouse antes/depois — **pendente** (precisa do site no ar).
 
 ---
 
@@ -191,4 +191,5 @@ corretos ao compartilhar uma notícia (crawlers desses previews não executam JS
 | 2026-09-03 | Plano criado | — | Levantamento inicial e definição das fases |
 | 2026-09-03 | Fase 1 (1.1–1.8) | 96eee49 | MetaTags UTF-8; `class`→`className` na Notícia; `public/` (favicon.svg, og-default.svg, robots.txt); Sobre e Categorias migrados para fora do `blog_posts.json` (Sobre = estático, Categorias = Supabase); rota 404 + `NotFound.jsx`; NewsletterModal sem envio para lista de terceiros; `src/config/site.js` unifica e-mail/redes. Build verde. Teste visual pendente (1.9). |
 | 2026-09-03 | Fase 2 (2.1–2.9) | 0204a33 | `PublicLayout` com `<Outlet/>` (App.jsx enxuto); `src/lib/images.js` (`resolvePostImages`/`toImageSrc`/`handleImageError`/placeholder) elimina parsing duplicado; `src/lib/sanitize.js` (DOMPurify) no HTML do artigo; `getPostById`→`getPostBySlugOrId` (frontend + admin); `postsService`/`supabase.js` reescritos sem `console.log` e sem teste de conexão no import; `ArticleHeader.jsx` e `SearchBar.jsx` removidos; deps `jsonwebtoken`/`bcryptjs` removidas; `processHtmlContent` simplificado. Build verde (142 módulos). |
-| 2026-09-03 | Fase 3 (3.1–3.6) | _a commitar_ | `JsonLd.jsx` + `structuredData.js` (Organization/WebSite na Home, NewsArticle/BreadcrumbList na notícia); `MetaTags` no Contato; funções serverless `api/sitemap.js` e `api/feed.js` + rewrites em `vercel.json`; `<link rel=alternate>` do RSS; header de cache corrigido para `/assets/`. Decisão 3.6 → Fase 9 (middleware de preview). Build verde (144 módulos). Validação 3.7 pendente (pós-deploy). |
+| 2026-09-03 | Fase 3 (3.1–3.6) | 20400d3 | `JsonLd.jsx` + `structuredData.js` (Organization/WebSite na Home, NewsArticle/BreadcrumbList na notícia); `MetaTags` no Contato; funções serverless `api/sitemap.js` e `api/feed.js` + rewrites em `vercel.json`; `<link rel=alternate>` do RSS; header de cache corrigido para `/assets/`. Decisão 3.6 → Fase 9 (middleware de preview). Build verde (144 módulos). Validação 3.7 pendente (pós-deploy). |
+| 2026-09-03 | Fase 4 (4.1–4.4, 4.7) | _a commitar_ | Feed público paginado (`getPostsPage`/`.range()`); `getPostsByCategory` e `getCategoryNames` no servidor; Home com "Carregar mais"; nova página `/busca` server-side (`Busca.jsx`); fontes em 1 `<link>` com `swap`; `React.lazy` no admin (8 chunks); LCP da notícia (`fetchPriority`, sem `lazy`, `width/height`) + `decoding="async"` nas imagens; `@tiptap/*` removido (sem uso). Build verde (145 módulos, bundle 130 kB gzip). 4.5/4.6(srcset)/4.8 adiados. |

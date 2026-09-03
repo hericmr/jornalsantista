@@ -20,7 +20,7 @@ const Header = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     const term = searchTerm.trim();
-    navigate(term ? `/?q=${encodeURIComponent(term)}` : '/');
+    navigate(term ? `/busca?q=${encodeURIComponent(term)}` : '/busca');
   };
 
   return (

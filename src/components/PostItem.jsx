@@ -90,7 +90,14 @@ const PostItem = ({ post, variant = 'regular' }) => {
       <Link to={linkTo} className="hero-card">
         {featuredImage && (
           <span className="hero-media">
-            <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" />
+            <img
+              src={featuredImage}
+              alt={getImageAlt()}
+              onError={handleImageError}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+            />
           </span>
         )}
         {categories[0] && <span className="kicker">{categories[0]}</span>}
@@ -106,7 +113,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
         <Link to={linkTo}>
           {featuredImage && (
             <span className="feature-media">
-              <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" />
+              <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" decoding="async" />
             </span>
           )}
           <div className="feature-split">
@@ -129,7 +136,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
       <Link to={linkTo} className="feed-item-link">
         {featuredImage && (
           <span className="feed-media">
-            <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" />
+            <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" decoding="async" />
           </span>
         )}
         <div className="feed-body">

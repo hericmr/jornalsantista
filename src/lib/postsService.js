@@ -35,6 +35,43 @@ export const getAllPosts = async () => {
   }
 };
 
+// Carrega uma página do feed público. Retorna { posts, total, ok }.
+export const getPostsPage = async (opts) => {
+  try {
+    const { rows, total } = await postsAPI.getPostsPage(opts);
+    return { posts: rows.map(mapPost), total, ok: true };
+  } catch (error) {
+    console.error('Erro ao carregar posts:', error);
+    return { posts: [], total: 0, ok: false };
+  }
+};
+
+// Busca textual server-side. Retorna { posts, total }.
+export const searchPosts = async (term, opts) => {
+  const q = (term || '').trim();
+  if (!q) return { posts: [], total: 0 };
+  try {
+    // vírgulas e parênteses quebram a sintaxe de filtro do PostgREST
+    const safe = q.replace(/[,()]/g, ' ');
+    const { rows, total } = await postsAPI.searchPosts(safe, opts);
+    return { posts: rows.map(mapPost), total };
+  } catch (error) {
+    console.error('Erro na busca:', error);
+    return { posts: [], total: 0 };
+  }
+};
+
+// Nomes de categorias distintos, ordenados (pt-BR).
+export const getCategoryNames = async () => {
+  try {
+    const names = await postsAPI.getCategoryNames();
+    return names.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  } catch (error) {
+    console.error('Erro ao carregar categorias:', error);
+    return [];
+  }
+};
+
 // Busca um post por slug (padrão) ou por id numérico.
 export const getPostBySlugOrId = async (slugOrId) => {
   try {
@@ -104,16 +141,11 @@ export const deletePost = async (id) => {
   }
 };
 
-// Filtra posts por categoria (case-insensitive, correspondência parcial).
+// Filtra posts por categoria (filtro no servidor: array `categories` contém o valor).
 export const getPostsByCategory = async (category) => {
   try {
-    const allPosts = await getAllPosts();
-    return allPosts.filter((post) => {
-      const categories = post.categories || [post.category].filter(Boolean);
-      return categories.some((cat) =>
-        cat.toLowerCase().includes(category.toLowerCase())
-      );
-    });
+    const rows = await postsAPI.getPostsByCategory(category);
+    return (rows || []).map(mapPost);
   } catch (error) {
     console.error('Erro ao buscar posts por categoria:', error);
     return [];
