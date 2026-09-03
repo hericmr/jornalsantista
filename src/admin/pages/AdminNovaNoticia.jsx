@@ -37,23 +37,20 @@ const AdminNovaNoticia = () => {
 
   const uploadImageToSupabase = async (file) => {
     const fileName = `${Date.now()}-${file.name}`;
-    console.log('Tentando enviar arquivo:', file);
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('noticias-imagens')
       .upload(fileName, file);
-    
-    console.log('Resultado do upload:', data, error);
+
     if (error) {
-      console.error('Erro detalhado do upload:', error);
+      console.error('Erro ao enviar imagem:', error);
       alert('Erro ao enviar imagem: ' + error.message);
       return null;
     }
-    
-    const { data: publicUrlData, error: publicUrlError } = supabase.storage
+
+    const { data: publicUrlData } = supabase.storage
       .from('noticias-imagens')
       .getPublicUrl(fileName);
-    
-    console.log('Resultado do getPublicUrl:', publicUrlData, publicUrlError);
+
     if (publicUrlData && publicUrlData.publicUrl) {
       return publicUrlData.publicUrl;
     } else {
@@ -67,13 +64,12 @@ const AdminNovaNoticia = () => {
 
     try {
       const uploadedUrls = [];
-      
+
       for (const file of selectedFiles) {
         const url = await uploadImageToSupabase(file);
         if (url) uploadedUrls.push(url);
       }
 
-      console.log('Imagens enviadas:', uploadedUrls);
       if (uploadedUrls.length === 0) {
         alert('Nenhuma imagem foi enviada com sucesso!');
         return;
@@ -100,38 +96,6 @@ const AdminNovaNoticia = () => {
     }));
   };
 
-  const testSupabaseConnection = async () => {
-    try {
-      console.log('🧪 Testando conexão direta com Supabase...');
-      const testData = {
-        title: 'Teste de Conectividade',
-        text_content: 'Este é um post de teste para verificar a conectividade com o Supabase.',
-        categories: ['teste'],
-        authors: ['Admin'],
-        author: 'Admin',
-        published_at: new Date().toISOString(),
-        status: 'draft',
-        slug: 'teste-conectividade-' + Date.now()
-      };
-      
-      const { data, error } = await supabase
-        .from('posts')
-        .insert([testData])
-        .select();
-      
-      if (error) {
-        console.error('❌ Erro no teste direto:', error);
-        alert('Erro no teste: ' + error.message);
-      } else {
-        console.log('✅ Teste direto funcionou:', data);
-        alert('Teste de conectividade bem-sucedido! Post de teste criado.');
-      }
-    } catch (error) {
-      console.error('❌ Erro no teste:', error);
-      alert('Erro no teste: ' + error.message);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -150,8 +114,6 @@ const AdminNovaNoticia = () => {
         status: post.status,
         slug: slugify(post.title)
       };
-
-      console.log('📝 Dados a serem salvos:', postData);
 
       await savePost(postData, true);
       alert('Notícia criada com sucesso!');
@@ -214,14 +176,7 @@ const AdminNovaNoticia = () => {
           <a href="/" className="btn btn-outline-dark me-2" target="_blank" rel="noopener noreferrer">
             Voltar para o site
           </a>
-          <button 
-            onClick={testSupabaseConnection}
-            className="btn btn-outline-info me-2"
-            type="button"
-          >
-            🧪 Testar Supabase
-          </button>
-          <button 
+          <button
             onClick={() => navigate('/admin/noticias')}
             className="btn btn-outline-secondary me-2"
           >
@@ -400,7 +355,6 @@ const AdminNovaNoticia = () => {
                   <div className="multi-author-selector" key={`authors-selector-${post.authors.join('-')}`}>
                     {/* Lista de autores selecionados */}
                     <div className="selected-authors mb-2">
-                      {console.log('🎨 AdminNew - Rendering badges for authors:', post.authors)}
                       {post.authors && post.authors.length > 0 ? (
                         post.authors.map((author, index) => (
                           <span key={`author-${index}-${author}`} className="badge bg-primary me-1 mb-1">
@@ -410,9 +364,7 @@ const AdminNovaNoticia = () => {
                               className="btn-close btn-close-white ms-1"
                               style={{ fontSize: '0.6rem' }}
                               onClick={() => {
-                                console.log('🗑️ AdminNew - Removing author:', author);
                                 const newAuthors = post.authors.filter((_, i) => i !== index);
-                                console.log('🗑️ AdminNew - Authors after removal:', newAuthors);
                                 setPost(prev => ({ ...prev, authors: newAuthors }));
                               }}
                             ></button>
@@ -427,16 +379,10 @@ const AdminNovaNoticia = () => {
                     <select
                       className="form-select mb-2"
                       onChange={(e) => {
-                        console.log('🔧 AdminNew - Select value:', e.target.value);
-                        console.log('🔧 AdminNew - Current authors:', post.authors);
-                        
                         if (e.target.value && !post.authors.includes(e.target.value)) {
-                          const newAuthors = [...post.authors, e.target.value];
-                          console.log('🔧 AdminNew - New authors array:', newAuthors);
-                          
-                          setPost(prev => ({ 
-                            ...prev, 
-                            authors: newAuthors
+                          setPost(prev => ({
+                            ...prev,
+                            authors: [...prev.authors, e.target.value]
                           }));
                         }
                         e.target.value = '';

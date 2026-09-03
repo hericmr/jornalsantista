@@ -22,10 +22,6 @@ const AdminEditarNoticia = () => {
     status: 'draft'
   });
   
-  // Debug: log do estado do post sempre que authors mudar
-  useEffect(() => {
-    console.log('📊 AdminEdit - Post authors state changed:', post.authors);
-  }, [post.authors]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [allAuthors, setAllAuthors] = useState([]);
 
@@ -36,10 +32,6 @@ const AdminEditarNoticia = () => {
     // Buscar autores do Supabase
     getAllAuthors().then(setAllAuthors);
   }, [id]);
-
-  useEffect(() => {
-    console.log('Estado atual das imagens:', post.images);
-  }, [post.images]);
 
   const loadPost = async () => {
     try {
@@ -71,14 +63,7 @@ const AdminEditarNoticia = () => {
           tags: foundPost.tags || [],
           status: foundPost.status || 'draft'
         };
-        
-        console.log('Dados mapeados para editor:', postData); // Debug
-        console.log('Conteúdo do post:', {
-          text_content: foundPost.text_content,
-          content: foundPost.content,
-          finalContent: postData.content
-        });
-        console.log('🔄 AdminEdit - Setting post with authors:', postData.authors);
+
         setPost(postData);
       } else {
         alert('Notícia não encontrada');
@@ -103,16 +88,13 @@ const AdminEditarNoticia = () => {
   // Upload para Supabase (igual AdminNovaNoticia)
   const uploadImageToSupabase = async (file) => {
     const fileName = `${Date.now()}-${file.name}`;
-    console.log('Tentando enviar arquivo:', file);
-    const { data, error } = await supabase.storage.from('noticias-imagens').upload(fileName, file);
-    console.log('Resultado do upload:', data, error);
+    const { error } = await supabase.storage.from('noticias-imagens').upload(fileName, file);
     if (error) {
-      console.error('Erro detalhado do upload:', error);
+      console.error('Erro ao enviar imagem:', error);
       alert('Erro ao enviar imagem: ' + error.message);
       return null;
     }
-    const { data: publicUrlData, error: publicUrlError } = supabase.storage.from('noticias-imagens').getPublicUrl(fileName);
-    console.log('Resultado do getPublicUrl:', publicUrlData, publicUrlError);
+    const { data: publicUrlData } = supabase.storage.from('noticias-imagens').getPublicUrl(fileName);
     if (publicUrlData && publicUrlData.publicUrl) {
       return publicUrlData.publicUrl;
     } else {
@@ -135,19 +117,14 @@ const AdminEditarNoticia = () => {
       const url = await uploadImageToSupabase(file);
       if (url) uploadedUrls.push(url);
     }
-    console.log('Imagens enviadas:', uploadedUrls); // Log para depuração
     if (uploadedUrls.length === 0) {
       alert('Nenhuma imagem foi enviada com sucesso!');
       return;
     }
-    setPost(prev => {
-      const newImages = [...prev.images, ...uploadedUrls];
-      console.log('Novo array de imagens:', newImages); // Log para depuração
-      return {
-        ...prev,
-        images: newImages
-      };
-    });
+    setPost(prev => ({
+      ...prev,
+      images: [...prev.images, ...uploadedUrls]
+    }));
     setSelectedFiles([]); // Limpa seleção após upload
   };
 
@@ -163,8 +140,6 @@ const AdminEditarNoticia = () => {
     setSaving(true);
 
     try {
-      console.log('💾 AdminEdit - Saving post with authors:', post.authors);
-      
       const postData = {
         title: post.title,
         excerpt: post.excerpt,
@@ -178,30 +153,19 @@ const AdminEditarNoticia = () => {
         status: post.status,
         slug: slugify(post.title)
       };
-      
-      console.log('💾 AdminEdit - Final postData:', {
-        authors: postData.authors,
-        author: postData.author
-      });
-
-      console.log('📝 Dados a serem salvos:', postData);
-      console.log('📄 Conteúdo:', postData.text_content);
-      console.log('📏 Tamanho do conteúdo:', postData.text_content?.length || 0);
 
       // Usa o id real da matéria carregada (state), não o parâmetro da rota —
       // que pode ser slug. Se existe id, é edição: UPDATE. Senão, criação.
       const existingId = post.id ?? id;
 
       if (existingId) {
-        console.log('🔄 Atualizando post existente com ID:', existingId);
         await savePost({ ...postData, id: existingId }, false);
         alert('Notícia atualizada com sucesso!');
       } else {
-        console.log('🆕 Criando nova postagem');
         await savePost(postData, true);
         alert('Notícia criada com sucesso!');
       }
-      
+
       navigate('/admin/noticias');
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -212,7 +176,7 @@ const AdminEditarNoticia = () => {
   };
 
   // Funções para formatação de texto
-  const formatText = (command, value = null) => {
+  const formatText = (command) => {
     const textarea = document.getElementById('content');
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -445,29 +409,10 @@ const AdminEditarNoticia = () => {
               </div>
               <div className="card-body">
                 <div className="mb-3">
-                  <label htmlFor="category" className="form-label">Categoria</label>
-                  <select
-                    className="form-select"
-                    id="category"
-                    name="category"
-                    value={post.category}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    <option value="Política">Política</option>
-                    <option value="Economia">Economia</option>
-                    <option value="Esportes">Esportes</option>
-                    <option value="Tecnologia">Tecnologia</option>
-                    <option value="Cultura">Cultura</option>
-                  </select>
-                </div>
-
-                <div className="mb-3">
                   <label htmlFor="authors" className="form-label">Autores</label>
                   <div className="multi-author-selector" key={`authors-selector-${post.authors.join('-')}`}>
                     {/* Lista de autores selecionados */}
                     <div className="selected-authors mb-2">
-                      {console.log('🎨 AdminEdit - Rendering badges for authors:', post.authors)}
                       {post.authors && post.authors.length > 0 ? (
                         post.authors.map((author, index) => (
                           <span key={`author-${index}-${author}`} className="badge bg-primary me-1 mb-1">
@@ -477,9 +422,7 @@ const AdminEditarNoticia = () => {
                               className="btn-close btn-close-white ms-1"
                               style={{ fontSize: '0.6rem' }}
                               onClick={() => {
-                                console.log('🗑️ AdminEdit - Removing author:', author);
                                 const newAuthors = post.authors.filter((_, i) => i !== index);
-                                console.log('🗑️ AdminEdit - Authors after removal:', newAuthors);
                                 setPost(prev => ({ ...prev, authors: newAuthors }));
                               }}
                             ></button>
@@ -494,16 +437,10 @@ const AdminEditarNoticia = () => {
                     <select
                       className="form-select mb-2"
                       onChange={(e) => {
-                        console.log('🔧 AdminEdit - Select value:', e.target.value);
-                        console.log('🔧 AdminEdit - Current authors:', post.authors);
-                        
                         if (e.target.value && !post.authors.includes(e.target.value)) {
-                          const newAuthors = [...post.authors, e.target.value];
-                          console.log('🔧 AdminEdit - New authors array:', newAuthors);
-                          
-                          setPost(prev => ({ 
-                            ...prev, 
-                            authors: newAuthors
+                          setPost(prev => ({
+                            ...prev,
+                            authors: [...prev.authors, e.target.value]
                           }));
                         }
                         e.target.value = '';
