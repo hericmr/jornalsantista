@@ -167,12 +167,15 @@ export default async function middleware(request) {
   }
 
   const title = (post.title && post.title.trim()) || SITE_NAME;
+  // "Resumo" digitado no admin (coluna excerpt) tem prioridade e é usado
+  // inteiro (teto generoso só por segurança). Sem resumo, cai no texto do
+  // corpo, aí sim cortado.
+  const manualExcerpt = post.excerpt && post.excerpt.trim();
   const description =
-    truncate(
-      (post.excerpt && post.excerpt.trim()) ||
-        stripHtml(post.content || post.text_content || ''),
-      200
-    ) || `Notícia do ${SITE_NAME}.`;
+    (manualExcerpt
+      ? truncate(manualExcerpt, 300)
+      : truncate(stripHtml(post.content || post.text_content || ''), 200)) ||
+    `Notícia do ${SITE_NAME}.`;
   const postImage = firstImage(post.images);
   const image = postImage || DEFAULT_IMAGE;
   const canonical = `${SITE_URL}/noticia/${encodeURIComponent(slug)}`;
