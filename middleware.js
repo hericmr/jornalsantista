@@ -91,7 +91,7 @@ async function fetchPost(slug) {
   return null;
 }
 
-function buildHead({ title, description, image, isDefaultImage, canonical, publishedTime, modifiedTime, section, authors }) {
+function buildHead({ title, description, image, canonical, publishedTime, modifiedTime, section, authors }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -123,10 +123,11 @@ function buildHead({ title, description, image, isDefaultImage, canonical, publi
     `<meta property="og:image" content="${esc(image)}" />`,
     `<meta property="og:image:secure_url" content="${esc(image)}" />`,
     `<meta property="og:image:alt" content="${esc(title)}" />`,
-    // dimensões só quando temos certeza (imagem padrão); para a imagem da
-    // matéria deixamos o crawler medir, evitando corte/letterbox.
-    isDefaultImage ? `<meta property="og:image:width" content="1200" />` : '',
-    isDefaultImage ? `<meta property="og:image:height" content="630" />` : '',
+    // O WhatsApp (sobretudo Web) pode não gerar preview nenhum sem essas
+    // dimensões — ele não mede a imagem sozinho de forma confiável. Preferimos
+    // um valor aproximado (1200x630, padrão OG) a nenhum preview.
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
     publishedTime ? `<meta property="article:published_time" content="${esc(publishedTime)}" />` : '',
     modifiedTime ? `<meta property="article:modified_time" content="${esc(modifiedTime)}" />` : '',
     section ? `<meta property="article:section" content="${esc(section)}" />` : '',
@@ -176,8 +177,7 @@ export default async function middleware(request) {
       ? truncate(manualExcerpt, 300)
       : truncate(stripHtml(post.content || post.text_content || ''), 200)) ||
     `Notícia do ${SITE_NAME}.`;
-  const postImage = firstImage(post.images);
-  const image = postImage || DEFAULT_IMAGE;
+  const image = firstImage(post.images) || DEFAULT_IMAGE;
   const canonical = `${SITE_URL}/noticia/${encodeURIComponent(slug)}`;
   const section =
     Array.isArray(post.categories) && post.categories.length ? post.categories[0] : null;
@@ -196,7 +196,6 @@ export default async function middleware(request) {
     title,
     description,
     image,
-    isDefaultImage: !postImage,
     canonical,
     publishedTime: toISO(post.published_at),
     modifiedTime: toISO(post.updated_at),
