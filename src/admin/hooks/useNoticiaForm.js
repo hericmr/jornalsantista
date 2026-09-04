@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsService';
-import { slugify, stripHtml } from '../../utils/textUtils';
+import { slugify, stripHtml, processHtmlContent } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
 import { requestRepublish } from '../../lib/republish';
 import { useToast, useConfirm } from '../components/AdminFeedback';
@@ -22,11 +22,20 @@ const EMPTY_POST = {
 };
 
 // Normaliza um registro vindo do Supabase para o formato do formulário.
+//
+// `content` passa por processHtmlContent (T2.5) — a MESMA função que o
+// público usa (src/utils/textUtils.js) antes de sanitizar/renderizar. Sem
+// isso, o editor richtext trataria o texto puro legado como HTML bruto: o
+// parser colapsa `\n` (regra de espaço em branco do HTML) e as matérias
+// antigas viram um parágrafo só, sem quebra nenhuma. Convertendo `\n` em
+// `<br>` aqui, o TipTap preserva as quebras — igual ao que já aparece no
+// site. Para HTML já estruturado, a função só remove indentação entre tags
+// (idempotente); não muda o conteúdo visível.
 const toFormState = (p) => ({
   id: p.id,
   title: p.title || '',
   excerpt: p.excerpt || '',
-  content: p.text_content || p.content || '',
+  content: processHtmlContent(p.text_content || p.content || ''),
   categories: p.categories || [],
   authors: (() => {
     if (Array.isArray(p.authors) && p.authors.length > 0) {
@@ -267,7 +276,10 @@ export const useNoticiaForm = ({ mode, id }) => {
         { ...buildPayload({ text_content: backup }), id: existingId },
         false
       );
-      setPost((prev) => ({ ...prev, content: backup }));
+      // Mesma normalização do load (T2.5): o backup pode ser texto puro
+      // legado, e o editor precisa do `<br>` explícito para não colapsar
+      // as quebras de linha originais.
+      setPost((prev) => ({ ...prev, content: processHtmlContent(backup) }));
       setBackupAvailable(true);
 
       requestRepublish().catch((e) =>
