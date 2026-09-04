@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaEye, FaSync } from 'react-icons/fa';
 import { getAllPosts, deletePost } from '../../lib/postsService';
+import { requestRepublish } from '../../lib/republish';
 import { slugify } from '../../utils/textUtils';
 import { useToast, useConfirm } from '../components/AdminFeedback';
 
@@ -10,6 +11,7 @@ const AdminNoticias = () => {
   const confirm = useConfirm();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [republishing, setRepublishing] = useState(false);
 
   useEffect(() => {
     loadPosts();
@@ -50,6 +52,18 @@ const AdminNoticias = () => {
     }
   };
 
+  const handleRepublish = async () => {
+    setRepublishing(true);
+    try {
+      await requestRepublish();
+      toast.success('Republicação do site iniciada. Fica no ar em ~2 min.');
+    } catch (error) {
+      toast.error('Erro ao republicar: ' + error.message);
+    } finally {
+      setRepublishing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
@@ -64,10 +78,22 @@ const AdminNoticias = () => {
     <div className="admin-noticias">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="text-light">Gerenciar Notícias</h2>
-        <Link to="/admin/noticias/nova" className="btn btn-primary">
-          <FaPlus className="me-2" />
-          Nova Notícia
-        </Link>
+        <div className="d-flex gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-light"
+            onClick={handleRepublish}
+            disabled={republishing}
+            title="Regera o site público com o conteúdo atual"
+          >
+            <FaSync className="me-2" />
+            {republishing ? 'Republicando...' : 'Republicar site'}
+          </button>
+          <Link to="/admin/noticias/nova" className="btn btn-primary">
+            <FaPlus className="me-2" />
+            Nova Notícia
+          </Link>
+        </div>
       </div>
 
       <div className="card bg-dark text-light border-secondary">

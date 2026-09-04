@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
+import { requestRepublish } from '../../lib/republish';
 import { useToast } from '../components/AdminFeedback';
 
 // Estado e regras de negócio compartilhados pelas telas "Nova notícia" e
@@ -199,6 +200,12 @@ export const useNoticiaForm = ({ mode, id }) => {
           await savePost(payload, true);
           toast.success('Notícia criada.');
         }
+
+        // Regenera o snapshot estático do site (não bloqueia o fluxo).
+        requestRepublish().catch((e) =>
+          console.warn('Republicação não disparada:', e.message)
+        );
+
         navigate('/admin/noticias');
       } catch (err) {
         console.error('Erro ao salvar:', err);

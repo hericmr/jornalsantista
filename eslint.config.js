@@ -26,4 +26,11 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Código que roda em Node/Edge (funções serverless, middleware, scripts de build)
+    files: ['api/**/*.js', 'scripts/**/*.js', 'middleware.js'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
 ])
