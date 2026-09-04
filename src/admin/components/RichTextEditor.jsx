@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import RichTextToolbar from './RichTextToolbar';
+import RichTextBubbleMenu from './RichTextBubbleMenu';
 
 // Editor richtext do corpo da matéria (TipTap). Carregado sob demanda — ver
 // RichTextEditor.lazy.jsx — para não pesar o bundle público.
@@ -58,6 +59,7 @@ const RichTextEditor = ({
   return (
     <div className="richtext-editor-shell">
       <RichTextToolbar editor={editor} />
+      <RichTextBubbleMenu editor={editor} />
       <EditorContent editor={editor} />
     </div>
   );

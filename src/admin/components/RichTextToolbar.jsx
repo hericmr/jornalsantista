@@ -25,10 +25,26 @@ const HEADING_LEVELS = [2, 3, 4];
 // mesma regra para imagens/embeds externos).
 const isValidUrl = (value) => /^(https?:\/\/|mailto:)\S+$/i.test(value.trim());
 
-const ToolbarButton = ({ onClick, active, disabled, label, title, children }) => (
+// `variant` troca a aparência: "toolbar" (barra fixa, clara) ou "bubble"
+// (menu flutuante escuro sobre a seleção — T2.4). Reaproveitado pelo
+// RichTextBubbleMenu.
+const VARIANT_CLASS = {
+  toolbar: 'btn btn-outline-secondary btn-sm',
+  bubble: 'richtext-bubble-btn'
+};
+
+export const ToolbarButton = ({
+  onClick,
+  active,
+  disabled,
+  label,
+  title,
+  variant = 'toolbar',
+  children
+}) => (
   <button
     type="button"
-    className={`btn btn-outline-secondary btn-sm${active ? ' active' : ''}`}
+    className={`${VARIANT_CLASS[variant]}${active ? ' active' : ''}`}
     aria-pressed={!!active}
     aria-label={label}
     title={title || label}
@@ -40,8 +56,9 @@ const ToolbarButton = ({ onClick, active, disabled, label, title, children }) =>
 );
 
 // Botão de link com popover próprio: campo de URL, validação de esquema
-// (http/https/mailto) e opção de remover o link atual.
-const LinkControl = ({ editor, active, href }) => {
+// (http/https/mailto) e opção de remover o link atual. Exportado para o
+// RichTextBubbleMenu (T2.4) reaproveitar.
+export const LinkControl = ({ editor, active, href, variant = 'toolbar' }) => {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
@@ -74,7 +91,7 @@ const LinkControl = ({ editor, active, href }) => {
 
   return (
     <div className="richtext-toolbar-link">
-      <ToolbarButton label="Link" active={active} onClick={openPopover}>
+      <ToolbarButton label="Link" active={active} variant={variant} onClick={openPopover}>
         <FaLink />
       </ToolbarButton>
       {open && (
