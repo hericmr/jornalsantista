@@ -263,22 +263,24 @@ Liga com o item 3.6 / 8.5 do `planning.md` (decisão de SSR/prerender pendente).
   Supabase (I2b). _(a commitar)_
 - [x] **I3** `public/data/` no `.gitignore` — gerado no build, entregue no deploy,
   nunca commitado. _(a commitar)_
-- [~] **I4** Frescor do conteúdo — via app, não via webhook do Supabase (o
-  projeto Supabase deu `schema "supabase_functions" does not exist` ao criar o
-  Database Webhook). Feito:
+- [x] **I4** Frescor do conteúdo — via app (o Database Webhook do Supabase deu
+  `schema "supabase_functions" does not exist`). Feito e **validado no ar**
+  (botão "Republicar site" gera um deploy novo e o `meta.json` atualiza em ~2 min):
   - `vercel.json`: cache do `/data/*` (`s-maxage=300, swr=86400`; a Vercel purga
     o CDN a cada deploy).
-  - `api/republish.js`: valida o token de admin do Supabase e faz POST no Deploy
-    Hook da Vercel.
+  - `api/republish.js`: valida token de admin do Supabase → POST no Deploy Hook.
   - `src/lib/republish.js` + chamada no `useNoticiaForm` após salvar (fire &
     forget) + botão "Republicar site" no `AdminNoticias`.
   - `eslint.config.js`: globals de Node para `api/**`, `scripts/**`, `middleware.js`.
-  **Falta o usuário:** criar env var `DEPLOY_HOOK_URL` no projeto Vercel = a URL
-  do Deploy Hook `content-rebuild`. Cooldown anti-spam de rebuild: futuro.
-- [ ] **I5** Preview de rascunho continua lendo o Supabase ao vivo (o rascunho não
-  entra no snapshot) — casa com a Fase E2.
+  - Env var `DEPLOY_HOOK_URL` no projeto Vercel (feito pelo usuário).
+  Cooldown anti-spam de rebuild (vários saves seguidos): melhoria futura.
+- [~] **I5** O admin já lê o Supabase ao vivo (`getPostBySlugOrId`), então
+  rascunho no editor nunca vem do snapshot. Um "preview no site público" de
+  rascunho ainda não existe — vira parte da Fase E2 quando houver.
 - [ ] **I6** _(opcional)_ `api/sitemap.js` e `api/feed.js` podem passar a ler o
   `index.json` local em vez do Supabase, reduzindo acoplamento.
+- [ ] **I2b** _(opcional)_ `getPostsByCategory` / `getCategoryNames` /
+  `searchPosts` a partir do `index.json` (hoje ainda batem no Supabase).
 - [x] **I7** Fallback: sem `/data/index.json`, `getPostsPage`/`getPublicPostBySlug`
   usam o Supabase (implementado no I2). Confirmado: build local sem env não gera
   o snapshot e o site funciona pelo Supabase.
@@ -363,4 +365,5 @@ o usuário testa no site online antes do próximo passo.
 | 2026-09-04 | Fase I · passo 1 (I1+I3) | 7e785cb | `scripts/build-content.js` gera o snapshot estático (`public/data/index.json` + `posts/<slug>.json` + `meta.json`) a partir do Supabase via REST com a chave `anon`, antes do `vite build`. À prova de falha: sem env ou erro de rede → aviso + exit 0. `public/data/` no `.gitignore`. **Validado no deploy:** `/data/meta.json` → `count: 128`; `index.json` (97 kB, 128 itens, sem corpo); `posts/<slug>.json` OK. Descoberta: 127/128 matérias têm `status: 'draft'` no banco mas aparecem no site → `status` não é gate de publicação; o snapshot e a app **não** filtram por status. |
 | 2026-09-04 | Fase I · passo 2 (I2) | a1f800e | `postsService.js`: `getPostsPage` e novo `getPublicPostBySlug` (usado no `Noticia.jsx`) leem o snapshot primeiro, com fallback ao Supabase. Admin intacto. Ordem do índice bate com o `/feed.xml` (confirmado: Oxxo 03/09, FMI 22/01, …). Build verde. |
 | 2026-09-04 | Fase I · passo 3 (I4a) | ed002ba | `vercel.json`: header de cache do `/data/*` (`s-maxage=300, stale-while-revalidate=86400`). |
-| 2026-09-04 | Fase I · passo 4 (I4b) | _a commitar_ | Webhook do Supabase falhou (`supabase_functions` schema inexistente) → rebuild disparado pela app. `api/republish.js` (valida admin via token Supabase → POST no Deploy Hook Vercel), `src/lib/republish.js`, chamada no `useNoticiaForm` pós-save + botão "Republicar site" no `AdminNoticias`. `eslint.config.js` ganhou globals de Node para `api/`/`scripts/`/`middleware.js`. Falta o usuário setar `DEPLOY_HOOK_URL` na Vercel. Build verde. |
+| 2026-09-04 | Fase I · passo 4 (I4b) | 3dac47a | Webhook do Supabase falhou (`supabase_functions` schema inexistente) → rebuild disparado pela app. `api/republish.js` (valida admin via token Supabase → POST no Deploy Hook Vercel), `src/lib/republish.js`, chamada no `useNoticiaForm` pós-save + botão "Republicar site" no `AdminNoticias`. `eslint.config.js` ganhou globals de Node para `api/`/`scripts/`/`middleware.js`. Build verde. |
+| 2026-09-04 | Fase I · I4 no ar | — | Usuário criou `DEPLOY_HOOK_URL` na Vercel + redeploy. Botão "Republicar site" testado: gera deploy novo, `meta.json` atualiza em ~2 min. **Núcleo da Fase I concluído** (I1–I5, I7). Restam opcionais: I6 (api/* do snapshot), I2b (categorias/busca do snapshot). |
