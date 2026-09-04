@@ -16,6 +16,41 @@ const mapPost = (post) => ({
   slug: post.slug || slugify(post.title || String(post.id || ''))
 });
 
+// ---- Snapshot estático de conteúdo (public/data/*, gerado no build) ----
+// É só uma otimização: se qualquer parte falhar, quem chama cai no Supabase.
+
+let staticIndexPromise;
+
+// Lê e ordena o índice do snapshot (mais recente primeiro; sem data no fim).
+// Cacheado por sessão. Retorna null se o snapshot não existir.
+const loadStaticIndex = () => {
+  if (staticIndexPromise === undefined) {
+    staticIndexPromise = fetch('/data/index.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((rows) => {
+        if (!Array.isArray(rows)) return null;
+        return [...rows].sort(
+          (a, b) =>
+            new Date(b.published_at || 0) - new Date(a.published_at || 0)
+        );
+      })
+      .catch(() => null);
+  }
+  return staticIndexPromise;
+};
+
+// Busca uma matéria do snapshot pelo slug. Retorna null se indisponível.
+const fetchStaticPost = async (slug) => {
+  try {
+    const res = await fetch(`/data/posts/${encodeURIComponent(slug)}.json`);
+    if (!res.ok) return null;
+    const post = await res.json();
+    return post && post.id ? post : null;
+  } catch {
+    return null;
+  }
+};
+
 // Carrega todos os posts, ordenados do mais recente para o mais antigo.
 export const getAllPosts = async () => {
   try {
@@ -36,7 +71,21 @@ export const getAllPosts = async () => {
 };
 
 // Carrega uma página do feed público. Retorna { posts, hasMore, ok }.
-export const getPostsPage = async (opts) => {
+// Tenta o snapshot estático primeiro; cai no Supabase se ele não existir.
+export const getPostsPage = async (opts = {}) => {
+  const { page = 0, pageSize = 12 } = opts;
+
+  const index = await loadStaticIndex();
+  if (index) {
+    const from = page * pageSize;
+    const slice = index.slice(from, from + pageSize);
+    return {
+      posts: slice.map(mapPost),
+      hasMore: index.length > from + pageSize,
+      ok: true
+    };
+  }
+
   try {
     const { rows, hasMore } = await postsAPI.getPostsPage(opts);
     return { posts: rows.map(mapPost), hasMore, ok: true };
@@ -94,6 +143,21 @@ export const getPostBySlugOrId = async (slugOrId) => {
     console.error('Erro ao buscar post:', error);
     return null;
   }
+};
+
+// Leitura pública de uma matéria: tenta o snapshot estático (por slug) e cai
+// no Supabase se não achar. Use SÓ no site público — o admin deve continuar
+// chamando getPostBySlugOrId (dados sempre frescos, inclui rascunhos).
+export const getPublicPostBySlug = async (slugOrId) => {
+  const key = String(slugOrId ?? '').trim();
+  if (!key) return null;
+
+  if (!/^\d+$/.test(key)) {
+    const staticPost = await fetchStaticPost(key);
+    if (staticPost) return mapPost(staticPost);
+  }
+
+  return getPostBySlugOrId(slugOrId);
 };
 
 // Salva um post (sempre no Supabase).

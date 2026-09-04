@@ -253,9 +253,14 @@ Liga com o item 3.6 / 8.5 do `planning.md` (decisão de SSR/prerender pendente).
   matéria, corpo completo), `meta.json` (timestamp + contagens). Chave `anon`.
   Dedup de slug. **Nunca derruba o build**: erro/env ausente → aviso + exit 0.
   `categorias.json`/`autores.json` ficam para depois. _(a commitar)_
-- [ ] **I2** `postsService.js`: ler o estático primeiro (`fetch('/data/…')`), cair
-  para o Supabase se faltar, estiver mais novo, ou em contexto admin/preview.
-  Feed da Home e página de matéria passam pelo estático; o CDN cacheia.
+- [x] **I2** `postsService.js` static-first: `getPostsPage` (feed da Home +
+  "todas" da Categorias) lê `/data/index.json`; novo `getPublicPostBySlug`
+  (usado só pelo `Noticia.jsx`) lê `/data/posts/<slug>.json`. Fallback ao
+  Supabase em qualquer falha, e para slug ausente do snapshot (matéria nova) ou
+  URL com id numérico. Admin (`useNoticiaForm`) continua no `getPostBySlugOrId`
+  ao vivo. Índice re-ordenado (data desc, sem-data no fim) = mesma ordem do
+  `/feed.xml` atual. `searchPosts`/`getPostsByCategory`/`getCategoryNames` ainda
+  Supabase (I2b). _(a commitar)_
 - [x] **I3** `public/data/` no `.gitignore` — gerado no build, entregue no deploy,
   nunca commitado. _(a commitar)_
 - [ ] **I4** Frescor do conteúdo: Database Webhook do Supabase na tabela `posts` →
@@ -342,4 +347,5 @@ o usuário testa no site online antes do próximo passo.
 | 2026-09-03 | Fase A · passo 3 (A5) | 05a91c4 | `src/admin/components/AdminFeedback.jsx`: `AdminFeedbackProvider` + `useToast` + `useConfirm` (toasts com `aria-live`, diálogo de confirmação com Promise, `Esc` fecha). Provider montado em `App.jsx` em volta das `Routes` (instância única, sobrevive à navegação). `alert()`/`window.confirm()` trocados por toasts/diálogo em `AdminNovaNoticia`, `AdminEditarNoticia` e `AdminNoticias`. CSS em `index.css`. Falta trocar em `AdminDashboard`/`AdminCategorias`/`AdminConfiguracoes` (fora do fluxo do editor). Build verde (146 módulos, +1 kB gzip). |
 | 2026-09-03 | Fase A · passo 4 (A1+A2a) | eaaaf58 | `src/admin/hooks/useNoticiaForm.js` (estado + regras: carregar, autores, upload de imagem, submit create/update) e `src/admin/components/NoticiaForm.jsx` (UI única). `AdminNovaNoticia.jsx` virou casca de 6 linhas (`<NoticiaForm mode="new" />`). Unificações já aplicadas na tela Nova: seletor de autores vem da tabela `authors` do Supabase (E17), `onKeyPress`→`onKeyDown`, `formatText` via ref, campo de novo autor controlado. `AdminEditarNoticia.jsx` **ainda não** usa o form novo — é o passo 5. Build verde (146 módulos). |
 | 2026-09-03 | Fase A · passo 5 (A1+A2b) | 8c9bee2 | `AdminEditarNoticia.jsx` (592→10 linhas) passa a usar `<NoticiaForm mode="edit" id={id} />`. ~1.170 linhas duplicadas entre as duas telas eliminadas. `loadPost`/mapeamento de autores/`formatText`/upload agora vivem só no hook/componente. Warning de `exhaustive-deps` da tela Editar sumiu. Build verde (148 módulos, −1,3 kB gzip JS). **Fase A concluída** (falta só o passo 6: smoke test + marcar itens). |
-| 2026-09-04 | Fase I · passo 1 (I1+I3) | _a commitar_ | `scripts/build-content.js` gera o snapshot estático (`public/data/index.json` + `posts/<slug>.json` + `meta.json`) a partir do Supabase via REST com a chave `anon`, antes do `vite build`. À prova de falha: sem env ou erro de rede → aviso + exit 0, build segue sem snapshot. `public/data/` no `.gitignore`. Testado local: caminho sem env, caminho de erro de rede, e caminho feliz com mock (dedup de slug + slug de título sem acento OK). **A app ainda não lê o snapshot** — isso é o passo 2 (I2). Validar `/data/index.json` no deploy. |
+| 2026-09-04 | Fase I · passo 1 (I1+I3) | 7e785cb | `scripts/build-content.js` gera o snapshot estático (`public/data/index.json` + `posts/<slug>.json` + `meta.json`) a partir do Supabase via REST com a chave `anon`, antes do `vite build`. À prova de falha: sem env ou erro de rede → aviso + exit 0. `public/data/` no `.gitignore`. **Validado no deploy:** `/data/meta.json` → `count: 128`; `index.json` (97 kB, 128 itens, sem corpo); `posts/<slug>.json` OK. Descoberta: 127/128 matérias têm `status: 'draft'` no banco mas aparecem no site → `status` não é gate de publicação; o snapshot e a app **não** filtram por status. |
+| 2026-09-04 | Fase I · passo 2 (I2) | _a commitar_ | `postsService.js`: `getPostsPage` e novo `getPublicPostBySlug` (usado no `Noticia.jsx`) leem o snapshot primeiro, com fallback ao Supabase. Admin intacto. Ordem do índice bate com o `/feed.xml` (confirmado: Oxxo 03/09, FMI 22/01, …). Build verde. |

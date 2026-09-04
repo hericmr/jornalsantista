@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPostBySlugOrId } from '../lib/postsService';
+import { getPublicPostBySlug } from '../lib/postsService';
 import { processHtmlContent, createExcerpt, stripHtml } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
 import { sanitizeHtml } from '../lib/sanitize';
@@ -73,7 +73,7 @@ const Noticia = () => {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    getPostBySlugOrId(slug)
+    getPublicPostBySlug(slug)
       .then((found) => {
         if (active) setPost(found);
       })
