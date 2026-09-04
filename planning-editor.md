@@ -88,18 +88,19 @@ _hero_ e o `og:image` (usado pelo `middleware.js` nos previews de link).
 
 **Objetivo:** uma só implementação para as duas telas. Pré-requisito de tudo.
 
-- [ ] **A1** Criar `src/admin/components/NoticiaForm.jsx` — formulário único
-  (título, resumo, conteúdo, categorias, autores, status, data, imagens).
-- [ ] **A2** Criar `src/admin/hooks/useNoticiaForm.js` — estado do post, `loadPost`,
-  `handleChange`, `submit`, flags `saving`/`loading`/`dirty`. `AdminNovaNoticia` e
-  `AdminEditarNoticia` viram cascas finas (`<NoticiaForm mode="new|edit" />`).
-- [ ] **A3** Remover: botão "🧪 Testar Supabase" + `testSupabaseConnection`, o
-  `<select>` "Categoria" morto da edição, todos os `console.log` (inclusive os de
-  dentro do JSX). Manter `console.error` úteis atrás de `import.meta.env.DEV`.
-- [ ] **A4** Padronizar o campo de conteúdo como `text_content` ponta a ponta;
-  simplificar o bloco `content`/`text_content` do `savePost`.
-- [ ] **A5** Trocar `alert`/`confirm` por um componente de _toast_ (`aria-live`) +
-  diálogo de confirmação próprio (reaproveitável no `AdminNoticias`).
+- [x] **A1** Criar `src/admin/components/NoticiaForm.jsx` — formulário único
+  (título, resumo, conteúdo, categorias, autores, status, data, imagens). _(eaaaf58)_
+- [x] **A2** Criar `src/admin/hooks/useNoticiaForm.js` — estado do post, `loadPost`,
+  `handleChange`, `submit`, flags `saving`/`loading`. `AdminNovaNoticia` e
+  `AdminEditarNoticia` viraram cascas finas (`<NoticiaForm mode="new|edit" />`).
+  _(eaaaf58 + passo 5)_ — `dirty` fica para a Fase F.
+- [x] **A3** Removido: botão "🧪 Testar Supabase" + `testSupabaseConnection`, o
+  `<select>` "Categoria" morto da edição, todos os `console.log`. _(c5d28d6)_
+- [x] **A4** `savePost` normaliza o corpo e grava `content` + `text_content` em
+  sincronia (leitores usam `content || text_content`); malabarismo removido. _(a7a5998)_
+  Convergir para uma coluna só = Fase I / migração futura.
+- [x] **A5** `AdminFeedbackProvider` + `useToast` + `useConfirm`; `alert`/`confirm`
+  trocados nas 3 telas do fluxo. _(05a91c4)_ Falta em Dashboard/Categorias/Configurações.
 - [ ] **A6** `npm run build` verde + smoke test: criar rascunho, editar, salvar.
 
 ---
@@ -341,4 +342,5 @@ o usuário testa no site online antes do próximo passo.
 | 2026-09-03 | Fase I planejada | — | Track paralelo de snapshot estático de conteúdo adicionado ao plano (I1–I7). Ordem: depois dos passos 1–3 da Fase A. |
 | 2026-09-03 | Fase A · passo 2 (A4) | a7a5998 | `savePost` normaliza o corpo e grava `content` + `text_content` em sincronia (antes só gravava `text_content`, mas os leitores preferem `content` → edições do corpo não apareciam no site). Simplificado o malabarismo da função. Build verde (145 módulos). |
 | 2026-09-03 | Fase A · passo 3 (A5) | 05a91c4 | `src/admin/components/AdminFeedback.jsx`: `AdminFeedbackProvider` + `useToast` + `useConfirm` (toasts com `aria-live`, diálogo de confirmação com Promise, `Esc` fecha). Provider montado em `App.jsx` em volta das `Routes` (instância única, sobrevive à navegação). `alert()`/`window.confirm()` trocados por toasts/diálogo em `AdminNovaNoticia`, `AdminEditarNoticia` e `AdminNoticias`. CSS em `index.css`. Falta trocar em `AdminDashboard`/`AdminCategorias`/`AdminConfiguracoes` (fora do fluxo do editor). Build verde (146 módulos, +1 kB gzip). |
-| 2026-09-03 | Fase A · passo 4 (A1+A2a) | _a commitar_ | `src/admin/hooks/useNoticiaForm.js` (estado + regras: carregar, autores, upload de imagem, submit create/update) e `src/admin/components/NoticiaForm.jsx` (UI única). `AdminNovaNoticia.jsx` virou casca de 6 linhas (`<NoticiaForm mode="new" />`). Unificações já aplicadas na tela Nova: seletor de autores vem da tabela `authors` do Supabase (E17), `onKeyPress`→`onKeyDown`, `formatText` via ref, campo de novo autor controlado. `AdminEditarNoticia.jsx` **ainda não** usa o form novo — é o passo 5. Build verde (146 módulos). |
+| 2026-09-03 | Fase A · passo 4 (A1+A2a) | eaaaf58 | `src/admin/hooks/useNoticiaForm.js` (estado + regras: carregar, autores, upload de imagem, submit create/update) e `src/admin/components/NoticiaForm.jsx` (UI única). `AdminNovaNoticia.jsx` virou casca de 6 linhas (`<NoticiaForm mode="new" />`). Unificações já aplicadas na tela Nova: seletor de autores vem da tabela `authors` do Supabase (E17), `onKeyPress`→`onKeyDown`, `formatText` via ref, campo de novo autor controlado. `AdminEditarNoticia.jsx` **ainda não** usa o form novo — é o passo 5. Build verde (146 módulos). |
+| 2026-09-03 | Fase A · passo 5 (A1+A2b) | _a commitar_ | `AdminEditarNoticia.jsx` (648→10 linhas) passa a usar `<NoticiaForm mode="edit" id={id} />`. ~1.170 linhas duplicadas entre as duas telas eliminadas. `loadPost`/mapeamento de autores/`formatText`/upload agora vivem só no hook/componente. Warning de `exhaustive-deps` da tela Editar sumiu. Build verde (148 módulos, −1,3 kB gzip JS). **Fase A concluída** (falta só o passo 6: smoke test + marcar itens). |
