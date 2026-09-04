@@ -26,3 +26,6 @@ dist-ssr
 public/admin_users.json
 .env
 .env*.local
+
+# Snapshot de conteúdo gerado no build (scripts/build-content.js)
+public/data/

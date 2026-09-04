@@ -246,20 +246,18 @@ do Supabase; menos requests (limites/custo); conteúdo versionável = backup.
 **Não é sobre o editor** — é um track de arquitetura em paralelo às Fases A–H.
 Liga com o item 3.6 / 8.5 do `planning.md` (decisão de SSR/prerender pendente).
 
-- [ ] **I1** `scripts/build-content.js` (Node, roda no `prebuild` — o Vite executa
-  `prebuild` antes do `build`): usa `@supabase/supabase-js` e escreve em
-  `public/data/`:
-  - `index.json` — lista de matérias, **só metadados** (id, slug, título, resumo,
-    categorias, autores, capa, datas). Sem o corpo.
-  - `posts/<slug>.json` — uma por matéria, com o corpo completo.
-  - `categorias.json` / `autores.json` (opcional).
+- [x] **I1** `scripts/build-content.js` (Node ESM, `fetch` REST — sem
+  `@supabase/supabase-js`): roda antes do `vite build` (`"build": "node
+  scripts/build-content.js && vite build"`). Escreve em `public/data/`:
+  `index.json` (lista, só metadados — sem corpo), `posts/<slug>.json` (uma por
+  matéria, corpo completo), `meta.json` (timestamp + contagens). Chave `anon`.
+  Dedup de slug. **Nunca derruba o build**: erro/env ausente → aviso + exit 0.
+  `categorias.json`/`autores.json` ficam para depois. _(a commitar)_
 - [ ] **I2** `postsService.js`: ler o estático primeiro (`fetch('/data/…')`), cair
   para o Supabase se faltar, estiver mais novo, ou em contexto admin/preview.
   Feed da Home e página de matéria passam pelo estático; o CDN cacheia.
-- [ ] **I3** **Não commitar** `public/data/` no git (`.gitignore`). É gerado no
-  build e entregue no deploy. Um bot que faz `git push` a cada build pode entrar
-  em loop e sujar o histórico. Backup em git, se quiser, é job separado e
-  agendado.
+- [x] **I3** `public/data/` no `.gitignore` — gerado no build, entregue no deploy,
+  nunca commitado. _(a commitar)_
 - [ ] **I4** Frescor do conteúdo: Database Webhook do Supabase na tabela `posts` →
   Deploy Hook da Vercel (rebuild automático ao publicar/editar). Alternativas:
   botão "Republicar site" no admin; cron diário.
@@ -343,4 +341,5 @@ o usuário testa no site online antes do próximo passo.
 | 2026-09-03 | Fase A · passo 2 (A4) | a7a5998 | `savePost` normaliza o corpo e grava `content` + `text_content` em sincronia (antes só gravava `text_content`, mas os leitores preferem `content` → edições do corpo não apareciam no site). Simplificado o malabarismo da função. Build verde (145 módulos). |
 | 2026-09-03 | Fase A · passo 3 (A5) | 05a91c4 | `src/admin/components/AdminFeedback.jsx`: `AdminFeedbackProvider` + `useToast` + `useConfirm` (toasts com `aria-live`, diálogo de confirmação com Promise, `Esc` fecha). Provider montado em `App.jsx` em volta das `Routes` (instância única, sobrevive à navegação). `alert()`/`window.confirm()` trocados por toasts/diálogo em `AdminNovaNoticia`, `AdminEditarNoticia` e `AdminNoticias`. CSS em `index.css`. Falta trocar em `AdminDashboard`/`AdminCategorias`/`AdminConfiguracoes` (fora do fluxo do editor). Build verde (146 módulos, +1 kB gzip). |
 | 2026-09-03 | Fase A · passo 4 (A1+A2a) | eaaaf58 | `src/admin/hooks/useNoticiaForm.js` (estado + regras: carregar, autores, upload de imagem, submit create/update) e `src/admin/components/NoticiaForm.jsx` (UI única). `AdminNovaNoticia.jsx` virou casca de 6 linhas (`<NoticiaForm mode="new" />`). Unificações já aplicadas na tela Nova: seletor de autores vem da tabela `authors` do Supabase (E17), `onKeyPress`→`onKeyDown`, `formatText` via ref, campo de novo autor controlado. `AdminEditarNoticia.jsx` **ainda não** usa o form novo — é o passo 5. Build verde (146 módulos). |
-| 2026-09-03 | Fase A · passo 5 (A1+A2b) | _a commitar_ | `AdminEditarNoticia.jsx` (648→10 linhas) passa a usar `<NoticiaForm mode="edit" id={id} />`. ~1.170 linhas duplicadas entre as duas telas eliminadas. `loadPost`/mapeamento de autores/`formatText`/upload agora vivem só no hook/componente. Warning de `exhaustive-deps` da tela Editar sumiu. Build verde (148 módulos, −1,3 kB gzip JS). **Fase A concluída** (falta só o passo 6: smoke test + marcar itens). |
+| 2026-09-03 | Fase A · passo 5 (A1+A2b) | 8c9bee2 | `AdminEditarNoticia.jsx` (592→10 linhas) passa a usar `<NoticiaForm mode="edit" id={id} />`. ~1.170 linhas duplicadas entre as duas telas eliminadas. `loadPost`/mapeamento de autores/`formatText`/upload agora vivem só no hook/componente. Warning de `exhaustive-deps` da tela Editar sumiu. Build verde (148 módulos, −1,3 kB gzip JS). **Fase A concluída** (falta só o passo 6: smoke test + marcar itens). |
+| 2026-09-04 | Fase I · passo 1 (I1+I3) | _a commitar_ | `scripts/build-content.js` gera o snapshot estático (`public/data/index.json` + `posts/<slug>.json` + `meta.json`) a partir do Supabase via REST com a chave `anon`, antes do `vite build`. À prova de falha: sem env ou erro de rede → aviso + exit 0, build segue sem snapshot. `public/data/` no `.gitignore`. Testado local: caminho sem env, caminho de erro de rede, e caminho feliz com mock (dedup de slug + slug de título sem acento OK). **A app ainda não lê o snapshot** — isso é o passo 2 (I2). Validar `/data/index.json` no deploy. |
