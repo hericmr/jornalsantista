@@ -207,14 +207,16 @@ desfazer e sanitização na escrita. `npm run build` verde.
 *Objetivo da etapa:* substituir o `<textarea>` do corpo pelo editor TipTap, com
 toolbar completa e atalhos, mantendo todo o resto do formulário intacto.
 
-- [ ] **T2.1 — Instalar as dependências do TipTap**
+- [x] **T2.1 — Instalar as dependências do TipTap**
   - **Objetivo:** adicionar só `StarterKit` + `link` + `image` + `placeholder` e
     os peers, sem uso ainda.
   - **Arquivos:** `package.json`, `package-lock.json`.
-  - **Pacotes:** `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`,
-    `@tiptap/extension-link`, `@tiptap/extension-image`,
-    `@tiptap/extension-placeholder`. Versões exatas anotadas no registro de
-    progresso.
+  - **Pacotes (TipTap v3.31.3):** `@tiptap/react`, `@tiptap/pm`,
+    `@tiptap/starter-kit`, `@tiptap/extension-image`,
+    `@tiptap/extension-placeholder`. **Sem** `@tiptap/extension-link` avulso: no
+    v3 o `StarterKit` já embute `Link` (`@tiptap/starter-kit` depende dele) e se
+    configura via `StarterKit.configure({ link: {...} })` — instalar o pacote à
+    parte duplicaria a extensão.
   - **Critério de aceite:** `npm run build` verde; `git diff package.json` mostra
     só esses 6 pacotes adicionados; o bundle **público** (`dist/assets/*`) não
     cresce (o import só entra no chunk do admin, verificado em T2.2).
@@ -705,7 +707,9 @@ schema será feita sem consulta.
 | 2026-09-04 | Decisões D1–D7 | — | D1 aprovado (marcação dos elementos). D2 adiado (embed → §5). D3 `localStorage`. D4/D5/D6 aprovados. D7 novo: formatação customizada de imagem no corpo → E6/T6.4. |
 | 2026-09-04 | E1 · T1.1 | c6897f2 | `src/lib/sanitize.js`: hook `afterSanitizeAttributes` filtra `class` contra allowlist fixa (`olho`, `boxe`, `nota-editor`, `credito`); `FORBID_ATTR` ganhou `srcset`; comentários atualizados (a função agora vale para escrita + leitura). `scripts/test-sanitize.mjs` com 5 casos (roda com `jsdom`; sem ele, sai com aviso). Build verde. Lint sem regressão nos arquivos tocados. |
 | 2026-09-04 | E1 · T1.3 | ae529ea | `savePost` (`src/lib/postsService.js`) passa o corpo por `sanitizeHtml` antes de gravar `content`/`text_content`. Texto puro sem tags passa intacto; HTML fora da allowlist é limpo na escrita. `content_backup` (T1.2) é a rede de segurança. Build verde; lint limpo nos arquivos tocados. |
-| 2026-09-04 | E1 · T1.4 | _(a commitar)_ | Botão "Desfazer último salvamento" (só no modo edição) em `NoticiaForm.jsx`. `useNoticiaForm`: `restoreBackup` (confirma → lê `content_backup` fresco → restaura no corpo e persiste) + `backupAvailable` (do load; desabilita o botão quando não há backup). `submit` refatorado com `buildPayload` compartilhado. Funciona como alternância (o `savePost` grava o corpo de agora como novo backup). Build verde; lint limpo. **Fim da Etapa E1.** |
+| 2026-09-04 | E1 · T1.4 | be9d15c | Botão "Desfazer último salvamento" (só no modo edição) em `NoticiaForm.jsx`. `useNoticiaForm`: `restoreBackup` (confirma → lê `content_backup` fresco → restaura no corpo e persiste) + `backupAvailable` (do load; desabilita o botão quando não há backup). `submit` refatorado com `buildPayload` compartilhado. Funciona como alternância (o `savePost` grava o corpo de agora como novo backup). Build verde; lint limpo. **Fim da Etapa E1.** |
+| 2026-09-04 | E1 aprovada; início de E2 | — | Usuário aprovou E1 sem instalar `jsdom` por ora. |
+| 2026-09-04 | E2 · T2.1 | _(a commitar)_ | Instalado TipTap **v3.31.3**: `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extension-image`, `@tiptap/extension-placeholder` (5 pacotes; `extension-link` ficou de fora — o v3 já embute Link no StarterKit, configurável via `StarterKit.configure({ link: {...} })`). `BubbleMenu`/`FloatingMenu` (T2.4) também já vêm via `@tiptap/react/menus`, sem pacote extra. `npm audit`: 18 vulnerabilidades, todas pré-existentes em deps transitivas do projeto (vite/react-router/eslint/etc.), nenhuma em `@tiptap/*` — não mexidas (fora de escopo). Build verde, bundle público idêntico (nada importado ainda). |
 
 ---
 
