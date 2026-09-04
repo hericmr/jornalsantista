@@ -12,6 +12,58 @@
 
 ---
 
+## 0. STATUS ATUAL — pausado em 2026-09-04, retomar por aqui
+
+**Onde paramos:** Etapa **E1 concluída** e Etapa **E2 concluída** (T2.1–T2.6, a
+T2.6 fora do plano original — layout de escrita pedido pelo usuário). Tudo
+commitado e **em produção** (`origin/main`, até o commit `efe0e09`).
+
+**🔴 Investigação aberta, NÃO resolvida — tratar antes de qualquer coisa nova:**
+Usuário reportou que, depois de salvar uma edição, o conteúdo parece **não ter
+mudado**. Ainda não sabemos se é:
+  (a) só o **cache do site público** (a página `/noticia/:slug` lê primeiro um
+      snapshot estático que leva ~2 min para regenerar após salvar — isso é
+      comportamento *pré-existente*, da "Fase I" do `planning-editor.md`, não
+      é algo desta sessão), ou
+  (b) um **bug real de salvamento** — possivelmente relacionado às mudanças de
+      T1.2/T1.3 em `savePost` (`src/lib/postsService.js`): antes do UPDATE
+      principal, agora existe um UPDATE extra só para `content_backup`
+      (`postsAPI.getPostById` + `postsAPI.updatePost` com só esse campo) —
+      dois `UPDATE`s sequenciais na mesma linha. Não identifiquei um bug
+      concreto lendo o código, mas essa é a área mais suspeita porque foi
+      tocada nesta sessão.
+
+**Pedido ao usuário (respondido? — conferir ao retomar):**
+  1. Rodar no SQL editor do Supabase, logo após salvar uma edição de teste
+     (com um marcador óbvio tipo "TESTE123" no corpo):
+     ```sql
+     select id, title, updated_at, content_backup is not null as tem_backup,
+            left(content, 200) as content_preview
+     from posts
+     where id = <ID>;
+     ```
+     — `updated_at` está fresco? `content_preview` mostra a edição?
+  2. Checar o Console do DevTools (F12) no momento de clicar "Salvar" — algum
+     erro em vermelho?
+
+**Ao retomar amanhã:**
+  1. Ler a resposta do usuário a esse pedido (pode ter vindo depois desta
+     sessão, fora do chat).
+  2. Se `updated_at`/`content_preview` confirmarem que o banco atualiza
+     normalmente → é só o cache do snapshot (a); nesse caso, ação sugerida:
+     melhorar o aviso pós-salvar ("Notícia atualizada — o site pode levar
+     ~2 min para atualizar") e considerar adiantar parte da E7/T7.4 (preview
+     fiel, que lê o estado ao vivo do formulário, não o snapshot).
+  3. Se o banco **não** atualizar → bug real em `savePost`
+     (`src/lib/postsService.js`, função `savePost`, bloco `if (!isNew && hasId)`
+     — os dois `UPDATE`s sequenciais de T1.2). Investigar com prioridade
+     máxima antes de tocar em qualquer outra coisa — **não iniciar a Etapa E3**
+     enquanto isso não estiver resolvido e confirmado pelo usuário.
+  4. Não foi possível reproduzir localmente (sem `.env`/Supabase neste
+     ambiente) — a investigação depende dos dados que o usuário trouxer.
+
+---
+
 ## 1. Visão geral
 
 ### O que muda
@@ -752,7 +804,8 @@ schema será feita sem consulta.
 | 2026-09-04 | E2 · T2.4 | e53347f | `RichTextBubbleMenu.jsx`: menu flutuante ao selecionar texto — negrito, itálico, intertítulo (H2), link. `ToolbarButton`/`LinkControl` de T2.3 ganharam prop `variant` ("toolbar" claro / "bubble" escuro flutuante) para serem reaproveitados aqui. `@tiptap/extension-bubble-menu` + `@floating-ui/*` já vieram como `optionalDependencies` de `@tiptap/react` (nenhum pacote novo instalado). CSS novo. Chunk `RichTextEditor-*.js` cresceu para 467.69 kB / 147.62 kB gzip (floating-ui é pesado) — isolado do público, só usado no admin. Build e lint verdes. |
 | 2026-09-04 | E2 · T2.5 | 099c41d | **Achado real, corrigido:** sem essa tarefa, o editor quebrava justamente as matérias em texto puro (a maioria do acervo) — o parser de HTML do ProseMirror colapsa `\n` (regra de espaço em branco do HTML), então um texto com parágrafos separados por linha em branco viraria um bloco só, sem quebra nenhuma. `toFormState` e o `restoreBackup` (T1.4) agora passam o corpo por `processHtmlContent` — a mesma função que o `Noticia.jsx` público já usa — antes de entregá-lo ao editor: texto puro ganha `<br>` explícito; HTML já estruturado só perde indentação (idempotente, sem mudar o conteúdo visível). Testado isoladamente em Node (função pura, sem DOM): `"a\n\nb\nc"` → `"a<br><br>b<br>c"`; `"<p>x</p>\n<p>y</p>"` → `"<p>x</p><p>y</p>"`. Build e lint verdes. |
 | 2026-09-04 | E2 · T2.6 (fora do plano original) | 23ad191 | Usuário pediu para reformular a disposição — 3 colunas prejudicava a imersão na escrita. `NoticiaForm.jsx` reestruturado: topbar fixa (Cancelar, Ver o site, Desfazer, **Detalhes**, Salvar) + página branca centralizada (título grande estilo documento + editor, folha de "papel" sobre o admin escuro, tipografia igual à pública) + painel "Detalhes" (resumo, categorias, status, autores, data, imagens) que desliza por cima, sem empurrar a escrita. Nenhum campo, handler ou comportamento mudou — só a posição (conferido campo a campo por grep contra a versão anterior). CSS novo em `index.css`; removidas as regras `.admin-editar-noticia .card`/`.card-header` (não existem mais na tela) e adicionados overrides para a toolbar/popover de link não herdarem o tema escuro genérico de input/botão (o editor senta sobre a folha branca, não sobre o admin escuro). Build e lint verdes. **Fim da Etapa E2.** |
-| 2026-09-04 | **Bugfix em produção** (T2.2) | _(a commitar)_ | Usuário reportou crash em produção logo após testar: `TypeError: can't access property "cached", e is null` em `fromSchema`, vindo de `getHTML()` chamado de dentro do `useEffect` de sincronização de `RichTextEditor.jsx` — sem error boundary, derrubava a tela inteira. Causa: o efeito comparava `value !== editor.getHTML()` a cada render para decidir se ressincroniza; chamar um método do editor de forma reativa é arriscado (o editor pode estar sendo destruído/recriado nesse instante — ex.: navegar para fora da tela — e a chamada quebra com schema nulo). **Corrigido**: o efeito agora usa uma `ref` (`isInternalUpdate`) para saber se a mudança de `value` veio do próprio editor (digitação normal → pula a ressincronização) ou de fora (trocar de matéria, desfazer, reparar texto puro → ressincroniza via `setContent`, sem nunca chamar `getHTML()` reativamente); guardas `editor.isDestroyed` em todos os pontos de risco. Build e lint verdes. **Verificação em tela pendente do usuário — é o que mais importa confirmar agora.** |
+| 2026-09-04 | **Bugfix em produção** (T2.2) | efe0e09 | Usuário reportou crash em produção logo após testar: `TypeError: can't access property "cached", e is null` em `fromSchema`, vindo de `getHTML()` chamado de dentro do `useEffect` de sincronização de `RichTextEditor.jsx` — sem error boundary, derrubava a tela inteira. Causa: o efeito comparava `value !== editor.getHTML()` a cada render para decidir se ressincroniza; chamar um método do editor de forma reativa é arriscado (o editor pode estar sendo destruído/recriado nesse instante — ex.: navegar para fora da tela — e a chamada quebra com schema nulo). **Corrigido**: o efeito agora usa uma `ref` (`isInternalUpdate`) para saber se a mudança de `value` veio do próprio editor (digitação normal → pula a ressincronização) ou de fora (trocar de matéria, desfazer, reparar texto puro → ressincroniza via `setContent`, sem nunca chamar `getHTML()` reativamente); guardas `editor.isDestroyed` em todos os pontos de risco. Build e lint verdes. |
+| 2026-09-04 | **🔴 Relato: salvar não muda o conteúdo visível** | — | Usuário: "atualizei e nada [mudou]". Pedido diagnóstico (query SQL de `updated_at`/`content` + checagem do Console do navegador) — resposta ainda não chegou nesta sessão. Hipóteses: (a) cache do snapshot público (~2 min, pré-existente) ou (b) bug real nos dois `UPDATE`s sequenciais que T1.2 adicionou a `savePost`. **Sessão pausada a pedido do usuário antes de confirmar qual é.** Ver seção 0 (topo do arquivo) para retomar. **Não iniciar E3 até isso ser resolvido.** |
 
 ---
 
