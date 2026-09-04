@@ -298,6 +298,40 @@ toolbar completa e atalhos, mantendo todo o resto do formulário intacto.
     normalizar tags). Mitigação: `content_backup`. Reversão = `git revert`.
   - **Dependências:** **T2.2**.
 
+- [x] **T2.6 — Layout de escrita** *(inserida por pedido do usuário durante a
+  Etapa E2 — não estava no plano original; a página de 3 colunas — nav do
+  admin + conteúdo + configurações — prejudicava a imersão na escrita)*
+  - **Objetivo:** reformular a disposição da tela para coluna única
+    (título + corpo, sem vizinhos), com os campos de metadados (resumo,
+    categorias, status, autores, data, imagens) num painel "Detalhes" que
+    abre sob demanda — sem alterar nome, comportamento ou lógica de nenhum
+    campo (regra "não reorganize os metadados" preservada: só a posição
+    visual muda, os campos continuam exatamente os mesmos).
+  - **Arquivos:** `src/admin/components/NoticiaForm.jsx` (reestruturado);
+    `src/index.css` (`.noticia-editor-*`, `.noticia-details-*`; removidas as
+    regras mortas `.admin-editar-noticia .card`/`.card-header`, que não
+    existem mais na tela; overrides para a toolbar/popover de link não
+    herdarem o tema escuro genérico de input/botão).
+  - **Critério de aceite:** ao abrir criar/editar matéria, a tela mostra só
+    título (grande, estilo documento) e o editor, numa folha branca
+    centralizada — nenhum card de configurações visível. Um botão
+    "Detalhes" abre um painel lateral (com Resumo, Categorias, Status,
+    Autores, Data, Imagens) por cima do conteúdo, sem empurrar a coluna de
+    escrita; `Esc` ou clique fora fecha. Salvar uma matéria de teste com
+    campos preenchidos nos dois lugares (título/corpo na página, resto no
+    painel) e conferir que tudo persiste normalmente.
+  - **Como verificar:** abrir `/admin/noticias/nova`, digitar título e
+    corpo, abrir "Detalhes", preencher resumo/categoria/autor, fechar,
+    salvar; reabrir e conferir que os dois grupos de campos voltaram
+    preenchidos.
+  - **Risco e reversão:** médio (reestruturação grande de JSX, mas sem
+    tocar em `useNoticiaForm.js`/handlers — só posição visual). Mitigação:
+    todos os campos e handlers testados por grep 1:1 contra a versão
+    anterior antes do commit. Reversão = `git revert` (volta ao layout de
+    2 colunas).
+  - **Dependências:** **T2.2** (o editor precisa existir para ocupar a
+    coluna principal).
+
 *Fim de E2:* editor TipTap completo no lugar do `<textarea>`, matérias antigas
 abrindo e salvando. `npm run build` verde.
 
@@ -716,7 +750,8 @@ schema será feita sem consulta.
 | 2026-09-04 | E2 · T2.3 | 23cfb42 | `src/admin/components/RichTextToolbar.jsx`: negrito, itálico, riscado, H2/H3/H4, listas, citação, link (popover com validação http(s)/mailto + remover), linha divisória, limpar formatação (D5: só marcas inline + rebaixa heading), desfazer/refazer. Estado ativo via `useEditorState` (re-renderiza em toda mudança de seleção/transação, não só no conteúdo). Atalhos de teclado vêm de graça do StarterKit (Mod-b/i, Mod-z/y, etc.). CSS novo em `index.css`. **Nota honesta sobre bundle:** o chunk `RichTextEditor-*.js` cresceu (+4 kB) como esperado; o chunk **principal** também cresceu uns 7 kB — não por causa do TipTap (a toolbar não é importada fora do lazy), mas porque `NoticiaForm.jsx` (não lazy) já importava `react-icons/fa`, e a toolbar importou mais ícones desse mesmo módulo; o Rollup preferiu não duplicar o módulo entre os dois chunks. A app inteira (inclusive as telas do admin) já ia num bundle só antes desta etapa — só o pedaço do TipTap ficou isolado, que era o objetivo. Build e lint verdes. |
 | 2026-09-04 | **Push para `origin/main`** | 23cfb42 | Usuário perguntou se o site estava sendo atualizado — não estava (6 commits só locais). Empurrado tudo (`641eabe..23cfb42`). **E2 foi ao ar pela metade** (T2.4/T2.5 ainda não feitas nem testadas em tela); usuário avisado e pediu para confirmar no ambiente dele. |
 | 2026-09-04 | E2 · T2.4 | e53347f | `RichTextBubbleMenu.jsx`: menu flutuante ao selecionar texto — negrito, itálico, intertítulo (H2), link. `ToolbarButton`/`LinkControl` de T2.3 ganharam prop `variant` ("toolbar" claro / "bubble" escuro flutuante) para serem reaproveitados aqui. `@tiptap/extension-bubble-menu` + `@floating-ui/*` já vieram como `optionalDependencies` de `@tiptap/react` (nenhum pacote novo instalado). CSS novo. Chunk `RichTextEditor-*.js` cresceu para 467.69 kB / 147.62 kB gzip (floating-ui é pesado) — isolado do público, só usado no admin. Build e lint verdes. |
-| 2026-09-04 | E2 · T2.5 | _(a commitar)_ | **Achado real, corrigido:** sem essa tarefa, o editor quebrava justamente as matérias em texto puro (a maioria do acervo) — o parser de HTML do ProseMirror colapsa `\n` (regra de espaço em branco do HTML), então um texto com parágrafos separados por linha em branco viraria um bloco só, sem quebra nenhuma. `toFormState` e o `restoreBackup` (T1.4) agora passam o corpo por `processHtmlContent` — a mesma função que o `Noticia.jsx` público já usa — antes de entregá-lo ao editor: texto puro ganha `<br>` explícito; HTML já estruturado só perde indentação (idempotente, sem mudar o conteúdo visível). Testado isoladamente em Node (função pura, sem DOM): `"a\n\nb\nc"` → `"a<br><br>b<br>c"`; `"<p>x</p>\n<p>y</p>"` → `"<p>x</p><p>y</p>"`. Build e lint verdes. **Fim da Etapa E2.** |
+| 2026-09-04 | E2 · T2.5 | 099c41d | **Achado real, corrigido:** sem essa tarefa, o editor quebrava justamente as matérias em texto puro (a maioria do acervo) — o parser de HTML do ProseMirror colapsa `\n` (regra de espaço em branco do HTML), então um texto com parágrafos separados por linha em branco viraria um bloco só, sem quebra nenhuma. `toFormState` e o `restoreBackup` (T1.4) agora passam o corpo por `processHtmlContent` — a mesma função que o `Noticia.jsx` público já usa — antes de entregá-lo ao editor: texto puro ganha `<br>` explícito; HTML já estruturado só perde indentação (idempotente, sem mudar o conteúdo visível). Testado isoladamente em Node (função pura, sem DOM): `"a\n\nb\nc"` → `"a<br><br>b<br>c"`; `"<p>x</p>\n<p>y</p>"` → `"<p>x</p><p>y</p>"`. Build e lint verdes. |
+| 2026-09-04 | E2 · T2.6 (fora do plano original) | _(a commitar)_ | Usuário pediu para reformular a disposição — 3 colunas prejudicava a imersão na escrita. `NoticiaForm.jsx` reestruturado: topbar fixa (Cancelar, Ver o site, Desfazer, **Detalhes**, Salvar) + página branca centralizada (título grande estilo documento + editor, folha de "papel" sobre o admin escuro, tipografia igual à pública) + painel "Detalhes" (resumo, categorias, status, autores, data, imagens) que desliza por cima, sem empurrar a escrita. Nenhum campo, handler ou comportamento mudou — só a posição (conferido campo a campo por grep contra a versão anterior). CSS novo em `index.css`; removidas as regras `.admin-editar-noticia .card`/`.card-header` (não existem mais na tela) e adicionados overrides para a toolbar/popover de link não herdarem o tema escuro genérico de input/botão (o editor senta sobre a folha branca, não sobre o admin escuro). Build e lint verdes. **Verificação em tela pendente do usuário.** **Fim da Etapa E2.** |
 
 ---
 
