@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsService';
-import { slugify } from '../../utils/textUtils';
+import { slugify, stripHtml } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
 import { requestRepublish } from '../../lib/republish';
 import { useToast, useConfirm } from '../components/AdminFeedback';
@@ -201,6 +201,14 @@ export const useNoticiaForm = ({ mode, id }) => {
   const submit = useCallback(
     async (e) => {
       if (e && e.preventDefault) e.preventDefault();
+
+      // O corpo agora vem do editor richtext (sem <textarea required>): a
+      // validação de "não pode ficar vazio" precisa ser feita aqui.
+      if (!stripHtml(post.content).trim()) {
+        toast.error('O conteúdo da matéria não pode ficar vazio.');
+        return;
+      }
+
       setSaving(true);
       try {
         const payload = buildPayload();
@@ -226,7 +234,7 @@ export const useNoticiaForm = ({ mode, id }) => {
         setSaving(false);
       }
     },
-    [buildPayload, existingId, isEdit, navigate, toast]
+    [buildPayload, existingId, isEdit, navigate, post.content, toast]
   );
 
   // Desfazer último salvamento (T1.4): restaura `content_backup` como corpo

@@ -1,18 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  FaSave,
-  FaTimes,
-  FaImage,
-  FaUndo,
-  FaBold,
-  FaItalic,
-  FaUnderline,
-  FaListUl,
-  FaListOl,
-  FaQuoteLeft
-} from 'react-icons/fa';
+import { FaSave, FaTimes, FaImage, FaUndo } from 'react-icons/fa';
 import { useNoticiaForm } from '../hooks/useNoticiaForm';
+import RichTextEditor from './RichTextEditor.lazy';
 
 // Formulário único de matéria — usado por "Nova notícia" e "Editar notícia".
 const NoticiaForm = ({ mode, id }) => {
@@ -37,40 +27,8 @@ const NoticiaForm = ({ mode, id }) => {
     backupAvailable
   } = useNoticiaForm({ mode, id });
 
-  const contentRef = useRef(null);
   const fileInputRef = useRef(null);
   const [newAuthor, setNewAuthor] = useState('');
-
-  // Envolve a seleção do textarea com uma marcação HTML simples.
-  const formatText = (command) => {
-    const textarea = contentRef.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = textarea.value.substring(start, end);
-
-    const wrap = {
-      bold: `<strong>${selected}</strong>`,
-      italic: `<em>${selected}</em>`,
-      underline: `<u>${selected}</u>`,
-      ul: `<ul>\n<li>${selected}</li>\n</ul>`,
-      ol: `<ol>\n<li>${selected}</li>\n</ol>`,
-      quote: `<blockquote>${selected}</blockquote>`
-    };
-    const formatted = wrap[command] ?? selected;
-
-    const next =
-      textarea.value.substring(0, start) +
-      formatted +
-      textarea.value.substring(end);
-    setPost((prev) => ({ ...prev, content: next }));
-
-    setTimeout(() => {
-      textarea.focus();
-      const caret = start + formatted.length;
-      textarea.setSelectionRange(caret, caret);
-    }, 0);
-  };
 
   const submitNewAuthor = () => {
     addAuthor(newAuthor);
@@ -234,81 +192,16 @@ const NoticiaForm = ({ mode, id }) => {
                     Conteúdo *
                   </label>
 
-                  <div className="editor-toolbar mb-2">
-                    <div className="btn-group" role="group">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => formatText('bold')}
-                        title="Negrito"
-                      >
-                        <FaBold />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => formatText('italic')}
-                        title="Itálico"
-                      >
-                        <FaItalic />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => formatText('underline')}
-                        title="Sublinhado"
-                      >
-                        <FaUnderline />
-                      </button>
-                    </div>
-
-                    <div className="btn-group ms-2" role="group">
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => formatText('ul')}
-                        title="Lista não ordenada"
-                      >
-                        <FaListUl />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => formatText('ol')}
-                        title="Lista ordenada"
-                      >
-                        <FaListOl />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => formatText('quote')}
-                        title="Citação"
-                      >
-                        <FaQuoteLeft />
-                      </button>
-                    </div>
-                  </div>
-
-                  <textarea
-                    ref={contentRef}
-                    className="form-control"
-                    id="content"
-                    name="content"
-                    rows="15"
+                  <RichTextEditor
                     value={post.content}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      fontFamily: 'Georgia, Times New Roman, serif',
-                      fontSize: '16px',
-                      lineHeight: '1.6'
-                    }}
+                    onChange={(html) =>
+                      setPost((prev) => ({ ...prev, content: html }))
+                    }
                   />
 
                   <div className="form-text">
-                    Dica: Selecione o texto e use os botões acima para formatar.
-                    Você pode usar HTML diretamente.
+                    Barra de formatação completa chega na próxima tarefa
+                    (negrito, itálico, títulos, listas, citação, link…).
                   </div>
                 </div>
               </div>

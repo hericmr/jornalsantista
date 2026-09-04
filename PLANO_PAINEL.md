@@ -226,13 +226,15 @@ toolbar completa e atalhos, mantendo todo o resto do formulário intacto.
     `git checkout package*.json`.
   - **Dependências:** nenhuma.
 
-- [ ] **T2.2 — Componente `RichTextEditor` carregado sob demanda**
+- [x] **T2.2 — Componente `RichTextEditor` carregado sob demanda**
   - **Objetivo:** um editor TipTap (sem toolbar ainda) que recebe `value` (HTML),
     emite `onChange` (HTML via `editor.getHTML()`), com `React.lazy` +
     `Suspense`, substituindo o `<textarea>` do corpo em `NoticiaForm`.
   - **Arquivos:** novo `src/admin/components/RichTextEditor.jsx`; novo
-    `src/admin/components/RichTextEditor.lazy.js` (wrapper `React.lazy`);
-    `src/admin/components/NoticiaForm.jsx` (troca do campo de conteúdo).
+    `src/admin/components/RichTextEditor.lazy.jsx` (wrapper `React.lazy` +
+    `Suspense`); `src/admin/components/NoticiaForm.jsx` (troca do campo de
+    conteúdo, remove a toolbar/`formatText` antigos); `src/admin/hooks/useNoticiaForm.js`
+    (validação de corpo vazio, já que o `required` do `<textarea>` some).
   - **Critério de aceite:** abrir `/admin/noticias/editar/<id>` de uma matéria
     com HTML → o conteúdo aparece renderizado (negrito, listas, parágrafos), é
     editável, e ao salvar o corpo persiste. Enquanto o editor carrega, aparece um
@@ -709,7 +711,8 @@ schema será feita sem consulta.
 | 2026-09-04 | E1 · T1.3 | ae529ea | `savePost` (`src/lib/postsService.js`) passa o corpo por `sanitizeHtml` antes de gravar `content`/`text_content`. Texto puro sem tags passa intacto; HTML fora da allowlist é limpo na escrita. `content_backup` (T1.2) é a rede de segurança. Build verde; lint limpo nos arquivos tocados. |
 | 2026-09-04 | E1 · T1.4 | be9d15c | Botão "Desfazer último salvamento" (só no modo edição) em `NoticiaForm.jsx`. `useNoticiaForm`: `restoreBackup` (confirma → lê `content_backup` fresco → restaura no corpo e persiste) + `backupAvailable` (do load; desabilita o botão quando não há backup). `submit` refatorado com `buildPayload` compartilhado. Funciona como alternância (o `savePost` grava o corpo de agora como novo backup). Build verde; lint limpo. **Fim da Etapa E1.** |
 | 2026-09-04 | E1 aprovada; início de E2 | — | Usuário aprovou E1 sem instalar `jsdom` por ora. |
-| 2026-09-04 | E2 · T2.1 | _(a commitar)_ | Instalado TipTap **v3.31.3**: `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extension-image`, `@tiptap/extension-placeholder` (5 pacotes; `extension-link` ficou de fora — o v3 já embute Link no StarterKit, configurável via `StarterKit.configure({ link: {...} })`). `BubbleMenu`/`FloatingMenu` (T2.4) também já vêm via `@tiptap/react/menus`, sem pacote extra. `npm audit`: 18 vulnerabilidades, todas pré-existentes em deps transitivas do projeto (vite/react-router/eslint/etc.), nenhuma em `@tiptap/*` — não mexidas (fora de escopo). Build verde, bundle público idêntico (nada importado ainda). |
+| 2026-09-04 | E2 · T2.1 | 9d603ca | Instalado TipTap **v3.31.3**: `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extension-image`, `@tiptap/extension-placeholder` (5 pacotes; `extension-link` ficou de fora — o v3 já embute Link no StarterKit, configurável via `StarterKit.configure({ link: {...} })`). `BubbleMenu`/`FloatingMenu` (T2.4) também já vêm via `@tiptap/react/menus`, sem pacote extra. `npm audit`: 18 vulnerabilidades, todas pré-existentes em deps transitivas do projeto (vite/react-router/eslint/etc.), nenhuma em `@tiptap/*` — não mexidas (fora de escopo). Build verde, bundle público idêntico (nada importado ainda). |
+| 2026-09-04 | E2 · T2.2 | _(a commitar)_ | `src/admin/components/RichTextEditor.jsx` (TipTap: StarterKit+Image+Placeholder, controlado por `value`/`onChange`) + `RichTextEditor.lazy.jsx` (`React.lazy`+`Suspense`, arquivo separado do `.jsx` real). `NoticiaForm.jsx`: removidos `formatText`/`contentRef`/toolbar antiga e o `<textarea>`; entra o editor novo. `useNoticiaForm`: validação de corpo vazio no `submit` (o `required` do textarea sumiu). CSS novo `.richtext-editor*` em `index.css` (o `.editor-toolbar` antigo fica para a limpeza de T8.5). **Build confirma o code-splitting sozinho:** chunk `RichTextEditor-*.js` (408 kB / 129 kB gzip) separado de `index-*.js` — só carrega nas rotas do admin que montam o editor. Build e lint verdes. **Verificação em tela pendente do usuário** (sem `.env`/Supabase neste ambiente): abrir uma matéria com HTML e uma em texto puro em `/admin/noticias/editar/:id`, conferir que o corpo aparece e edita, e que salvar persiste. |
 
 ---
 

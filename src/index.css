@@ -1006,7 +1006,48 @@ a:hover {
   }
 }
 
-/* Estilos para o editor de texto rico personalizado */
+/* Editor richtext do corpo da matéria (TipTap — E2). O `.editor-toolbar`
+   abaixo é da toolbar antiga (textarea); sai na limpeza de T8.5. */
+.richtext-editor-shell {
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  background: #fff;
+}
+.richtext-editor-shell:focus-within {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.richtext-editor {
+  min-height: 360px;
+  padding: 0.75rem 1rem;
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #212529;
+  outline: none;
+}
+.richtext-editor p,
+.richtext-editor ul,
+.richtext-editor ol,
+.richtext-editor blockquote {
+  margin: 0 0 1rem;
+}
+.richtext-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: #6c757d;
+  font-style: italic;
+  pointer-events: none;
+}
+.richtext-editor-loading {
+  min-height: 300px;
+  border: 1px dashed #ced4da;
+  border-radius: 0.375rem;
+  color: #6c757d;
+}
+
+/* Estilos para o editor de texto rico personalizado (legado — ver T8.5) */
 .editor-toolbar {
   background-color: #f8f9fa;
   border: 1px solid #ced4da;
