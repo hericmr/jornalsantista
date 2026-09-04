@@ -31,9 +31,10 @@
   conteúdo anterior em `content_backup` antes; reversível.
 - **Elementos jornalísticos no corpo**: intertítulo, olho (citação destacada),
   boxe, crédito de foto, nota do editor.
-- **Imagens e mídia no corpo**: upload ou URL, com legenda, crédito e texto
-  alternativo obrigatório, como `<figure><img><figcaption>` no HTML do corpo.
-  Incorporação de vídeo/posts por URL (condicionada à Decisão D2).
+- **Imagens no corpo**: upload ou URL, com legenda, crédito e texto alternativo
+  obrigatório, como `<figure><img><figcaption>` no HTML do corpo, com formatação
+  customizada (alinhamento e tamanho — D7). Incorporação de vídeo/posts por URL
+  fica **adiada** (D2).
 - **Fluxo de escrita**: autosave local de rascunho com indicador de estado, aviso
   ao sair com alterações não salvas, contador de palavras e tempo de leitura,
   pré-visualização fiel ao site, modo foco.
@@ -66,45 +67,38 @@
 
 ---
 
-## 2. Decisões técnicas em aberto (dependem de você)
+## 2. Decisões técnicas (resolvidas em 2026-09-04)
 
-**D1 — Marcação semântica dos elementos jornalísticos.**
-Proposta para fechar a allowlist e o CSS:
-- Intertítulo → `<h2>` / `<h3>` (já cobertos pela toolbar; sem tag nova).
+**D1 — Marcação dos elementos jornalísticos.** ✅ Aprovada a proposta:
+- Intertítulo → `<h2>` / `<h3>` (sem tag nova).
 - Olho (citação destacada) → `<blockquote class="olho">`.
 - Boxe → `<aside class="boxe">`.
 - Crédito de foto → `<figcaption class="credito">` dentro de `<figure>`.
 - Nota do editor → `<aside class="nota-editor">`.
-Aceita essa marcação, ou prefere outra (ex.: `<div>` com `data-tipo`, ou classes
-diferentes)? A resposta trava E5 e a allowlist em E1/T1.1.
 
-**D2 — Incorporação de vídeo e posts por URL (item "e" do escopo).**
-A allowlist hoje tem `FORBID_TAGS: ['iframe', ...]`. Opções:
-- (a) Permitir `<iframe>` só de uma allowlist de domínios (YouTube, Vimeo, X,
-  Instagram) — mais fiel, aumenta a superfície de segurança.
-- (b) Renderizar um **card com link + thumbnail**, sem iframe — mais seguro,
-  menos fiel ao embed real.
-- (c) Adiar embed para depois; nesta rodada, só imagem no corpo.
-Qual? Isso define o escopo de E6/T6.3.
+**D2 — Incorporação de vídeo/posts por URL.** ⏸️ **Adiada.** Nesta rodada, só
+imagem no corpo. E6/T6.3 fica registrada como fora do escopo atual (ver §5).
 
-**D3 — Armazenamento do autosave local.**
-`localStorage` (simples, síncrono, ~5 MB por origem, chave por `id`/"nova") vs.
-`IndexedDB` (mais robusto para textos longos). Proposta: `localStorage`.
-Confirma?
+**D3 — Autosave local.** ✅ `localStorage`, uma chave por matéria
+(`id` / "nova").
 
-**D4 — Heurística de detecção de intertítulo na rotina de reparo (T4.1).**
-Proposta: linha isolada (cercada por linha em branco), com no máximo ~60
-caracteres, sem pontuação final (`. ? ! : ;`) → vira `<h2>`. Todos como `<h2>`,
-ou alternar `<h2>`/`<h3>` por algum critério? Confirma o teto de caracteres?
+**D4 — Detecção de intertítulo na rotina de reparo.** ✅ Linha isolada (cercada
+por linha em branco), ≤ 60 caracteres, sem pontuação final (`. ? ! : ;`) →
+vira `<h2>`.
 
-**D5 — Comportamento de "Limpar formatação".**
-Proposta: remove só marcas inline (negrito, itálico, riscado, link, sublinhado)
-e rebaixa heading da seleção para parágrafo; **não** mexe em listas/citações.
-Confirma, ou quer que limpe tudo (inclusive blocos)?
+**D5 — "Limpar formatação".** ✅ Remove só marcas inline (negrito, itálico,
+riscado, link, sublinhado) e rebaixa heading da seleção para parágrafo; não
+mexe em listas/citações.
 
-**D6 — Apresentação dos elementos jornalísticos na UI.**
-Botões fixos na toolbar vs. um dropdown "Inserir" (mais enxuto). Proposta:
-dropdown "Inserir" na toolbar. Confirma?
+**D6 — Elementos jornalísticos na UI.** ✅ Dropdown "Inserir" na toolbar.
+
+**D7 — Formatação customizada de imagem no corpo.** ➕ Pedido acrescentado pelo
+usuário: além de inserir imagem com legenda/crédito/alt, poder **formatar** a
+imagem no corpo (alinhamento e tamanho). Entra como E6/T6.4. Proposta de opções
+a confirmar na T6.4: alinhamento (esquerda / centro / direita / largura plena) e
+tamanho (pequena ≈ 320 px / média ≈ 480 px / grande = largura da coluna /
+plena = *full-bleed*), aplicados como classes na `<figure>`
+(`class="fig-esq fig-media"` etc.) e refletidos na allowlist e no CSS público.
 
 ---
 
@@ -122,7 +116,7 @@ preview) → **E8** (qualidade e acessibilidade).
 *Objetivo da etapa:* criar a proteção contra perda de conteúdo e alinhar a
 sanitização, sem alterar ainda a experiência de edição (o `<textarea>` continua).
 
-- [ ] **T1.1 — Revisar e travar a allowlist do DOMPurify**
+- [x] **T1.1 — Revisar e travar a allowlist do DOMPurify**
   - **Objetivo:** garantir que `figure`, `figcaption`, `hr`, `cite`,
     `blockquote`, `h2`–`h4`, listas e `a[href target rel]` passem, e que só um
     conjunto fixo de valores de `class` seja aceito (os de D1).
@@ -484,25 +478,34 @@ legenda e crédito, como `<figure>` no HTML — **sem tocar no array `images`**.
     `git revert`.
   - **Dependências:** **T6.1**.
 
-- [ ] **T6.3 — Incorporar vídeo/posts por URL** *(condicionada a D2)*
-  - **Objetivo:** conforme D2 — (a) iframe de domínios permitidos, (b) card com
-    link, ou (c) adiar.
-  - **Arquivos:** dependem de D2; provavelmente
-    `src/admin/components/tiptap/Embed.js`, `src/lib/sanitize.js` (se iframe),
-    `src/index.css`.
-  - **Critério de aceite:** colar/inserir uma URL de YouTube e uma de X → o
-    conteúdo aparece no editor e renderiza em `/noticia/<slug>` conforme a opção
-    de D2; se a opção for iframe, `sanitizeHtml` só permite os domínios da
-    allowlist (uma URL de domínio aleatório é removida).
-  - **Como verificar:** manual, com uma URL válida e uma de domínio não
-    permitido; conferir `content` no banco e a renderização.
-  - **Risco e reversão:** **alto** se D2 = iframe (superfície de segurança).
-    Mitigação: allowlist de domínios estrita + teste. Reversão = `git revert` +
-    reverter a mudança de `sanitize.js`.
-  - **Dependências:** **D2**, **T2.3**, **T1.1**.
+- [ ] **T6.3 — Incorporar vídeo/posts por URL** — ⏸️ **adiada (D2)**, ver §5.
 
-*Fim de E6:* imagem no corpo com metadados obrigatórios; embed conforme D2.
-Array `images` e galeria da sidebar inalterados. `npm run build` verde.
+- [ ] **T6.4 — Formatação customizada da imagem no corpo (D7)**
+  - **Objetivo:** controlar alinhamento e tamanho da `<figure>` no corpo, via
+    menu contextual ao selecionar a imagem no editor.
+  - **Arquivos:** `src/admin/components/tiptap/FigureImage.js` (atributos
+    `align`/`size` → classes), `src/admin/components/RichTextEditor.jsx` (controle
+    de imagem selecionada), `src/lib/sanitize.js` (allowlist das classes),
+    `src/index.css` (regras no editor e em `.article-content`).
+  - **Opções (confirmar no início da tarefa):** alinhamento esquerda / centro /
+    direita / largura plena; tamanho pequena ≈ 320 px / média ≈ 480 px / grande =
+    largura da coluna / plena. Classes na `<figure>`, ex.: `fig-esq fig-media`.
+  - **Critério de aceite:** selecionar uma imagem no editor mostra os controles;
+    escolher "direita + média" grava `<figure class="fig-dir fig-media">` (via
+    `select content from posts where id = <ID>;`); a mesma matéria em
+    `/noticia/<slug>` exibe a imagem alinhada à direita, ~480 px, com o texto
+    fluindo ao lado; classe fora do conjunto é removida por `sanitizeHtml`.
+  - **Como verificar:** aplicar 2–3 combinações numa matéria de teste, salvar,
+    conferir `content` no banco e o resultado no site e no preview.
+  - **Risco e reversão:** médio (CSS de *float* + *full-bleed* pode brigar com o
+    layout de coluna). Mitigação: presets fixos, sem valores livres. Reversão =
+    `git revert` (figuras voltam ao padrão centralizado; HTML salvo continua
+    válido).
+  - **Dependências:** **T6.1**, **T1.1**.
+
+*Fim de E6:* imagem no corpo com metadados obrigatórios e formatação (alinhamento
++ tamanho). Embed adiado. Array `images` e galeria da sidebar inalterados.
+`npm run build` verde.
 
 ---
 
@@ -684,6 +687,12 @@ schema será feita sem consulta.
 - **Colunas de corpo dobradas:** `content` + `text_content` gravadas em
   sincronia por `savePost` — mantido de propósito (regra 7), mas é acoplamento a
   ser resolvido numa consolidação futura.
+- **Embed de vídeo/posts por URL (D2):** adiado. Quando entrar, decidir entre
+  `<iframe>` de domínios permitidos (mais fiel, mais superfície de segurança) ou
+  card com link (mais seguro). Exigirá revisar `src/lib/sanitize.js`.
+- **Suíte de testes automatizada:** `scripts/test-sanitize.mjs` (e as futuras de
+  E3/E4) precisam de um DOM no Node. Sem `jsdom` instalado, os scripts saem com
+  aviso (exit 0) e a verificação é manual no navegador.
 
 ---
 
@@ -692,7 +701,9 @@ schema será feita sem consulta.
 | Data | Etapa/Tarefa | Commit | Observações |
 |------|--------------|--------|-------------|
 | 2026-09-04 | Fase 0 + Plano | — | Diagnóstico e schema real (`information_schema`) conferidos; `PLANO_PAINEL.md` criado. Aguardando aprovação e respostas a D1–D6. |
-| 2026-09-04 | E1 · T1.2 | _(a commitar)_ | `scripts/sql/2026-09-04-content-backup.sql` (criação + reversão). `savePost` passa a copiar `content` atual para `content_backup` antes de todo UPDATE (best-effort: se a coluna não existir, segue sem o backup e só loga um warning). Build verde (149 módulos). **Pendente:** aplicar o SQL no Supabase. |
+| 2026-09-04 | E1 · T1.2 | a4acec6 | `scripts/sql/2026-09-04-content-backup.sql` (criação + reversão). `savePost` passa a copiar `content` atual para `content_backup` antes de todo UPDATE (best-effort: se a coluna não existir, segue sem o backup e só loga um warning). Build verde (149 módulos). SQL aplicado no Supabase pelo usuário. |
+| 2026-09-04 | Decisões D1–D7 | — | D1 aprovado (marcação dos elementos). D2 adiado (embed → §5). D3 `localStorage`. D4/D5/D6 aprovados. D7 novo: formatação customizada de imagem no corpo → E6/T6.4. |
+| 2026-09-04 | E1 · T1.1 | _(a commitar)_ | `src/lib/sanitize.js`: hook `afterSanitizeAttributes` filtra `class` contra allowlist fixa (`olho`, `boxe`, `nota-editor`, `credito`); `FORBID_ATTR` ganhou `srcset`; comentários atualizados (a função agora vale para escrita + leitura). `scripts/test-sanitize.mjs` com 5 casos (roda com `jsdom`; sem ele, sai com aviso). Build verde. Lint sem regressão nos arquivos tocados. |
 
 ---
 
