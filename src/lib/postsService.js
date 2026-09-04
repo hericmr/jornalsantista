@@ -2,6 +2,7 @@ import { postsAPI } from './supabase';
 import { supabase } from './supabase';
 import { slugify } from '../utils/textUtils';
 import { resolvePostImages } from './images';
+import { sanitizeHtml } from './sanitize';
 
 // Normaliza um registro do Supabase para o formato usado pelo frontend.
 const mapPost = (post) => ({
@@ -170,7 +171,12 @@ export const savePost = async (postData, isNew = false) => {
     // `text_content`. Todos os leitores (mapPost, middleware, feed) usam
     // `content || text_content`, então gravamos as duas com o mesmo valor
     // para nunca servir o corpo defasado depois de uma edição.
-    const body = text_content ?? content ?? '';
+    //
+    // O corpo passa pela MESMA sanitização da leitura pública (T1.3): o que
+    // é gravado é exatamente o que o público vai renderizar. Texto puro sem
+    // tags passa intacto; HTML fora da allowlist é limpo aqui. A rede de
+    // segurança é o `content_backup` gravado logo abaixo (T1.2).
+    const body = sanitizeHtml(text_content ?? content ?? '');
     const supabaseData = { ...rest, content: body, text_content: body };
 
     // Atualiza sempre que não for criação e houver um id — numérico ou UUID.

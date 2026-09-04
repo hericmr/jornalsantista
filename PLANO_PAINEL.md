@@ -162,7 +162,7 @@ sanitização, sem alterar ainda a experiência de edição (o `<textarea>` cont
     do commit de `postsService.js`.
   - **Dependências:** nenhuma.
 
-- [ ] **T1.3 — Aplicar `sanitizeHtml` na escrita do corpo**
+- [x] **T1.3 — Aplicar `sanitizeHtml` na escrita do corpo**
   - **Objetivo:** o corpo gravado em `content`/`text_content` já passa pela mesma
     sanitização do público, para "o que salvo === o que renderiza".
   - **Arquivos:** `src/lib/postsService.js` (`savePost`, aplicar no `body` antes
@@ -703,7 +703,8 @@ schema será feita sem consulta.
 | 2026-09-04 | Fase 0 + Plano | — | Diagnóstico e schema real (`information_schema`) conferidos; `PLANO_PAINEL.md` criado. Aguardando aprovação e respostas a D1–D6. |
 | 2026-09-04 | E1 · T1.2 | a4acec6 | `scripts/sql/2026-09-04-content-backup.sql` (criação + reversão). `savePost` passa a copiar `content` atual para `content_backup` antes de todo UPDATE (best-effort: se a coluna não existir, segue sem o backup e só loga um warning). Build verde (149 módulos). SQL aplicado no Supabase pelo usuário. |
 | 2026-09-04 | Decisões D1–D7 | — | D1 aprovado (marcação dos elementos). D2 adiado (embed → §5). D3 `localStorage`. D4/D5/D6 aprovados. D7 novo: formatação customizada de imagem no corpo → E6/T6.4. |
-| 2026-09-04 | E1 · T1.1 | _(a commitar)_ | `src/lib/sanitize.js`: hook `afterSanitizeAttributes` filtra `class` contra allowlist fixa (`olho`, `boxe`, `nota-editor`, `credito`); `FORBID_ATTR` ganhou `srcset`; comentários atualizados (a função agora vale para escrita + leitura). `scripts/test-sanitize.mjs` com 5 casos (roda com `jsdom`; sem ele, sai com aviso). Build verde. Lint sem regressão nos arquivos tocados. |
+| 2026-09-04 | E1 · T1.1 | c6897f2 | `src/lib/sanitize.js`: hook `afterSanitizeAttributes` filtra `class` contra allowlist fixa (`olho`, `boxe`, `nota-editor`, `credito`); `FORBID_ATTR` ganhou `srcset`; comentários atualizados (a função agora vale para escrita + leitura). `scripts/test-sanitize.mjs` com 5 casos (roda com `jsdom`; sem ele, sai com aviso). Build verde. Lint sem regressão nos arquivos tocados. |
+| 2026-09-04 | E1 · T1.3 | _(a commitar)_ | `savePost` (`src/lib/postsService.js`) passa o corpo por `sanitizeHtml` antes de gravar `content`/`text_content`. Texto puro sem tags passa intacto; HTML fora da allowlist é limpo na escrita. `content_backup` (T1.2) é a rede de segurança. Build verde; lint limpo nos arquivos tocados. |
 
 ---
 
