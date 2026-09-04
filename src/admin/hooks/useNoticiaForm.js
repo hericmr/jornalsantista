@@ -4,7 +4,7 @@ import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsServi
 import { slugify } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
 import { requestRepublish } from '../../lib/republish';
-import { useToast } from '../components/AdminFeedback';
+import { useToast, useConfirm } from '../components/AdminFeedback';
 
 // Estado e regras de negócio compartilhados pelas telas "Nova notícia" e
 // "Editar notícia". A UI fica em NoticiaForm.jsx.
@@ -72,6 +72,7 @@ const uploadImage = async (file, toast) => {
 export const useNoticiaForm = ({ mode, id }) => {
   const navigate = useNavigate();
   const toast = useToast();
+  const confirm = useConfirm();
   const isEdit = mode === 'edit';
 
   const [post, setPost] = useState(EMPTY_POST);
@@ -79,6 +80,8 @@ export const useNoticiaForm = ({ mode, id }) => {
   const [allAuthors, setAllAuthors] = useState([]);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  // Há um corpo anterior guardado em `content_backup` para "desfazer" (T1.4)?
+  const [backupAvailable, setBackupAvailable] = useState(false);
 
   useEffect(() => {
     getAllAuthors().then(setAllAuthors);
@@ -97,6 +100,7 @@ export const useNoticiaForm = ({ mode, id }) => {
           return;
         }
         setPost(toFormState(found));
+        setBackupAvailable(Boolean(found.content_backup));
       })
       .catch((err) => {
         console.error('Erro ao carregar post:', err);
@@ -168,30 +172,38 @@ export const useNoticiaForm = ({ mode, id }) => {
     }));
   }, []);
 
+  // Monta o payload de `posts` a partir do state do formulário. `overrides`
+  // permite trocar um campo pontual (ex.: o corpo, no "desfazer").
+  const buildPayload = useCallback(
+    (overrides = {}) => ({
+      title: post.title,
+      excerpt: post.excerpt,
+      text_content: post.content,
+      categories: post.categories,
+      authors: post.authors,
+      author: post.authors.length > 0 ? post.authors.join(', ') : '',
+      published_at: post.published
+        ? new Date(post.published).toISOString()
+        : null,
+      images: post.images,
+      tags: post.tags,
+      status: post.status,
+      slug: slugify(post.title),
+      ...overrides
+    }),
+    [post]
+  );
+
+  // `id` do state (matéria carregada) tem prioridade sobre o da rota, que pode
+  // ser um slug. Com id => UPDATE; sem id => criação.
+  const existingId = post.id ?? (isEdit ? id : undefined);
+
   const submit = useCallback(
     async (e) => {
       if (e && e.preventDefault) e.preventDefault();
       setSaving(true);
       try {
-        const payload = {
-          title: post.title,
-          excerpt: post.excerpt,
-          text_content: post.content,
-          categories: post.categories,
-          authors: post.authors,
-          author: post.authors.length > 0 ? post.authors.join(', ') : '',
-          published_at: post.published
-            ? new Date(post.published).toISOString()
-            : null,
-          images: post.images,
-          tags: post.tags,
-          status: post.status,
-          slug: slugify(post.title)
-        };
-
-        // `id` do state (matéria carregada) tem prioridade sobre o da rota,
-        // que pode ser um slug. Com id => UPDATE; sem id => criação.
-        const existingId = post.id ?? (isEdit ? id : undefined);
+        const payload = buildPayload();
 
         if (isEdit && existingId) {
           await savePost({ ...payload, id: existingId }, false);
@@ -214,8 +226,53 @@ export const useNoticiaForm = ({ mode, id }) => {
         setSaving(false);
       }
     },
-    [post, isEdit, id, navigate, toast]
+    [buildPayload, existingId, isEdit, navigate, toast]
   );
+
+  // Desfazer último salvamento (T1.4): restaura `content_backup` como corpo
+  // atual e persiste. O próprio savePost grava o corpo de agora como novo
+  // backup, então o botão continua disponível (funciona como alternância).
+  const restoreBackup = useCallback(async () => {
+    if (!isEdit || !existingId) return;
+
+    const ok = await confirm({
+      title: 'Desfazer último salvamento',
+      message:
+        'O corpo da matéria volta a ser a versão anterior ao último salvamento. ' +
+        'O que foi escrito desde então será perdido.',
+      confirmLabel: 'Desfazer',
+      variant: 'danger'
+    });
+    if (!ok) return;
+
+    setSaving(true);
+    try {
+      const fresh = await getPostBySlugOrId(existingId);
+      const backup = fresh?.content_backup;
+      if (backup === undefined || backup === null || backup === '') {
+        toast.error('Não há um salvamento anterior para desfazer.');
+        setBackupAvailable(false);
+        return;
+      }
+
+      await savePost(
+        { ...buildPayload({ text_content: backup }), id: existingId },
+        false
+      );
+      setPost((prev) => ({ ...prev, content: backup }));
+      setBackupAvailable(true);
+
+      requestRepublish().catch((e) =>
+        console.warn('Republicação não disparada:', e.message)
+      );
+      toast.success('Último salvamento desfeito.');
+    } catch (err) {
+      console.error('Erro ao desfazer salvamento:', err);
+      toast.error('Erro ao desfazer o salvamento: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }, [buildPayload, confirm, existingId, isEdit, toast]);
 
   return {
     isEdit,
@@ -232,7 +289,9 @@ export const useNoticiaForm = ({ mode, id }) => {
     removeImage,
     loading,
     saving,
-    submit
+    submit,
+    restoreBackup,
+    backupAvailable
   };
 };
 

@@ -4,6 +4,7 @@ import {
   FaSave,
   FaTimes,
   FaImage,
+  FaUndo,
   FaBold,
   FaItalic,
   FaUnderline,
@@ -31,7 +32,9 @@ const NoticiaForm = ({ mode, id }) => {
     removeImage,
     loading,
     saving,
-    submit
+    submit,
+    restoreBackup,
+    backupAvailable
   } = useNoticiaForm({ mode, id });
 
   const contentRef = useRef(null);
@@ -109,6 +112,22 @@ const NoticiaForm = ({ mode, id }) => {
           >
             Voltar para o site
           </a>
+          {isEdit && (
+            <button
+              type="button"
+              onClick={restoreBackup}
+              disabled={saving || !backupAvailable}
+              className="btn btn-outline-danger me-2"
+              title={
+                backupAvailable
+                  ? 'Restaura o corpo da matéria à versão anterior ao último salvamento'
+                  : 'Nenhum salvamento anterior para desfazer'
+              }
+            >
+              <FaUndo className="me-2" />
+              Desfazer último salvamento
+            </button>
+          )}
           <button
             type="button"
             onClick={() => navigate('/admin/noticias')}
