@@ -1,0 +1,703 @@
+# PLANO_PAINEL.md — Reformulação do editor de matérias
+
+> Alvo: `src/admin/components/NoticiaForm.jsx` + `src/admin/hooks/useNoticiaForm.js`
+> (telas `/admin/noticias/nova` e `/admin/noticias/editar/:id`), mais o que o
+> corpo da matéria toca no salvamento, na sanitização e na pré-visualização.
+>
+> Método: fases E1..E8 ordenadas por dependência e risco. Cada fase termina com
+> `npm run build` verde e o painel funcionando, sem estado quebrado intermediário.
+> Cada tarefa cabe em um commit. Marcar `- [x]` ao concluir.
+>
+> **Nada é implementado antes da aprovação deste plano.**
+
+---
+
+## 1. Visão geral
+
+### O que muda
+
+- O corpo da matéria passa a ser editado num **editor richtext TipTap**, carregado
+  sob demanda (`dynamic import`) só na rota do admin. Substitui o `<textarea>` +
+  os 6 botões que embrulham HTML cru (`formatText`).
+- **Barra de ferramentas completa**: negrito, itálico, riscado, H2/H3/H4, lista
+  ordenada/não-ordenada, citação em bloco, link com validação de URL, linha
+  divisória, limpar formatação, desfazer/refazer. Menu flutuante de seleção
+  (BubbleMenu) e atalhos de teclado padrão.
+- **Colar limpo**: remoção automática de `style=`, `class=` não-permitida,
+  `<span>` vazio e lixo de Word / Google Docs / páginas web, preservando a
+  estrutura semântica.
+- **Rotina "reparar texto puro"** (sob demanda, uma matéria por vez): converte o
+  bloco único legado em parágrafos, detectando prováveis intertítulos. Grava o
+  conteúdo anterior em `content_backup` antes; reversível.
+- **Elementos jornalísticos no corpo**: intertítulo, olho (citação destacada),
+  boxe, crédito de foto, nota do editor.
+- **Imagens e mídia no corpo**: upload ou URL, com legenda, crédito e texto
+  alternativo obrigatório, como `<figure><img><figcaption>` no HTML do corpo.
+  Incorporação de vídeo/posts por URL (condicionada à Decisão D2).
+- **Fluxo de escrita**: autosave local de rascunho com indicador de estado, aviso
+  ao sair com alterações não salvas, contador de palavras e tempo de leitura,
+  pré-visualização fiel ao site, modo foco.
+- **Rede de segurança**: coluna `content_backup` (aditiva), com o corpo anterior
+  copiado a cada salvamento e um botão único "Desfazer último salvamento".
+- **Sanitização na escrita**: a allowlist do DOMPurify em `src/lib/sanitize.js` é
+  revista/ampliada e passa a ser aplicada também no momento de salvar, para que o
+  que é gravado seja exatamente o que o público renderiza.
+
+### O que se mantém (não tocar)
+
+- Todos os campos de metadados atuais, exatamente como funcionam hoje: título,
+  resumo (`excerpt`), categorias, autores (`authors` + `author` derivado),
+  data de publicação (`published_at` + `<input type="date">`), status, tags.
+- `savePost` gravando `content` **e** `text_content` em sincronia.
+- O array `images` (jsonb), `images[0]` como hero e `og:image`, e a galeria de
+  upload atual na sidebar.
+- Pipeline público de render (`processHtmlContent` → `sanitizeHtml` →
+  `dangerouslySetInnerHTML` em `src/pages/Noticia.jsx`).
+- `requestRepublish()` disparado após o salvamento.
+- Snapshot estático (`public/data/*`) e o middleware de crawlers.
+
+### O que é descartado
+
+- O `<textarea>` do corpo, a função `formatText` e a toolbar manual de
+  `NoticiaForm.jsx`.
+- CSS morto de tentativas anteriores: `.tiptap-editor-wrapper` e `.editor-toolbar`
+  em `src/index.css` (se não for reaproveitado — ver E8/T8.5).
+- Imports não usados no fluxo (`FaLink` importado e nunca usado, etc.).
+
+---
+
+## 2. Decisões técnicas em aberto (dependem de você)
+
+**D1 — Marcação semântica dos elementos jornalísticos.**
+Proposta para fechar a allowlist e o CSS:
+- Intertítulo → `<h2>` / `<h3>` (já cobertos pela toolbar; sem tag nova).
+- Olho (citação destacada) → `<blockquote class="olho">`.
+- Boxe → `<aside class="boxe">`.
+- Crédito de foto → `<figcaption class="credito">` dentro de `<figure>`.
+- Nota do editor → `<aside class="nota-editor">`.
+Aceita essa marcação, ou prefere outra (ex.: `<div>` com `data-tipo`, ou classes
+diferentes)? A resposta trava E5 e a allowlist em E1/T1.1.
+
+**D2 — Incorporação de vídeo e posts por URL (item "e" do escopo).**
+A allowlist hoje tem `FORBID_TAGS: ['iframe', ...]`. Opções:
+- (a) Permitir `<iframe>` só de uma allowlist de domínios (YouTube, Vimeo, X,
+  Instagram) — mais fiel, aumenta a superfície de segurança.
+- (b) Renderizar um **card com link + thumbnail**, sem iframe — mais seguro,
+  menos fiel ao embed real.
+- (c) Adiar embed para depois; nesta rodada, só imagem no corpo.
+Qual? Isso define o escopo de E6/T6.3.
+
+**D3 — Armazenamento do autosave local.**
+`localStorage` (simples, síncrono, ~5 MB por origem, chave por `id`/"nova") vs.
+`IndexedDB` (mais robusto para textos longos). Proposta: `localStorage`.
+Confirma?
+
+**D4 — Heurística de detecção de intertítulo na rotina de reparo (T4.1).**
+Proposta: linha isolada (cercada por linha em branco), com no máximo ~60
+caracteres, sem pontuação final (`. ? ! : ;`) → vira `<h2>`. Todos como `<h2>`,
+ou alternar `<h2>`/`<h3>` por algum critério? Confirma o teto de caracteres?
+
+**D5 — Comportamento de "Limpar formatação".**
+Proposta: remove só marcas inline (negrito, itálico, riscado, link, sublinhado)
+e rebaixa heading da seleção para parágrafo; **não** mexe em listas/citações.
+Confirma, ou quer que limpe tudo (inclusive blocos)?
+
+**D6 — Apresentação dos elementos jornalísticos na UI.**
+Botões fixos na toolbar vs. um dropdown "Inserir" (mais enxuto). Proposta:
+dropdown "Inserir" na toolbar. Confirma?
+
+---
+
+## 3. Etapas
+
+Ordem: **E1** (rede de segurança + sanitização, sem mudança de UX) → **E2**
+(editor base) → **E3** (colar limpo) → **E4** (reparar texto puro) → **E5**
+(elementos jornalísticos) → **E6** (mídia no corpo) → **E7** (fluxo de escrita +
+preview) → **E8** (qualidade e acessibilidade).
+
+---
+
+### E1 — Rede de segurança do conteúdo e base de sanitização
+
+*Objetivo da etapa:* criar a proteção contra perda de conteúdo e alinhar a
+sanitização, sem alterar ainda a experiência de edição (o `<textarea>` continua).
+
+- [ ] **T1.1 — Revisar e travar a allowlist do DOMPurify**
+  - **Objetivo:** garantir que `figure`, `figcaption`, `hr`, `cite`,
+    `blockquote`, `h2`–`h4`, listas e `a[href target rel]` passem, e que só um
+    conjunto fixo de valores de `class` seja aceito (os de D1).
+  - **Arquivos:** `src/lib/sanitize.js`; novo `src/lib/__tests__/sanitize.test.js`
+    (ou `scripts/test-sanitize.mjs` se não houver runner de teste).
+  - **Critério de aceite:** dado um HTML com
+    `<blockquote class="olho">`, `<aside class="boxe">`, `<figure><img><figcaption class="credito">`,
+    `<hr>`, `<a href target rel>` e também `<script>`, `<iframe>`, `style="..."`,
+    `class="mso-x"` e `<span>` vazio — a saída de `sanitizeHtml` **mantém** os
+    primeiros e **remove** `script`, `iframe`, `style=`, a classe não-permitida e
+    o `<span>` vazio.
+  - **Como verificar:** rodar o arquivo de teste (`node scripts/test-sanitize.mjs`
+    ou `npm test`); a saída lista cada caso como PASS/FAIL. Sem runner: um HTML de
+    fixture + `console.log(sanitizeHtml(fixture))` comparado à string esperada.
+  - **Risco e reversão:** baixo. Risco = allowlist muito restritiva quebrar HTML
+    antigo válido. Reversão = `git revert` do commit; `sanitize.js` volta ao
+    estado atual. Nenhuma migração envolvida.
+  - **Dependências:** D1 (nomes das classes).
+
+- [x] **T1.2 — Criar a coluna `content_backup` e copiá-la no `savePost`**
+  - **Objetivo:** antes de todo UPDATE, gravar o corpo atual da linha em
+    `content_backup`.
+  - **Arquivos:** `src/lib/postsService.js` (`savePost`); novo
+    `scripts/sql/2026-xx-content-backup.sql` com o SQL abaixo.
+  - **SQL de criação:**
+    ```sql
+    alter table public.posts add column if not exists content_backup text;
+    ```
+  - **SQL de reversão:**
+    ```sql
+    alter table public.posts drop column if exists content_backup;
+    ```
+  - **Critério de aceite:** ao salvar uma edição de matéria existente, a query
+    `select id, left(content,40) as atual, left(content_backup,40) as backup from posts where id = <ID>;`
+    mostra em `content_backup` o corpo que estava salvo **antes** deste
+    salvamento. Em criação de matéria nova, `content_backup` fica `null`.
+  - **Como verificar:** aplicar o SQL no Supabase (SQL editor). Editar uma
+    matéria de teste trocando uma palavra, salvar, rodar a query acima e conferir
+    que `backup` é o texto anterior. Salvar de novo e conferir que `backup` passou
+    a ser a versão intermediária.
+  - **Risco e reversão:** baixo — coluna aditiva, nullable, sem default, sem
+    constraint; não afeta nenhum leitor. Reversão = SQL de reversão + `git revert`
+    do commit de `postsService.js`.
+  - **Dependências:** nenhuma.
+
+- [ ] **T1.3 — Aplicar `sanitizeHtml` na escrita do corpo**
+  - **Objetivo:** o corpo gravado em `content`/`text_content` já passa pela mesma
+    sanitização do público, para "o que salvo === o que renderiza".
+  - **Arquivos:** `src/lib/postsService.js` (`savePost`, aplicar no `body` antes
+    de montar `supabaseData`).
+  - **Critério de aceite:** salvar uma matéria cujo corpo contenha
+    `<script>alert(1)</script>` e `style="color:red"` → a query
+    `select content from posts where id = <ID>;` retorna o corpo **sem** o
+    `<script>` e **sem** `style=`. Uma matéria com HTML já limpo salva **sem
+    diferença** (idempotência: salvar 2× seguidas não muda o valor).
+  - **Como verificar:** editar matéria de teste, colar o trecho malicioso no
+    `<textarea>` atual, salvar, rodar a query. Repetir o salvamento e comparar
+    `content` (deve ser igual).
+  - **Risco e reversão:** médio — sanitizar pode alterar HTML legado idiossincrático.
+    Mitigação: T1.2 (backup) já está no ar antes desta tarefa. Reversão =
+    `git revert`; o backup permite restaurar linha a linha via T1.4.
+  - **Dependências:** **T1.1** (allowlist final), **T1.2** (backup no ar primeiro).
+
+- [ ] **T1.4 — Botão "Desfazer último salvamento"**
+  - **Objetivo:** restaurar `content_backup` como corpo atual, num clique, sem
+    tela de histórico.
+  - **Arquivos:** `src/admin/components/NoticiaForm.jsx` (botão no modo `edit`),
+    `src/admin/hooks/useNoticiaForm.js` (ação `restoreBackup`), `src/lib/postsService.js`
+    (expor leitura de `content_backup`).
+  - **Critério de aceite:** numa matéria já salva 2×, clicar em "Desfazer último
+    salvamento", confirmar no diálogo → o corpo no editor e no banco volta a ser a
+    versão anterior; um toast confirma. Se `content_backup` for `null`, o botão
+    fica desabilitado com tooltip explicativo.
+  - **Como verificar:** editar → salvar → editar de novo → salvar → clicar em
+    desfazer → conferir na tela e com
+    `select left(content,60) from posts where id = <ID>;`.
+  - **Risco e reversão:** baixo. Usa `useConfirm` já existente. Reversão =
+    `git revert`; a coluna permanece (inofensiva).
+  - **Dependências:** **T1.2**.
+
+*Fim de E1:* painel idêntico visualmente, agora com backup automático, botão de
+desfazer e sanitização na escrita. `npm run build` verde.
+
+---
+
+### E2 — Editor richtext base (TipTap) com carregamento tardio
+
+*Objetivo da etapa:* substituir o `<textarea>` do corpo pelo editor TipTap, com
+toolbar completa e atalhos, mantendo todo o resto do formulário intacto.
+
+- [ ] **T2.1 — Instalar as dependências do TipTap**
+  - **Objetivo:** adicionar só `StarterKit` + `link` + `image` + `placeholder` e
+    os peers, sem uso ainda.
+  - **Arquivos:** `package.json`, `package-lock.json`.
+  - **Pacotes:** `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`,
+    `@tiptap/extension-link`, `@tiptap/extension-image`,
+    `@tiptap/extension-placeholder`. Versões exatas anotadas no registro de
+    progresso.
+  - **Critério de aceite:** `npm run build` verde; `git diff package.json` mostra
+    só esses 6 pacotes adicionados; o bundle **público** (`dist/assets/*`) não
+    cresce (o import só entra no chunk do admin, verificado em T2.2).
+  - **Como verificar:** `npm ls @tiptap/react @tiptap/starter-kit`; `npm run build`
+    e comparar o tamanho dos chunks antes/depois.
+  - **Risco e reversão:** baixo. Reversão = `npm remove` dos 6 pacotes +
+    `git checkout package*.json`.
+  - **Dependências:** nenhuma.
+
+- [ ] **T2.2 — Componente `RichTextEditor` carregado sob demanda**
+  - **Objetivo:** um editor TipTap (sem toolbar ainda) que recebe `value` (HTML),
+    emite `onChange` (HTML via `editor.getHTML()`), com `React.lazy` +
+    `Suspense`, substituindo o `<textarea>` do corpo em `NoticiaForm`.
+  - **Arquivos:** novo `src/admin/components/RichTextEditor.jsx`; novo
+    `src/admin/components/RichTextEditor.lazy.js` (wrapper `React.lazy`);
+    `src/admin/components/NoticiaForm.jsx` (troca do campo de conteúdo).
+  - **Critério de aceite:** abrir `/admin/noticias/editar/<id>` de uma matéria
+    com HTML → o conteúdo aparece renderizado (negrito, listas, parágrafos), é
+    editável, e ao salvar o corpo persiste. Enquanto o editor carrega, aparece um
+    spinner. O chunk do TipTap só é baixado nessa rota (aba Network: o
+    `RichTextEditor` chunk não carrega na Home).
+  - **Como verificar:** DevTools → Network → abrir a Home (nenhum chunk TipTap) →
+    abrir a rota de edição (chunk TipTap carrega). Editar um parágrafo, salvar,
+    recarregar, conferir persistência e com
+    `select left(content,80) from posts where id = <ID>;`.
+  - **Risco e reversão:** **alto** — é a troca central. Mitigação: manter o campo
+    antigo até esta task; reversão = `git revert` da troca em `NoticiaForm`
+    (volta ao `<textarea>`); os arquivos novos ficam órfãos, inofensivos. A
+    coluna `content_backup` protege contra salvamento ruim.
+  - **Dependências:** **T2.1**, **T1.3** (sanitização na escrita já ativa).
+
+- [ ] **T2.3 — Barra de ferramentas completa + atalhos**
+  - **Objetivo:** toolbar em Bootstrap ligada ao editor: negrito, itálico,
+    riscado, H2/H3/H4, lista ordenada/não-ordenada, citação em bloco, link (com
+    validação de URL), linha divisória (`<hr>`), limpar formatação (D5),
+    desfazer/refazer. Atalhos padrão (`Ctrl/Cmd+B/I`, `Ctrl/Cmd+Z/Shift+Z`).
+  - **Arquivos:** `src/admin/components/RichTextEditor.jsx`, novo
+    `src/admin/components/RichTextToolbar.jsx`, `src/index.css` (estilos da nova
+    toolbar).
+  - **Critério de aceite:** cada botão aplica/retira a formatação na seleção e
+    reflete o estado ativo (`aria-pressed`). O botão de link abre um campo,
+    rejeita entradas sem esquema `http(s):` ou `mailto:` com aviso, e grava
+    `<a href rel="noopener noreferrer" target="_blank">`. Salvar e conferir que o
+    HTML resultante passa por `sanitizeHtml` sem perda (`select content ...`).
+  - **Como verificar:** aplicar cada formato numa matéria de teste, salvar,
+    inspecionar `content` no banco e a renderização em `/noticia/<slug>`.
+  - **Risco e reversão:** médio. Reversão = `git revert` da task (editor fica sem
+    toolbar, ainda usável). 
+  - **Dependências:** **T2.2**, **T1.1** (allowlist inclui `hr`, `a` com `rel`).
+
+- [ ] **T2.4 — Menu flutuante de seleção (BubbleMenu)**
+  - **Objetivo:** ao selecionar texto, aparece um menu compacto com negrito,
+    itálico, link e "intertítulo".
+  - **Arquivos:** `src/admin/components/RichTextEditor.jsx`, `src/index.css`.
+  - **Critério de aceite:** selecionar uma palavra faz o menu aparecer perto da
+    seleção; clicar em negrito formata; o menu some ao clicar fora. Não aparece
+    quando não há seleção.
+  - **Como verificar:** manual na rota de edição, em desktop e numa largura
+    mobile (DevTools responsive) — o menu não pode estourar a tela.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T2.3**.
+
+- [ ] **T2.5 — Compatibilidade com matérias legadas no editor**
+  - **Objetivo:** garantir que matérias em HTML antigo **e** em texto puro
+    (bloco único) abram no editor sem perda e salvem sem corromper.
+  - **Arquivos:** `src/admin/hooks/useNoticiaForm.js` (normalização de entrada:
+    se o corpo não tem tag de bloco, envolver em um único `<p>` com `<br>` nas
+    quebras, sem tentar detectar intertítulo — isso é a rotina E4).
+  - **Critério de aceite:** abrir 3 matérias reais — uma com HTML rico, uma com
+    texto puro com parágrafos separados por linha em branco, uma com texto puro
+    corrido — todas aparecem legíveis no editor. Salvar **sem editar** não muda
+    o corpo de forma destrutiva (diff só de espaços/quebras entre tags,
+    verificado com `select content from posts where id = <ID>;` antes/depois).
+  - **Como verificar:** escolher 3 ids do acervo, anotar `left(content,120)` de
+    cada, abrir, salvar, comparar.
+  - **Risco e reversão:** médio (round-trip de HTML no ProseMirror pode
+    normalizar tags). Mitigação: `content_backup`. Reversão = `git revert`.
+  - **Dependências:** **T2.2**.
+
+*Fim de E2:* editor TipTap completo no lugar do `<textarea>`, matérias antigas
+abrindo e salvando. `npm run build` verde.
+
+---
+
+### E3 — Colar limpo
+
+*Objetivo da etapa:* colar de Word, Google Docs e web sem trazer lixo.
+
+- [ ] **T3.1 — Filtro de colagem**
+  - **Objetivo:** ao colar, remover `style=`, `class=` não-permitida, `<span>`
+    sem atributos, comentários condicionais do Word (`<!--[if ...]>`), tags
+    `<o:p>`/`<w:*>`, atributos `xmlns*`/`lang`/`dir` supérfluos — preservando
+    `p`, `h2`–`h4`, `ul/ol/li`, `strong/em`, `a[href]`, `blockquote`.
+  - **Arquivos:** `src/admin/components/RichTextEditor.jsx` (opção
+    `editorProps.transformPastedHTML` ou `handlePaste`), novo
+    `src/lib/pasteClean.js` (função pura, reutiliza a lógica/allowlist de
+    `sanitize.js`).
+  - **Critério de aceite:** colar um trecho copiado do Word e outro do Google
+    Docs → o HTML resultante no editor (e depois salvo) **não contém** `style=`,
+    `class=` fora da allowlist, nem `<span>` vazio; títulos do original viram
+    `<h2>/<h3>`, listas continuam listas, negrito/itálico preservados.
+  - **Como verificar:** colar amostras reais na rota de edição, salvar, rodar
+    `select content from posts where id = <ID>;` e conferir com
+    `grep -o 'style=\|class="Mso\|<span>\|<o:p>'` na string (deve dar vazio).
+  - **Risco e reversão:** médio — filtro agressivo demais remove semântica.
+    Mitigação: fixtures em T3.2. Reversão = `git revert` (volta ao paste padrão
+    do TipTap, que já é razoável).
+  - **Dependências:** **T2.2**, **T1.1**.
+
+- [ ] **T3.2 — Fixtures de colagem versionadas**
+  - **Objetivo:** congelar o comportamento com amostras reais de Word, Google
+    Docs e uma página web.
+  - **Arquivos:** novo `src/lib/__tests__/pasteClean.test.js` (ou
+    `scripts/test-paste.mjs`) + `src/lib/__tests__/fixtures/` com 3 HTMLs de
+    entrada e os 3 esperados.
+  - **Critério de aceite:** rodar o teste imprime PASS para os 3 casos; cada
+    esperado é HTML semântico sem `style`/`class` suja/`span` vazio.
+  - **Como verificar:** `node scripts/test-paste.mjs` (ou `npm test`).
+  - **Risco e reversão:** baixo. Reversão = remover os arquivos de teste.
+  - **Dependências:** **T3.1**.
+
+*Fim de E3:* colar de qualquer origem produz HTML limpo. `npm run build` verde.
+
+---
+
+### E4 — Reparar texto puro (sob demanda)
+
+*Objetivo da etapa:* converter uma matéria antiga em bloco único para parágrafos
++ intertítulos, uma de cada vez, sempre com backup antes. Sem lote.
+
+- [ ] **T4.1 — Função `plainTextToHtml`**
+  - **Objetivo:** função pura que quebra texto puro em `<p>` (por linha em branco;
+    `\n` simples vira espaço ou `<br>` conforme regra) e marca prováveis
+    intertítulos como `<h2>` conforme D4.
+  - **Arquivos:** novo `src/lib/plainTextToHtml.js` + teste
+    `src/lib/__tests__/plainTextToHtml.test.js`.
+  - **Critério de aceite:** entrada com 3 parágrafos separados por linha em branco
+    e uma linha curta isolada sem pontuação → saída com 3 `<p>` e 1 `<h2>` na
+    posição certa. Entrada que já é HTML (tem `<p>`) → retorna igual (no-op).
+  - **Como verificar:** rodar o teste; casos PASS/FAIL listados.
+  - **Risco e reversão:** baixo (função isolada, sem efeito). Reversão = remover
+    o arquivo.
+  - **Dependências:** **D4**.
+
+- [ ] **T4.2 — Botão "Reparar texto puro" no editor**
+  - **Objetivo:** botão que só aparece quando o corpo não tem tags de bloco;
+    grava `content` atual em `content_backup`, aplica `plainTextToHtml`, carrega
+    o resultado no editor **sem salvar** (autor revisa e salva).
+  - **Arquivos:** `src/admin/components/NoticiaForm.jsx`,
+    `src/admin/hooks/useNoticiaForm.js`, `src/lib/postsService.js` (escrever
+    `content_backup` sob demanda).
+  - **Critério de aceite:** numa matéria de texto puro, o botão aparece; clicar →
+    diálogo de confirmação → o editor mostra parágrafos e intertítulos; nada foi
+    salvo ainda (recarregar a página sem salvar mantém o original). Após salvar,
+    `content_backup` guarda o texto puro anterior e o botão "Desfazer último
+    salvamento" (T1.4) restaura. Numa matéria já em HTML, o botão **não** aparece.
+  - **Como verificar:** escolher um id de texto puro; anotar
+    `left(content,120)`; reparar; conferir a tela; recarregar sem salvar (deve
+    voltar ao puro); reparar de novo, salvar, rodar
+    `select left(content,120) as novo, left(content_backup,120) as bkp from posts where id = <ID>;`.
+  - **Risco e reversão:** médio — conversão pode escolher intertítulos errados.
+    Mitigação: não salva sozinha; `content_backup` + botão de desfazer.
+    Reversão = `git revert`.
+  - **Dependências:** **T4.1**, **T1.2**, **T1.4**, **T2.2**.
+
+*Fim de E4:* reparo de texto puro disponível, uma matéria por vez, reversível.
+Sem execução em lote nem opção escondida. `npm run build` verde.
+
+---
+
+### E5 — Elementos jornalísticos no corpo
+
+*Objetivo da etapa:* inserir intertítulo, olho, boxe, crédito de foto e nota do
+editor como marcação semântica no corpo.
+
+- [ ] **T5.1 — Nodes/estilos TipTap para os elementos**
+  - **Objetivo:** definir no editor os elementos de D1 (olho, boxe, crédito, nota
+    do editor; intertítulo já é H2/H3), cada um com sua marcação semântica.
+  - **Arquivos:** novo `src/admin/components/tiptap/journalismNodes.js`,
+    `src/admin/components/RichTextEditor.jsx`.
+  - **Critério de aceite:** inserir cada elemento produz exatamente a marcação de
+    D1; o `getHTML()` reflete isso; salvar e conferir com
+    `select content from posts where id = <ID>;`.
+  - **Como verificar:** inserir os 5 elementos numa matéria de teste, salvar,
+    inspecionar o HTML no banco.
+  - **Risco e reversão:** médio. Reversão = `git revert` (elementos somem da
+    toolbar; HTML já salvo permanece válido e é renderizado pelo CSS de T5.3).
+  - **Dependências:** **D1**, **T2.3**.
+
+- [ ] **T5.2 — UI de inserção dos elementos**
+  - **Objetivo:** dropdown "Inserir" (D6) na toolbar com os 5 elementos.
+  - **Arquivos:** `src/admin/components/RichTextToolbar.jsx`, `src/index.css`.
+  - **Critério de aceite:** cada item do menu insere o elemento no ponto do
+    cursor; navegável por teclado; `aria-label` em cada opção.
+  - **Como verificar:** manual, com mouse e com teclado (Tab/Enter/Esc).
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T5.1**, **D6**.
+
+- [ ] **T5.3 — CSS dos elementos no editor e no público**
+  - **Objetivo:** estilo visual de olho/boxe/crédito/nota do editor, reutilizado
+    em `.article-content` (público) e no editor.
+  - **Arquivos:** `src/index.css` (bloco novo perto de `.article-content`).
+  - **Critério de aceite:** uma matéria com os 5 elementos renderiza em
+    `/noticia/<slug>` com destaque visual coerente com a identidade do site; o
+    mesmo no preview do editor (E7/T7.4).
+  - **Como verificar:** abrir a matéria de teste no site e no preview; comparar.
+  - **Risco e reversão:** baixo (CSS aditivo, classes novas). Reversão =
+    `git revert`.
+  - **Dependências:** **T5.1**.
+
+- [ ] **T5.4 — Allowlist para os elementos jornalísticos**
+  - **Objetivo:** garantir que `aside`, as classes de D1 e `figcaption.credito`
+    passem por `sanitizeHtml`, e que classes fora do conjunto sejam removidas.
+  - **Arquivos:** `src/lib/sanitize.js`, teste de T1.1 ampliado.
+  - **Critério de aceite:** HTML com os 5 elementos + um `<aside class="hack">`
+    → saída mantém os 5 e remove a classe `hack` (vira `<aside>` sem classe ou é
+    removido, conforme a regra escolhida).
+  - **Como verificar:** rodar o teste de sanitização.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T5.1**, **T1.1**.
+
+*Fim de E5:* elementos jornalísticos inseríveis, estilizados e sanitizados.
+`npm run build` verde.
+
+---
+
+### E6 — Imagens e mídia no corpo
+
+*Objetivo da etapa:* inserir imagem no corpo (upload ou URL) com alt obrigatório,
+legenda e crédito, como `<figure>` no HTML — **sem tocar no array `images`**.
+
+- [ ] **T6.1 — Inserir imagem por URL no corpo**
+  - **Objetivo:** diálogo com campos URL, texto alternativo (obrigatório),
+    legenda, crédito → insere `<figure><img src alt><figcaption>legenda —
+    crédito</figcaption></figure>` no cursor.
+  - **Arquivos:** `src/admin/components/RichTextEditor.jsx`, novo
+    `src/admin/components/tiptap/FigureImage.js` (extensão baseada em
+    `@tiptap/extension-image` com `figure`+`figcaption`).
+  - **Critério de aceite:** sem preencher o alt, o botão "Inserir" fica
+    desabilitado com aviso. Com tudo preenchido, a figura aparece no editor e,
+    após salvar, o HTML no banco tem `<figure><img alt="...">...<figcaption>`.
+    A query `select images from posts where id = <ID>;` **não muda**.
+  - **Como verificar:** inserir uma imagem por URL, salvar, comparar `images`
+    (igual) e `content` (com a figura) no banco; abrir `/noticia/<slug>`.
+  - **Risco e reversão:** médio. Reversão = `git revert` (figuras já salvas
+    continuam válidas — `<figure>` está na allowlist por E1).
+  - **Dependências:** **T2.3**, **T1.1**.
+
+- [ ] **T6.2 — Upload de imagem para o corpo**
+  - **Objetivo:** no mesmo diálogo, opção de enviar arquivo → reutiliza
+    `uploadImage` do hook (bucket `noticias-imagens`), devolve a URL pública e
+    insere a `<figure>`.
+  - **Arquivos:** `src/admin/hooks/useNoticiaForm.js` (expor `uploadImage`
+    isolado), `src/admin/components/RichTextEditor.jsx`.
+  - **Critério de aceite:** enviar um JPG → barra/spinner de progresso → a figura
+    aparece com a URL do Storage; alt continua obrigatório; `images` no banco
+    intacto após salvar.
+  - **Como verificar:** upload numa matéria de teste, salvar, conferir `content`
+    (URL do Storage dentro de `<figure>`) e `images` (inalterado).
+  - **Risco e reversão:** médio (reaproveitamento do upload). Reversão =
+    `git revert`.
+  - **Dependências:** **T6.1**.
+
+- [ ] **T6.3 — Incorporar vídeo/posts por URL** *(condicionada a D2)*
+  - **Objetivo:** conforme D2 — (a) iframe de domínios permitidos, (b) card com
+    link, ou (c) adiar.
+  - **Arquivos:** dependem de D2; provavelmente
+    `src/admin/components/tiptap/Embed.js`, `src/lib/sanitize.js` (se iframe),
+    `src/index.css`.
+  - **Critério de aceite:** colar/inserir uma URL de YouTube e uma de X → o
+    conteúdo aparece no editor e renderiza em `/noticia/<slug>` conforme a opção
+    de D2; se a opção for iframe, `sanitizeHtml` só permite os domínios da
+    allowlist (uma URL de domínio aleatório é removida).
+  - **Como verificar:** manual, com uma URL válida e uma de domínio não
+    permitido; conferir `content` no banco e a renderização.
+  - **Risco e reversão:** **alto** se D2 = iframe (superfície de segurança).
+    Mitigação: allowlist de domínios estrita + teste. Reversão = `git revert` +
+    reverter a mudança de `sanitize.js`.
+  - **Dependências:** **D2**, **T2.3**, **T1.1**.
+
+*Fim de E6:* imagem no corpo com metadados obrigatórios; embed conforme D2.
+Array `images` e galeria da sidebar inalterados. `npm run build` verde.
+
+---
+
+### E7 — Fluxo de escrita e pré-visualização
+
+*Objetivo da etapa:* autosave, aviso de não salvo, métricas de texto, preview
+fiel e modo foco.
+
+- [ ] **T7.1 — Autosave local de rascunho + indicador de estado**
+  - **Objetivo:** salvar o rascunho em `localStorage` (D3) a cada ~5 s quando há
+    alteração; indicador "salvando…", "salvo às HH:MM", "erro ao salvar". Ao
+    reabrir a matéria, oferecer recuperar o rascunho local mais novo que o banco.
+  - **Arquivos:** novo `src/admin/hooks/useLocalDraft.js`,
+    `src/admin/components/NoticiaForm.jsx`, `src/admin/hooks/useNoticiaForm.js`.
+  - **Critério de aceite:** editar o corpo, esperar 5 s → indicador mostra "salvo
+    às HH:MM"; recarregar a página (sem salvar no banco) → aparece "recuperar
+    rascunho não salvo"; aceitar restaura o texto; recusar mantém o do banco e
+    limpa o rascunho local.
+  - **Como verificar:** DevTools → Application → Local Storage (chave por id);
+    editar, recarregar, testar os dois caminhos.
+  - **Risco e reversão:** baixo (só client-side). Reversão = `git revert`;
+    limpar `localStorage` não é necessário (chave própria).
+  - **Dependências:** **D3**, **T2.2**.
+
+- [ ] **T7.2 — Aviso de alterações não salvas**
+  - **Objetivo:** `beforeunload` + bloqueio de navegação do React Router
+    (`useBlocker`) quando há alteração não salva no banco.
+  - **Arquivos:** `src/admin/components/NoticiaForm.jsx`,
+    `src/admin/hooks/useNoticiaForm.js` (flag `dirty`).
+  - **Critério de aceite:** com alteração pendente, fechar a aba pede confirmação
+    do navegador; clicar em "Cancelar"/"Voltar para o site" dentro da SPA abre um
+    diálogo (`useConfirm`) antes de sair. Após salvar, sair não pede nada.
+  - **Como verificar:** editar → tentar navegar para `/admin/noticias` → diálogo;
+    salvar → navegar → sem diálogo.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T2.2**.
+
+- [ ] **T7.3 — Contador de palavras e tempo de leitura**
+  - **Objetivo:** rodapé do editor com nº de palavras e minutos estimados
+    (`palavras / 200`, mesma fórmula de `src/pages/Noticia.jsx`).
+  - **Arquivos:** `src/admin/components/RichTextEditor.jsx` ou `NoticiaForm.jsx`,
+    reutilizando `stripHtml` de `src/utils/textUtils.js`.
+  - **Critério de aceite:** o contador acompanha a digitação; para uma matéria
+    conhecida, o nº de minutos bate com o exibido em `/noticia/<slug>`.
+  - **Como verificar:** abrir a mesma matéria no editor e no site, comparar.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T2.2**.
+
+- [ ] **T7.4 — Pré-visualização fiel (mesmo pipeline do público)**
+  - **Objetivo:** extrair de `src/pages/Noticia.jsx` o trecho que renderiza o
+    corpo (`processHtmlContent` → `sanitizeHtml` → `dangerouslySetInnerHTML` com
+    `.article-content`) para um componente compartilhado, e usá-lo no preview do
+    editor. Sem renderização paralela.
+  - **Arquivos:** novo `src/components/ArticleBody.jsx`;
+    `src/pages/Noticia.jsx` (passa a usar `ArticleBody`);
+    `src/admin/components/NoticiaForm.jsx` (aba/painel "Pré-visualizar").
+  - **Critério de aceite:** o HTML renderizado no preview é idêntico ao de
+    `/noticia/<slug>` para a mesma matéria (mesma marcação, mesma tipografia,
+    mesmos elementos jornalísticos). `Noticia.jsx` continua funcionando igual
+    (diff visual nulo).
+  - **Como verificar:** abrir `/noticia/<slug>` e o preview lado a lado; comparar
+    o DOM de `.article-content` (deve ser o mesmo após sanitização).
+  - **Risco e reversão:** médio — mexe numa página pública. Mitigação: refactor
+    sem mudança de comportamento, testado contra a página atual. Reversão =
+    `git revert` (restaura o render inline em `Noticia.jsx`).
+  - **Dependências:** **T2.2**, **T1.1**, e idealmente **E5** (para o preview
+    cobrir os elementos jornalísticos).
+
+- [ ] **T7.5 — Modo foco**
+  - **Objetivo:** alternar um modo que esconde a sidebar de configurações e
+    centraliza o corpo.
+  - **Arquivos:** `src/admin/components/NoticiaForm.jsx`, `src/index.css`.
+  - **Critério de aceite:** o botão de modo foco esconde a coluna da direita e
+    alarga o editor; sair restaura; o estado não interfere no salvamento.
+  - **Como verificar:** manual, desktop e mobile.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T2.2**.
+
+*Fim de E7:* escrita protegida contra perda, com métricas, preview fiel e modo
+foco. `npm run build` verde.
+
+---
+
+### E8 — Qualidade, acessibilidade e limpeza
+
+*Objetivo da etapa:* fechar erro/loading/vazio, acessibilidade, responsividade e
+remover código morto.
+
+- [ ] **T8.1 — Tratamento de erro em toda operação de banco/Storage**
+  - **Objetivo:** `load`, `save`, `upload`, `restoreBackup`, `reparar` e autosave
+    tratam falha com toast claro e estado recuperável (sem tela travada).
+  - **Arquivos:** `src/admin/hooks/useNoticiaForm.js`,
+    `src/admin/components/RichTextEditor.jsx`, `src/lib/postsService.js`.
+  - **Critério de aceite:** simular falha (offline no DevTools) em cada operação →
+    aparece toast de erro, o editor continua utilizável, nenhum dado é perdido.
+  - **Como verificar:** DevTools → Network → Offline; executar cada ação.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** E1–E7 no ar.
+
+- [ ] **T8.2 — Estados de carregamento e vazio**
+  - **Objetivo:** skeleton/spinner enquanto o editor carrega; estado "matéria
+    sem corpo" com placeholder amigável.
+  - **Arquivos:** `src/admin/components/NoticiaForm.jsx`,
+    `src/admin/components/RichTextEditor.jsx`.
+  - **Critério de aceite:** abrir a rota de edição em rede lenta (throttling)
+    mostra o carregamento sem "pulo" de layout; matéria nova mostra o placeholder
+    do editor.
+  - **Como verificar:** DevTools → Network → Slow 3G; abrir edição e "nova".
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T2.2**.
+
+- [ ] **T8.3 — Acessibilidade do editor**
+  - **Objetivo:** `role="toolbar"` com navegação por setas, `aria-pressed` nos
+    botões de marca, `aria-label` em todos, foco visível, ordem de tabulação sã,
+    `Esc` fecha diálogos do editor (link, inserir, imagem).
+  - **Arquivos:** `src/admin/components/RichTextToolbar.jsx`,
+    `src/admin/components/RichTextEditor.jsx`, `src/index.css`.
+  - **Critério de aceite:** dá para aplicar negrito, criar link e inserir
+    intertítulo **só com teclado**; foco sempre visível; leitor de tela anuncia o
+    estado dos botões. `axe` (DevTools) sem violações críticas no editor.
+  - **Como verificar:** navegação só por teclado + extensão axe/Lighthouse a11y.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **T2.3**, **T5.2**.
+
+- [ ] **T8.4 — Layout responsivo do editor**
+  - **Objetivo:** toolbar que quebra sem estourar, coluna única no mobile,
+    BubbleMenu e diálogos utilizáveis em telas pequenas.
+  - **Arquivos:** `src/index.css`, `src/admin/components/NoticiaForm.jsx`.
+  - **Critério de aceite:** em 360 px de largura, a toolbar não gera scroll
+    horizontal, todos os botões são alcançáveis, o editor ocupa a largura total.
+  - **Como verificar:** DevTools responsive em 360/768/1024 px.
+  - **Risco e reversão:** baixo (CSS). Reversão = `git revert`.
+  - **Dependências:** **T2.3**.
+
+- [ ] **T8.5 — Remover CSS e imports mortos**
+  - **Objetivo:** apagar `.tiptap-editor-wrapper` e `.editor-toolbar` de
+    `src/index.css` se não reaproveitados, e imports não usados (`FaLink` etc.).
+  - **Arquivos:** `src/index.css`, `src/admin/components/NoticiaForm.jsx`.
+  - **Critério de aceite:** `npm run lint` sem avisos de import não usado no
+    fluxo; `grep -n "tiptap-editor-wrapper\|editor-toolbar" src/index.css` só
+    retorna o que o editor novo realmente usa (ou nada).
+  - **Como verificar:** `npm run lint` + `npm run build` + smoke test do editor.
+  - **Risco e reversão:** baixo. Reversão = `git revert`.
+  - **Dependências:** **E2**–**E7** concluídas (para saber o que sobra).
+
+*Fim de E8:* editor tratado para erro, acessível, responsivo e sem código morto.
+`npm run build` verde.
+
+---
+
+## 4. Alteração de schema (única, aprovada)
+
+| Item | SQL de criação | SQL de reversão |
+|---|---|---|
+| `content_backup` (T1.2) | `alter table public.posts add column if not exists content_backup text;` | `alter table public.posts drop column if exists content_backup;` |
+
+Coluna `text`, nullable, sem default, sem constraint. Nenhuma outra alteração de
+schema será feita sem consulta.
+
+---
+
+## 5. Dívida técnica conhecida (fora de escopo — não tocar nesta rodada)
+
+- **`slug` e sua regeneração:** `savePost` faz `slug = slugify(title)` em todo
+  salvamento; renomear matéria publicada muda o slug e quebra links/RSS/sitemap.
+  Não há checagem de unicidade (`getPostBySlug` usa `.single()`).
+- **`published_at` é `text`, não `timestamptz`:** ordenação
+  `.order('published_at')` é lexicográfica; só funciona porque as datas novas são
+  ISO 8601. `<input type="date">` perde a hora e sofre *off-by-one* de fuso.
+- **`status` sem gate:** `text` livre, sem default nem constraint; 127/128
+  matérias são `draft` e mesmo assim públicas. Status não controla publicação.
+- **Colunas legadas duplicadas:** `published` e `updated` (`text`) coexistem com
+  `published_at`/`updated_at` (`timestamptz`); os leitores fazem *fallback* entre
+  elas.
+- **`getAllPosts()` na listagem (`AdminNoticias`):** traz o corpo inteiro de
+  128+ matérias, sem paginação nem busca.
+- **`updated_at` gravado e nunca lido:** não há detecção de concorrência; dois
+  editores = o último salva por cima.
+- **Colunas de corpo dobradas:** `content` + `text_content` gravadas em
+  sincronia por `savePost` — mantido de propósito (regra 7), mas é acoplamento a
+  ser resolvido numa consolidação futura.
+
+---
+
+## 6. Registro de progresso
+
+| Data | Etapa/Tarefa | Commit | Observações |
+|------|--------------|--------|-------------|
+| 2026-09-04 | Fase 0 + Plano | — | Diagnóstico e schema real (`information_schema`) conferidos; `PLANO_PAINEL.md` criado. Aguardando aprovação e respostas a D1–D6. |
+| 2026-09-04 | E1 · T1.2 | _(a commitar)_ | `scripts/sql/2026-09-04-content-backup.sql` (criação + reversão). `savePost` passa a copiar `content` atual para `content_backup` antes de todo UPDATE (best-effort: se a coluna não existir, segue sem o backup e só loga um warning). Build verde (149 módulos). **Pendente:** aplicar o SQL no Supabase. |
+
+---
+
+## 7. Fechamento (preencher ao fim da Fase 2)
+
+- O que ficou de fora:
+- O que virou dívida técnica nova:
+- O que depende de decisão sua:

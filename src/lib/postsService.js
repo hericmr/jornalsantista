@@ -179,6 +179,23 @@ export const savePost = async (postData, isNew = false) => {
     const hasId = id !== undefined && id !== null && String(id).trim() !== '';
 
     if (!isNew && hasId) {
+      // Rede de segurança (T1.2): antes de sobrescrever, guarda o corpo atual
+      // em `content_backup` na mesma linha. Best-effort — se falhar (ex.: a
+      // coluna ainda não existe no banco), o salvamento segue sem o backup.
+      try {
+        const current = await postsAPI.getPostById(id);
+        if (current) {
+          await postsAPI.updatePost(id, {
+            content_backup: current.content ?? current.text_content ?? ''
+          });
+        }
+      } catch (backupError) {
+        console.warn(
+          'Backup do corpo anterior não gravado (seguindo sem ele):',
+          backupError.message
+        );
+      }
+
       const updatedPost = await postsAPI.updatePost(id, {
         ...supabaseData,
         updated_at: new Date().toISOString()
