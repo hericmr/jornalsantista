@@ -263,22 +263,30 @@ Liga com o item 3.6 / 8.5 do `planning.md` (decisão de SSR/prerender pendente).
   Supabase (I2b). _(a commitar)_
 - [x] **I3** `public/data/` no `.gitignore` — gerado no build, entregue no deploy,
   nunca commitado. _(a commitar)_
-- [ ] **I4** Frescor do conteúdo: Database Webhook do Supabase na tabela `posts` →
-  Deploy Hook da Vercel (rebuild automático ao publicar/editar). Alternativas:
-  botão "Republicar site" no admin; cron diário.
+- [~] **I4** Frescor do conteúdo. Feito no código: header de cache do `/data/*`
+  no `vercel.json` (`max-age=0, s-maxage=300, stale-while-revalidate=86400`; a
+  Vercel purga o CDN a cada deploy, então um rebuild propaga na hora). **Falta
+  o usuário nos dashboards:** criar Deploy Hook na Vercel + Database Webhook no
+  Supabase (`posts`, insert/update/delete) apontando para o hook. Alternativa
+  futura: proxy `api/republish.js` com cooldown (evita rebuild a cada save de
+  rascunho) + botão "Republicar" no admin.
 - [ ] **I5** Preview de rascunho continua lendo o Supabase ao vivo (o rascunho não
   entra no snapshot) — casa com a Fase E2.
 - [ ] **I6** _(opcional)_ `api/sitemap.js` e `api/feed.js` podem passar a ler o
   `index.json` local em vez do Supabase, reduzindo acoplamento.
-- [ ] **I7** Fallback: sem `/data/index.json` (1º deploy, build sem env), a app
-  usa o Supabase normalmente — o estático é otimização, não dependência dura.
+- [x] **I7** Fallback: sem `/data/index.json`, `getPostsPage`/`getPublicPostBySlug`
+  usam o Supabase (implementado no I2). Confirmado: build local sem env não gera
+  o snapshot e o site funciona pelo Supabase.
+
+**Decisões tomadas (Fase I):**
+- Chave no build: **`anon`** (o RLS/estado atual expõe tudo que o site já mostra).
+- Ordem do feed: reordenado no cliente (data desc, sem-data no fim) = `/feed.xml`.
+- `status` **não** é filtrado (127/128 são `draft` e são públicas hoje).
 
 **Decisões em aberto (Fase I):**
-- Chave no build: `anon` (RLS libera o que é público) vs. `service_role` como env
-  var só de build.
-- Gatilho de rebuild: webhook Supabase→Vercel (automático) vs. botão manual vs.
-  cron.
-- `api/*` migram para ler o snapshot ou ficam como estão.
+- Gatilho de rebuild: webhook Supabase→Vercel direto (simples, rebuilda a cada
+  save) vs. proxy `api/republish.js` com cooldown + botão no admin.
+- `api/sitemap.js` / `api/feed.js` migram para o snapshot (I6) ou ficam.
 
 ---
 
@@ -348,4 +356,5 @@ o usuário testa no site online antes do próximo passo.
 | 2026-09-03 | Fase A · passo 4 (A1+A2a) | eaaaf58 | `src/admin/hooks/useNoticiaForm.js` (estado + regras: carregar, autores, upload de imagem, submit create/update) e `src/admin/components/NoticiaForm.jsx` (UI única). `AdminNovaNoticia.jsx` virou casca de 6 linhas (`<NoticiaForm mode="new" />`). Unificações já aplicadas na tela Nova: seletor de autores vem da tabela `authors` do Supabase (E17), `onKeyPress`→`onKeyDown`, `formatText` via ref, campo de novo autor controlado. `AdminEditarNoticia.jsx` **ainda não** usa o form novo — é o passo 5. Build verde (146 módulos). |
 | 2026-09-03 | Fase A · passo 5 (A1+A2b) | 8c9bee2 | `AdminEditarNoticia.jsx` (592→10 linhas) passa a usar `<NoticiaForm mode="edit" id={id} />`. ~1.170 linhas duplicadas entre as duas telas eliminadas. `loadPost`/mapeamento de autores/`formatText`/upload agora vivem só no hook/componente. Warning de `exhaustive-deps` da tela Editar sumiu. Build verde (148 módulos, −1,3 kB gzip JS). **Fase A concluída** (falta só o passo 6: smoke test + marcar itens). |
 | 2026-09-04 | Fase I · passo 1 (I1+I3) | 7e785cb | `scripts/build-content.js` gera o snapshot estático (`public/data/index.json` + `posts/<slug>.json` + `meta.json`) a partir do Supabase via REST com a chave `anon`, antes do `vite build`. À prova de falha: sem env ou erro de rede → aviso + exit 0. `public/data/` no `.gitignore`. **Validado no deploy:** `/data/meta.json` → `count: 128`; `index.json` (97 kB, 128 itens, sem corpo); `posts/<slug>.json` OK. Descoberta: 127/128 matérias têm `status: 'draft'` no banco mas aparecem no site → `status` não é gate de publicação; o snapshot e a app **não** filtram por status. |
-| 2026-09-04 | Fase I · passo 2 (I2) | _a commitar_ | `postsService.js`: `getPostsPage` e novo `getPublicPostBySlug` (usado no `Noticia.jsx`) leem o snapshot primeiro, com fallback ao Supabase. Admin intacto. Ordem do índice bate com o `/feed.xml` (confirmado: Oxxo 03/09, FMI 22/01, …). Build verde. |
+| 2026-09-04 | Fase I · passo 2 (I2) | a1f800e | `postsService.js`: `getPostsPage` e novo `getPublicPostBySlug` (usado no `Noticia.jsx`) leem o snapshot primeiro, com fallback ao Supabase. Admin intacto. Ordem do índice bate com o `/feed.xml` (confirmado: Oxxo 03/09, FMI 22/01, …). Build verde. |
+| 2026-09-04 | Fase I · passo 3 (I4 parcial) | _a commitar_ | `vercel.json`: header de cache do `/data/*` (`s-maxage=300, stale-while-revalidate=86400`). Falta o usuário criar o Deploy Hook (Vercel) + Database Webhook (Supabase) para rebuild automático ao editar/publicar. |
