@@ -18,6 +18,7 @@ import AdminEditarNoticia from './admin/pages/AdminEditarNoticia';
 import AdminNovaNoticia from './admin/pages/AdminNovaNoticia';
 import AdminCategorias from './admin/pages/AdminCategorias';
 import AdminConfiguracoes from './admin/pages/AdminConfiguracoes';
+import { AdminFeedbackProvider } from './admin/components/AdminFeedback';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -25,6 +26,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <AdminFeedbackProvider>
         <Routes>
           {/* Rotas públicas */}
           <Route element={<PublicLayout />}>
@@ -93,6 +95,7 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
+        </AdminFeedbackProvider>
       </Router>
     </AuthProvider>
   );

@@ -45,7 +45,7 @@ const AdminLayout = ({ children }) => {
       <div className="d-flex">
         {/* Sidebar */}
         <AdminSidebar />
-        
+
         {/* Main Content */}
         <div className="admin-content">
           {children}

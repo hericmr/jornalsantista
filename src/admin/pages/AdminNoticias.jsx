@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
 import { getAllPosts, deletePost } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
+import { useToast, useConfirm } from '../components/AdminFeedback';
 
 const AdminNoticias = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,28 +19,34 @@ const AdminNoticias = () => {
     try {
       const posts = await getAllPosts();
       setPosts(posts);
-      console.log('Posts carregados:', posts.length); // Debug
     } catch (error) {
       console.error('Erro ao carregar posts:', error);
+      toast.error('Erro ao carregar as notícias.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (postId) => {
-    if (window.confirm('Tem certeza que deseja excluir esta notícia?')) {
-      try {
-        const deleted = await deletePost(postId);
-        if (deleted) {
-          alert('Notícia excluída com sucesso!');
-          loadPosts(); // Recarregar a lista
-        } else {
-          alert('Posts locais não podem ser excluídos via interface.');
-        }
-      } catch (error) {
-        console.error('Erro ao excluir post:', error);
-        alert('Erro ao excluir a notícia: ' + error.message);
+    const ok = await confirm({
+      title: 'Excluir notícia',
+      message: 'Tem certeza que deseja excluir esta notícia? Esta ação não pode ser desfeita.',
+      confirmLabel: 'Excluir',
+      variant: 'danger'
+    });
+    if (!ok) return;
+
+    try {
+      const deleted = await deletePost(postId);
+      if (deleted) {
+        toast.success('Notícia excluída.');
+        loadPosts();
+      } else {
+        toast.error('Não foi possível excluir esta notícia.');
       }
+    } catch (error) {
+      console.error('Erro ao excluir post:', error);
+      toast.error('Erro ao excluir a notícia: ' + error.message);
     }
   };
 
@@ -50,9 +59,6 @@ const AdminNoticias = () => {
       </div>
     );
   }
-
-  // Depuração: mostrar posts carregados
-  console.log('Posts para exibir:', posts);
 
   return (
     <div className="admin-noticias">

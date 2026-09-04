@@ -4,9 +4,11 @@ import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaList
 import { savePost } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../components/AdminFeedback';
 
 const AdminNovaNoticia = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [saving, setSaving] = useState(false);
   const [post, setPost] = useState({
     title: '',
@@ -43,7 +45,7 @@ const AdminNovaNoticia = () => {
 
     if (error) {
       console.error('Erro ao enviar imagem:', error);
-      alert('Erro ao enviar imagem: ' + error.message);
+      toast.error('Erro ao enviar imagem: ' + error.message);
       return null;
     }
 
@@ -54,7 +56,7 @@ const AdminNovaNoticia = () => {
     if (publicUrlData && publicUrlData.publicUrl) {
       return publicUrlData.publicUrl;
     } else {
-      alert('Erro ao obter URL pública da imagem!');
+      toast.error('Erro ao obter a URL pública da imagem.');
       return null;
     }
   };
@@ -71,7 +73,7 @@ const AdminNovaNoticia = () => {
       }
 
       if (uploadedUrls.length === 0) {
-        alert('Nenhuma imagem foi enviada com sucesso!');
+        toast.error('Nenhuma imagem foi enviada.');
         return;
       }
 
@@ -79,13 +81,17 @@ const AdminNovaNoticia = () => {
         ...prev,
         images: [...prev.images, ...uploadedUrls]
       }));
-      
+
       setSelectedFiles([]);
       document.getElementById('images').value = '';
-      
+      toast.success(
+        uploadedUrls.length > 1
+          ? `${uploadedUrls.length} imagens enviadas.`
+          : 'Imagem enviada.'
+      );
     } catch (error) {
       console.error('Erro ao enviar imagens:', error);
-      alert('Erro ao enviar imagens: ' + error.message);
+      toast.error('Erro ao enviar imagens: ' + error.message);
     }
   };
 
@@ -116,11 +122,11 @@ const AdminNovaNoticia = () => {
       };
 
       await savePost(postData, true);
-      alert('Notícia criada com sucesso!');
+      toast.success('Notícia criada.');
       navigate('/admin/noticias');
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar a notícia: ' + error.message);
+      toast.error('Erro ao salvar a notícia: ' + error.message);
     } finally {
       setSaving(false);
     }

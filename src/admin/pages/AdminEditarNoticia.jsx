@@ -4,10 +4,12 @@ import { FaSave, FaTimes, FaImage, FaLink, FaBold, FaItalic, FaUnderline, FaList
 import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsService';
 import { slugify } from '../../utils/textUtils';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../components/AdminFeedback';
 
 const AdminEditarNoticia = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [post, setPost] = useState({
@@ -66,12 +68,12 @@ const AdminEditarNoticia = () => {
 
         setPost(postData);
       } else {
-        alert('Notícia não encontrada');
+        toast.error('Notícia não encontrada.');
         navigate('/admin/noticias');
       }
     } catch (error) {
       console.error('Erro ao carregar post:', error);
-      alert('Erro ao carregar a notícia');
+      toast.error('Erro ao carregar a notícia.');
     } finally {
       setLoading(false);
     }
@@ -91,14 +93,14 @@ const AdminEditarNoticia = () => {
     const { error } = await supabase.storage.from('noticias-imagens').upload(fileName, file);
     if (error) {
       console.error('Erro ao enviar imagem:', error);
-      alert('Erro ao enviar imagem: ' + error.message);
+      toast.error('Erro ao enviar imagem: ' + error.message);
       return null;
     }
     const { data: publicUrlData } = supabase.storage.from('noticias-imagens').getPublicUrl(fileName);
     if (publicUrlData && publicUrlData.publicUrl) {
       return publicUrlData.publicUrl;
     } else {
-      alert('Erro ao obter URL pública da imagem!');
+      toast.error('Erro ao obter a URL pública da imagem.');
       return null;
     }
   };
@@ -118,7 +120,7 @@ const AdminEditarNoticia = () => {
       if (url) uploadedUrls.push(url);
     }
     if (uploadedUrls.length === 0) {
-      alert('Nenhuma imagem foi enviada com sucesso!');
+      toast.error('Nenhuma imagem foi enviada.');
       return;
     }
     setPost(prev => ({
@@ -126,6 +128,11 @@ const AdminEditarNoticia = () => {
       images: [...prev.images, ...uploadedUrls]
     }));
     setSelectedFiles([]); // Limpa seleção após upload
+    toast.success(
+      uploadedUrls.length > 1
+        ? `${uploadedUrls.length} imagens enviadas.`
+        : 'Imagem enviada.'
+    );
   };
 
   const removeImage = (index) => {
@@ -160,16 +167,16 @@ const AdminEditarNoticia = () => {
 
       if (existingId) {
         await savePost({ ...postData, id: existingId }, false);
-        alert('Notícia atualizada com sucesso!');
+        toast.success('Notícia atualizada.');
       } else {
         await savePost(postData, true);
-        alert('Notícia criada com sucesso!');
+        toast.success('Notícia criada.');
       }
 
       navigate('/admin/noticias');
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar a notícia: ' + error.message);
+      toast.error('Erro ao salvar a notícia: ' + error.message);
     } finally {
       setSaving(false);
     }
