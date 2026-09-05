@@ -75,6 +75,7 @@ async function run() {
     authors: p.authors || [],
     author: p.author || '',
     images: p.images || [],
+    video_url: p.video_url || null,
     status: p.status || null,
     published_at: p.published_at || null,
     updated_at: p.updated_at || null

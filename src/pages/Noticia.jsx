@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getPublicPostBySlug } from '../lib/postsService';
 import { processHtmlContent, createExcerpt, stripHtml } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
+import { extractYouTubeId, getYouTubeThumbnail, getYouTubeEmbedUrl } from '../lib/video';
 import { sanitizeHtml } from '../lib/sanitize';
 import MetaTags from '../components/MetaTags';
 import JsonLd from '../components/JsonLd';
@@ -171,7 +172,8 @@ const Noticia = () => {
   }
 
   const images = resolvePostImages(post.images);
-  const heroImage = images.length > 0 ? toImageSrc(images[0]) : null;
+  const videoId = extractYouTubeId(post.video_url);
+  const heroImage = images.length > 0 ? toImageSrc(images[0]) : getYouTubeThumbnail(videoId);
   const pageUrl = window.location.href;
   const metaDescription = post.excerpt || createExcerpt(post.text_content || post.content || '', 160);
   const section = Array.isArray(post.categories) && post.categories.length > 0 ? post.categories[0] : undefined;
@@ -249,25 +251,37 @@ const Noticia = () => {
 
       <div className="reading-progress" style={{ width: `${progress}%` }} aria-hidden="true" />
 
-      {heroImage && (
-        <div className="article-hero">
-          <img
-            className="article-hero-img"
-            src={heroImage}
-            alt={post.title || 'Notícia'}
-            width="1600"
-            height="900"
-            fetchPriority="high"
-            decoding="async"
-            onError={handleImageError}
+      {videoId ? (
+        <div className="article-video">
+          <iframe
+            src={getYouTubeEmbedUrl(videoId)}
+            title={post.title || 'Vídeo'}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
           />
-          <div className="article-hero-overlay">
-            <div className="article-hero-inner">
-              {section && <span className="kicker">{section}</span>}
-              <h1 className="article-hero-title">{post.title || 'Título não disponível'}</h1>
+        </div>
+      ) : (
+        heroImage && (
+          <div className="article-hero">
+            <img
+              className="article-hero-img"
+              src={heroImage}
+              alt={post.title || 'Notícia'}
+              width="1600"
+              height="900"
+              fetchPriority="high"
+              decoding="async"
+              onError={handleImageError}
+            />
+            <div className="article-hero-overlay">
+              <div className="article-hero-inner">
+                {section && <span className="kicker">{section}</span>}
+                <h1 className="article-hero-title">{post.title || 'Título não disponível'}</h1>
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
 
       <div className="article-layout">
@@ -284,7 +298,7 @@ const Noticia = () => {
             )}
           </nav>
 
-          {!heroImage && (
+          {(!heroImage || videoId) && (
             <header className="article-head-plain">
               {section && <span className="kicker">{section}</span>}
               <h1 className="article-title">{post.title || 'Título não disponível'}</h1>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPostBySlugOrId, savePost, getAllAuthors } from '../../lib/postsService';
 import { slugify, stripHtml, processHtmlContent } from '../../utils/textUtils';
+import { extractYouTubeId } from '../../lib/video';
 import { supabase } from '../../lib/supabase';
 import { requestRepublish } from '../../lib/republish';
 import { useToast, useConfirm } from '../components/AdminFeedback';
@@ -17,6 +18,7 @@ const EMPTY_POST = {
   authors: [],
   published: '',
   images: [],
+  video_url: '',
   tags: [],
   status: 'draft'
 };
@@ -53,6 +55,7 @@ const toFormState = (p) => ({
       ? new Date(p.published_at || p.published).toISOString().split('T')[0]
       : '',
   images: p.images || [],
+  video_url: p.video_url || '',
   tags: p.tags || [],
   status: p.status || 'draft'
 });
@@ -195,6 +198,7 @@ export const useNoticiaForm = ({ mode, id }) => {
         ? new Date(post.published).toISOString()
         : null,
       images: post.images,
+      video_url: post.video_url ? post.video_url.trim() : null,
       tags: post.tags,
       status: post.status,
       slug: slugify(post.title),
@@ -212,8 +216,9 @@ export const useNoticiaForm = ({ mode, id }) => {
       if (e && e.preventDefault) e.preventDefault();
 
       // O corpo agora vem do editor richtext (sem <textarea required>): a
-      // validação de "não pode ficar vazio" precisa ser feita aqui.
-      if (!stripHtml(post.content).trim()) {
+      // validação de "não pode ficar vazio" precisa ser feita aqui. Um post
+      // de vídeo com URL válida dispensa corpo (a legenda é opcional).
+      if (!stripHtml(post.content).trim() && !extractYouTubeId(post.video_url)) {
         toast.error('O conteúdo da matéria não pode ficar vazio.');
         return;
       }
@@ -243,7 +248,7 @@ export const useNoticiaForm = ({ mode, id }) => {
         setSaving(false);
       }
     },
-    [buildPayload, existingId, isEdit, navigate, post.content, toast]
+    [buildPayload, existingId, isEdit, navigate, post.content, post.video_url, toast]
   );
 
   // Desfazer último salvamento (T1.4): restaura `content_backup` como corpo

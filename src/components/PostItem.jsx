@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createExcerpt, slugify } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
+import { extractYouTubeId, getYouTubeThumbnail } from '../lib/video';
 
 const PostItem = ({ post, variant = 'regular' }) => {
   const formatDate = (dateString) => {
@@ -29,7 +30,17 @@ const PostItem = ({ post, variant = 'regular' }) => {
     return createExcerpt(text, maxLength);
   };
 
-  const getFeaturedImage = () => toImageSrc(resolvePostImages(post.images)[0]);
+  const videoId = extractYouTubeId(post.video_url);
+
+  const getFeaturedImage = () =>
+    toImageSrc(resolvePostImages(post.images)[0]) || getYouTubeThumbnail(videoId);
+
+  const PlayBadge = () =>
+    videoId ? (
+      <span className="play-badge" aria-hidden="true">
+        <i className="bi bi-play-fill"></i>
+      </span>
+    ) : null;
 
   const getImageAlt = () => {
     let alt = '';
@@ -98,6 +109,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
               fetchPriority="high"
               decoding="async"
             />
+            <PlayBadge />
           </span>
         )}
         {categories[0] && <span className="kicker">{categories[0]}</span>}
@@ -114,6 +126,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
           {featuredImage && (
             <span className="feature-media">
               <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" decoding="async" />
+              <PlayBadge />
             </span>
           )}
           <div className="feature-split">
@@ -137,6 +150,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
         {featuredImage && (
           <span className="feed-media">
             <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" decoding="async" />
+            <PlayBadge />
           </span>
         )}
         <div className="feed-body">

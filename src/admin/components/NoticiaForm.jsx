@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSave, FaTimes, FaImage, FaUndo, FaSlidersH } from 'react-icons/fa';
+import { FaSave, FaTimes, FaImage, FaUndo, FaSlidersH, FaYoutube } from 'react-icons/fa';
 import { useNoticiaForm } from '../hooks/useNoticiaForm';
 import RichTextEditor from './RichTextEditor.lazy';
+import { extractYouTubeId, getYouTubeThumbnail } from '../../lib/video';
 
 // Formulário único de matéria — usado por "Nova notícia" e "Editar notícia".
 //
@@ -36,6 +37,9 @@ const NoticiaForm = ({ mode, id }) => {
   const fileInputRef = useRef(null);
   const [newAuthor, setNewAuthor] = useState('');
   const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const videoId = extractYouTubeId(post.video_url);
+  const videoUrlInvalid = post.video_url.trim() !== '' && !videoId;
 
   // Esc fecha o painel de detalhes (mesmo padrão do diálogo de confirmação
   // em AdminFeedback.jsx).
@@ -328,6 +332,42 @@ const NoticiaForm = ({ mode, id }) => {
                 value={post.published}
                 onChange={handleChange}
               />
+            </section>
+
+            <section className="noticia-details-section">
+              <label htmlFor="video_url" className="form-label">
+                <FaYoutube className="me-2" />
+                Vídeo (YouTube)
+              </label>
+              <input
+                type="url"
+                className={`form-control${videoUrlInvalid ? ' is-invalid' : ''}`}
+                id="video_url"
+                name="video_url"
+                value={post.video_url}
+                onChange={handleChange}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+              {videoUrlInvalid ? (
+                <div className="form-text text-danger">
+                  Não reconhecemos essa URL como um link do YouTube.
+                </div>
+              ) : (
+                <div className="form-text">
+                  Publica a matéria como um post de vídeo: a miniatura do
+                  YouTube vira a capa e o player aparece na página da matéria.
+                </div>
+              )}
+              {videoId && (
+                <div className="mt-2">
+                  <img
+                    src={getYouTubeThumbnail(videoId)}
+                    alt="Miniatura do vídeo"
+                    className="img-fluid rounded"
+                    style={{ maxWidth: 240 }}
+                  />
+                </div>
+              )}
             </section>
 
             <section className="noticia-details-section">
