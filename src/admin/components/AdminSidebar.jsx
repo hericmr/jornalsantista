@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaChartBar, FaNewspaper, FaTags, FaCog } from 'react-icons/fa';
+import { FaChartBar, FaNewspaper, FaTags, FaCog, FaYoutube } from 'react-icons/fa';
 
 const AdminSidebar = () => {
   const menuItems = [
@@ -49,6 +49,12 @@ const AdminSidebar = () => {
           <li className="nav-item">
             <a className="nav-link" href="/admin/noticias/nova">
               + Nova Notícia
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link d-flex align-items-center" href="/admin/noticias/nova?tipo=video">
+              <FaYoutube className="me-2" />
+              + Novo Vídeo
             </a>
           </li>
         </ul>

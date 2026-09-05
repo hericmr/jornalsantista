@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FaSave, FaTimes, FaImage, FaUndo, FaSlidersH, FaYoutube } from 'react-icons/fa';
 import { useNoticiaForm } from '../hooks/useNoticiaForm';
 import RichTextEditor from './RichTextEditor.lazy';
@@ -14,6 +14,7 @@ import { extractYouTubeId, getYouTubeThumbnail } from '../../lib/video';
 // de antes; só a posição na tela mudou.
 const NoticiaForm = ({ mode, id }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     isEdit,
     post,
@@ -34,12 +35,23 @@ const NoticiaForm = ({ mode, id }) => {
     backupAvailable
   } = useNoticiaForm({ mode, id });
 
+  // "+ Novo Vídeo" no menu manda pra cá com ?tipo=video: abre o formulário já
+  // com o painel de Detalhes aberto no campo de vídeo, em vez do admin
+  // precisar descobrir que esse campo existe escondido ali.
+  const isVideoMode = !isEdit && searchParams.get('tipo') === 'video';
+
   const fileInputRef = useRef(null);
   const [newAuthor, setNewAuthor] = useState('');
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(isVideoMode);
+  const videoUrlInputRef = useRef(null);
 
   const videoId = extractYouTubeId(post.video_url);
   const videoUrlInvalid = post.video_url.trim() !== '' && !videoId;
+
+  useEffect(() => {
+    if (isVideoMode) videoUrlInputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Esc fecha o painel de detalhes (mesmo padrão do diálogo de confirmação
   // em AdminFeedback.jsx).
@@ -92,7 +104,7 @@ const NoticiaForm = ({ mode, id }) => {
         </button>
 
         <span className="noticia-editor-kicker">
-          {isEdit ? 'Editando matéria' : 'Nova matéria'}
+          {isEdit ? 'Editando matéria' : isVideoMode ? 'Novo vídeo' : 'Nova matéria'}
         </span>
 
         <div className="noticia-editor-topbar-actions">
@@ -153,7 +165,7 @@ const NoticiaForm = ({ mode, id }) => {
             id="title"
             name="title"
             className="noticia-editor-title"
-            placeholder="Título da matéria"
+            placeholder={isVideoMode ? 'Título do vídeo' : 'Título da matéria'}
             value={post.title}
             onChange={handleChange}
             required
@@ -340,6 +352,7 @@ const NoticiaForm = ({ mode, id }) => {
                 Vídeo (YouTube)
               </label>
               <input
+                ref={videoUrlInputRef}
                 type="url"
                 className={`form-control${videoUrlInvalid ? ' is-invalid' : ''}`}
                 id="video_url"

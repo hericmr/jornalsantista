@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEdit, FaTrash, FaPlus, FaEye, FaSync } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaEye, FaSync, FaYoutube } from 'react-icons/fa';
 import { getAllPosts, deletePost } from '../../lib/postsService';
 import { requestRepublish } from '../../lib/republish';
 import { slugify } from '../../utils/textUtils';
@@ -89,6 +89,10 @@ const AdminNoticias = () => {
             <FaSync className="me-2" />
             {republishing ? 'Republicando...' : 'Republicar site'}
           </button>
+          <Link to="/admin/noticias/nova?tipo=video" className="btn btn-outline-light">
+            <FaYoutube className="me-2" />
+            Novo Vídeo
+          </Link>
           <Link to="/admin/noticias/nova" className="btn btn-primary">
             <FaPlus className="me-2" />
             Nova Notícia
