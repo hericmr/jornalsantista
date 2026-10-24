@@ -46,9 +46,15 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const profile = await loadAdminProfile(session?.user);
-      if (active) setUser(profile);
+    // O callback não pode aguardar chamadas ao Supabase: ele roda enquanto o
+    // cliente de auth segura o lock interno, e a consulta a `profiles` fica
+    // esperando esse mesmo lock (deadlock — o login ficava em "Entrando...").
+    // Por isso a consulta é adiada para fora do callback.
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTimeout(async () => {
+        const profile = await loadAdminProfile(session?.user);
+        if (active) setUser(profile);
+      }, 0);
     });
 
     return () => {
