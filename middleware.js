@@ -102,7 +102,7 @@ function buildHead({ title, description, image, canonical, publishedTime, modifi
     publisher: {
       '@type': 'NewsMediaOrganization',
       name: SITE_NAME,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg` }
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon-512.png` }
     }
   };
   if (publishedTime) jsonLd.datePublished = publishedTime;

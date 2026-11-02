@@ -6,7 +6,7 @@ export const organizationSchema = () => ({
   '@type': 'NewsMediaOrganization',
   name: SITE.name,
   url: SITE.url,
-  logo: `${SITE.url}/favicon.svg`,
+  logo: `${SITE.url}/icon-512.png`,
   email: SITE.email,
   sameAs: Object.values(SITE.social)
 });
@@ -53,7 +53,7 @@ export const newsArticleSchema = ({
     publisher: {
       '@type': 'NewsMediaOrganization',
       name: SITE.name,
-      logo: { '@type': 'ImageObject', url: `${SITE.url}/favicon.svg` }
+      logo: { '@type': 'ImageObject', url: `${SITE.url}/icon-512.png` }
     }
   };
   if (image) data.image = [image];
