@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { BsCheck2, BsFacebook, BsLink45Deg, BsPersonFill, BsTwitterX, BsWhatsapp } from 'react-icons/bs';
 import { useParams, Link } from 'react-router-dom';
 import { getPublicPostBySlug } from '../lib/postsService';
 import { processHtmlContent, createExcerpt, stripHtml } from '../utils/textUtils';
@@ -184,16 +185,16 @@ const Noticia = () => {
   const renderShare = (variant) => (
     <div className={variant === 'rail' ? 'article-share-rail' : 'article-share-inline'}>
       <button type="button" className="share-btn" onClick={() => shareOnSocialMedia('whatsapp')} aria-label="Compartilhar no WhatsApp">
-        <i className="bi bi-whatsapp" aria-hidden="true"></i>
+        <BsWhatsapp className="bi" aria-hidden="true" />
       </button>
       <button type="button" className="share-btn" onClick={() => shareOnSocialMedia('facebook')} aria-label="Compartilhar no Facebook">
-        <i className="bi bi-facebook" aria-hidden="true"></i>
+        <BsFacebook className="bi" aria-hidden="true" />
       </button>
       <button type="button" className="share-btn" onClick={() => shareOnSocialMedia('x')} aria-label="Compartilhar no X">
-        <i className="bi bi-twitter-x" aria-hidden="true"></i>
+        <BsTwitterX className="bi" aria-hidden="true" />
       </button>
       <button type="button" className="share-btn" onClick={copyLink} aria-label={copied ? 'Link copiado' : 'Copiar link'}>
-        <i className={`bi ${copied ? 'bi-check2' : 'bi-link-45deg'}`} aria-hidden="true"></i>
+        {copied ? <BsCheck2 className="bi" aria-hidden="true" /> : <BsLink45Deg className="bi" aria-hidden="true" />}
       </button>
     </div>
   );
@@ -208,7 +209,7 @@ const Noticia = () => {
           <img key={i} src={img} alt={author} loading="lazy" onError={handleImageError} />
         ) : (
           <span key={i} className="ph" aria-hidden="true">
-            <i className="bi bi-person-fill"></i>
+            <BsPersonFill className="bi" />
           </span>
         );
       })}
@@ -373,7 +374,7 @@ const Noticia = () => {
                     <img src={img} alt={author} loading="lazy" onError={handleImageError} />
                   ) : (
                     <span className="ph" aria-hidden="true">
-                      <i className="bi bi-person-fill"></i>
+                      <BsPersonFill className="bi" />
                     </span>
                   )}
                   <div>

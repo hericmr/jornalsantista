@@ -1,4 +1,5 @@
 import React from 'react';
+import { BsEnvelope, BsFacebook, BsGeoAlt, BsInstagram, BsTwitter } from 'react-icons/bs';
 import MetaTags from '../components/MetaTags';
 import { SITE } from '../config/site';
 
@@ -25,7 +26,7 @@ const Contato = () => {
               <div className="card h-100 shadow-sm">
                 <div className="card-body text-center">
                   <div className="mb-3">
-                    <i className="bi bi-envelope fs-1 text-dark"></i>
+                    <BsEnvelope className="bi fs-1 text-dark" />
                   </div>
                   <h5 className="card-title">Email</h5>
                   <p className="card-text">
@@ -41,7 +42,7 @@ const Contato = () => {
               <div className="card h-100 shadow-sm">
                 <div className="card-body text-center">
                   <div className="mb-3">
-                    <i className="bi bi-geo-alt fs-1 text-dark"></i>
+                    <BsGeoAlt className="bi fs-1 text-dark" />
                   </div>
                   <h5 className="card-title">Localização</h5>
                   <p className="card-text">
@@ -59,7 +60,7 @@ const Contato = () => {
               <div className="row">
                 <div className="col-md-4 mb-3">
                   <div className="d-flex align-items-center">
-                    <i className="bi bi-facebook fs-4 me-3"></i>
+                    <BsFacebook className="bi fs-4 me-3" />
                     <div>
                       <h6 className="mb-0">Facebook</h6>
                       <small className="text-muted">@jornalsantista</small>
@@ -68,7 +69,7 @@ const Contato = () => {
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="d-flex align-items-center">
-                    <i className="bi bi-twitter fs-4 me-3"></i>
+                    <BsTwitter className="bi fs-4 me-3" />
                     <div>
                       <h6 className="mb-0">Twitter</h6>
                       <small className="text-muted">@jornalsantista</small>
@@ -77,7 +78,7 @@ const Contato = () => {
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="d-flex align-items-center">
-                    <i className="bi bi-instagram fs-4 me-3"></i>
+                    <BsInstagram className="bi fs-4 me-3" />
                     <div>
                       <h6 className="mb-0">Instagram</h6>
                       <small className="text-muted">@jornalsantista</small>

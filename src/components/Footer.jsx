@@ -1,4 +1,5 @@
 import React from 'react';
+import { BsEnvelopeFill, BsFacebook, BsInstagram, BsTwitter } from 'react-icons/bs';
 import { SITE } from '../config/site';
 
 const Footer = () => {
@@ -28,16 +29,16 @@ const Footer = () => {
             <h6 className="footer-section-title">Redes Sociais</h6>
             <div className="footer-social">
               <a href={`mailto:${SITE.email}`} className="social-link" title="E-mail" aria-label="E-mail">
-                <i className="bi bi-envelope-fill"></i>
+                <BsEnvelopeFill className="bi" />
               </a>
               <a href={SITE.social.facebook} className="social-link" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook">
-                <i className="bi bi-facebook"></i>
+                <BsFacebook className="bi" />
               </a>
               <a href={SITE.social.twitter} className="social-link" target="_blank" rel="noopener noreferrer" title="Twitter" aria-label="Twitter">
-                <i className="bi bi-twitter"></i>
+                <BsTwitter className="bi" />
               </a>
               <a href={SITE.social.instagram} className="social-link" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
-                <i className="bi bi-instagram"></i>
+                <BsInstagram className="bi" />
               </a>
             </div>
           </div>

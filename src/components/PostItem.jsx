@@ -1,4 +1,5 @@
 import React from 'react';
+import { BsPlayFill } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import { createExcerpt, slugify } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
@@ -38,7 +39,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
   const PlayBadge = () =>
     videoId ? (
       <span className="play-badge" aria-hidden="true">
-        <i className="bi bi-play-fill"></i>
+        <i><BsPlayFill /></i>
       </span>
     ) : null;
 

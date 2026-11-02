@@ -23,7 +23,6 @@ const AdminCategorias = lazy(() => import('./admin/pages/AdminCategorias'));
 const AdminConfiguracoes = lazy(() => import('./admin/pages/AdminConfiguracoes'));
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function App() {
   return (
