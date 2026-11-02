@@ -23,7 +23,10 @@ export const createExcerpt = (html, maxLength = 200) => {
   const plainText = stripHtml(html);
   
   if (plainText.length <= maxLength) return plainText;
-  return plainText.substring(0, maxLength) + '...';
+  // corta na última palavra inteira para não deixar "frá..."
+  const cut = plainText.substring(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 0 ? cut.substring(0, lastSpace) : cut).replace(/[\s,.;:–-]+$/, '') + '…';
 };
 
 /**

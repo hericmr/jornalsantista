@@ -14,10 +14,12 @@ const PostItem = ({ post, variant = 'regular' }) => {
       if (isNaN(date.getTime())) {
         return '';
       }
+      // "31 de outubro"; o ano só aparece quando não é o corrente
+      const sameYear = date.getFullYear() === new Date().getFullYear();
       return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+        day: 'numeric',
+        month: 'long',
+        ...(sameYear ? {} : { year: 'numeric' })
       });
     } catch {
       return '';
@@ -146,7 +148,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
     );
   }
 
-  const excerpt = getExcerpt(160);
+  const excerpt = getExcerpt(240);
   return (
     <article className="feed-item">
       <Link to={linkTo} className="feed-item-link">
@@ -160,8 +162,8 @@ const PostItem = ({ post, variant = 'regular' }) => {
           {categories[0] && <span className="kicker">{categories[0]}</span>}
           <h3 className="feed-title">{title}</h3>
           <MetaLine />
-          {excerpt && <p className="feed-excerpt">{excerpt}</p>}
         </div>
+        {excerpt && <p className="feed-excerpt">{excerpt}</p>}
       </Link>
     </article>
   );
