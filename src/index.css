@@ -9,7 +9,7 @@
 }
 
 body {
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-family: 'Archivo', Arial, Helvetica, sans-serif;
   font-size: 1.08rem;
   line-height: 1.7;
   color: #000;
@@ -17,7 +17,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Merriweather', serif;
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
   font-weight: 700;
   color: #000;
   letter-spacing: 0.5px;
@@ -47,7 +47,7 @@ h5, h6 {
 }
 
 .journal-title {
-  font-family: 'Merriweather', serif;
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
   font-size: 2.2rem;
   font-weight: 700;
   letter-spacing: 2px;
@@ -55,13 +55,13 @@ h5, h6 {
 }
 
 .slogan-text {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 0.95rem;
   color: #ccc;
 }
 
 .nav-link, .navbar-brand {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -325,9 +325,11 @@ h5, h6 {
   border-color: #e9ecef !important;
 }
 
-/* Ícones */
+/* Ícones (SVG do react-icons/bs, mesmo alinhamento da antiga fonte bootstrap-icons) */
 .bi {
   color: inherit;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
 }
 
 /* Texto muted mais legível */
@@ -409,7 +411,7 @@ a:hover {
 .header-search-icon { color: #888; font-size: 0.85rem; line-height: 1; display: flex; }
 .header-search input {
   background: transparent; border: none; outline: none; color: #fff;
-  font-family: 'Roboto', sans-serif; font-size: 0.85rem; width: 100%;
+  font-family: 'Archivo', sans-serif; font-size: 0.85rem; width: 100%;
 }
 .header-search input::placeholder { color: #7d7d7d; }
 .masthead-right { display: flex; align-items: center; gap: 1.1rem; }
@@ -455,7 +457,7 @@ a:hover {
 }
 
 .footer-title {
-  font-family: 'Merriweather', serif;
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #fff;
@@ -464,7 +466,7 @@ a:hover {
 }
 
 .footer-subtitle {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 0.9rem;
   font-style: italic;
   color: #ccc;
@@ -479,7 +481,7 @@ a:hover {
 }
 
 .footer-section-title {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
@@ -1790,7 +1792,7 @@ a:hover {
   margin-bottom: 2px;
 }
 .article-byline-meta {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 0.85rem;
   color: #6b7280;
 }
@@ -1901,7 +1903,7 @@ a:hover {
 }
 .article-content figcaption,
 .article-gallery figcaption {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 0.85rem;
   color: #6b7280;
   line-height: 1.45;
@@ -1977,7 +1979,7 @@ a:hover {
   margin: 0 0 0.25rem;
 }
 .author-bio-text {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 0.95rem;
   color: #374151;
   line-height: 1.55;
