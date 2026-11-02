@@ -33,6 +33,29 @@ const slugify = (text) =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+
+// Resumo em texto puro a partir do HTML do corpo, para os cards do feed
+// (o index não leva o corpo). Corta na última palavra inteira.
+const toExcerpt = (html, maxLength = 240) => {
+  const text = String(html || '')
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&(#\d+|#x[\da-f]+|\w+);/gi, (m, e) => {
+      if (e[0] === '#') {
+        const code = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1));
+        return Number.isFinite(code) ? String.fromCodePoint(code) : m;
+      }
+      return ENTITIES[e.toLowerCase()] ?? m;
+    })
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (text.length <= maxLength) return text;
+  const cut = text.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:–-]+$/, '')}…`;
+};
+
 async function run() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     warn(
@@ -70,7 +93,8 @@ async function run() {
     id: p.id,
     slug: p.slug || slugify(p.title || String(p.id)),
     title: p.title || '',
-    excerpt: p.excerpt || '',
+    // matérias antigas (importadas do Blogger) têm o corpo em text_content
+    excerpt: p.excerpt || toExcerpt(p.content || p.text_content),
     categories: p.categories || [],
     authors: p.authors || [],
     author: p.author || '',

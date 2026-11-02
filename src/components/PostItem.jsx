@@ -24,10 +24,10 @@ const PostItem = ({ post, variant = 'regular' }) => {
     }
   };
 
-  const getExcerpt = (text, maxLength = 160) => {
-    if (!text || typeof text !== 'string' || text.trim() === '') {
-      return 'Conteúdo não disponível...';
-    }
+  // O index estático só traz `excerpt`; o Supabase traz também o corpo.
+  const getExcerpt = (maxLength = 160) => {
+    const text = post.excerpt || post.text_content || post.content;
+    if (!text || typeof text !== 'string' || text.trim() === '') return '';
     return createExcerpt(text, maxLength);
   };
 
@@ -121,6 +121,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
   }
 
   if (variant === 'feature') {
+    const featureExcerpt = getExcerpt(220);
     return (
       <article className="feed-feature">
         <Link to={linkTo}>
@@ -136,7 +137,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
               <h2 className="feature-title">{title}</h2>
             </div>
             <div>
-              <p className="feature-excerpt">{getExcerpt(post.text_content || post.content, 220)}</p>
+              {featureExcerpt && <p className="feature-excerpt">{featureExcerpt}</p>}
               <MetaLine />
             </div>
           </div>
@@ -145,6 +146,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
     );
   }
 
+  const excerpt = getExcerpt(160);
   return (
     <article className="feed-item">
       <Link to={linkTo} className="feed-item-link">
@@ -158,7 +160,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
           {categories[0] && <span className="kicker">{categories[0]}</span>}
           <h3 className="feed-title">{title}</h3>
           <MetaLine />
-          <p className="feed-excerpt">{getExcerpt(post.text_content || post.content, 160)}</p>
+          {excerpt && <p className="feed-excerpt">{excerpt}</p>}
         </div>
       </Link>
     </article>
