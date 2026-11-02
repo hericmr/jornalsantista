@@ -426,7 +426,12 @@ a:hover {
 }
 
 @media (max-width: 480px) {
-  .header-search { display: none; }
+  .masthead .header-search { display: none; }
+}
+.brand-heading { margin: 0; font-size: inherit; line-height: inherit; }
+.menu-search { display: none; width: auto; max-width: none; margin: 1rem 1rem 0.5rem; }
+@media (max-width: 480px) {
+  .menu-search { display: flex; }
 }
 
 /* Footer */

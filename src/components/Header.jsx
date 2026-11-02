@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { FaSearch, FaBars, FaTimes, FaInstagram } from 'react-icons/fa';
 import { SITE } from '../config/site';
 
@@ -14,14 +14,20 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const closeMenu = () => setMenuOpen(false);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     const term = searchTerm.trim();
+    closeMenu();
     navigate(term ? `/busca?q=${encodeURIComponent(term)}` : '/busca');
   };
+
+  // Na home o nome do jornal é o título da página (único <h1>); nas demais
+  // o <h1> fica com o título da matéria/seção.
+  const brand = <Link to="/" className="brand-name">Jornal Santista</Link>;
 
   return (
     <>
@@ -36,7 +42,7 @@ const Header = () => {
             >
               <FaBars />
             </button>
-            <Link to="/" className="brand-name">Jornal Santista</Link>
+            {pathname === '/' ? <h1 className="brand-heading">{brand}</h1> : brand}
           </div>
 
           <form className="header-search" onSubmit={handleSearchSubmit} role="search">
@@ -69,6 +75,17 @@ const Header = () => {
                 <FaTimes />
               </button>
             </div>
+            {/* no celular a busca do cabeçalho some; aqui ela continua acessível */}
+            <form className="header-search menu-search" onSubmit={handleSearchSubmit} role="search">
+              <span className="header-search-icon"><FaSearch /></span>
+              <input
+                type="search"
+                placeholder="Buscar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Buscar notícias"
+              />
+            </form>
             <nav className="menu-content px-3">
               {navLinks.map((link) => (
                 <NavLink
