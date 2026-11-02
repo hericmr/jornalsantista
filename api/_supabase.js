@@ -9,7 +9,7 @@ const key =
   process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 export const SITE_URL =
-  process.env.SITE_URL || 'https://jornalsantista.com.br';
+  process.env.SITE_URL || 'https://www.jornalsantista.com.br';
 
 export const supabase = url && key ? createClient(url, key) : null;
 

@@ -7,7 +7,7 @@ export const SITE = {
   tagline: 'Mídia alternativa na Baixada',
   description:
     'Mídia independente com olhar crítico sobre a Baixada Santista. Informação com opinião, denúncias, cultura e debate sob a ótica dos trabalhadores.',
-  url: 'https://jornalsantista.com.br',
+  url: 'https://www.jornalsantista.com.br',
   email: 'contato@jornalsantista.com.br',
   social: {
     instagram: 'https://instagram.com/jornalsantista',
