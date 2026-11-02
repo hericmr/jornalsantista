@@ -1,5 +1,6 @@
 import React from 'react';
 import { BsEnvelopeFill, BsFacebook, BsInstagram, BsTwitter } from 'react-icons/bs';
+import { Link } from 'react-router-dom';
 import { SITE } from '../config/site';
 
 const Footer = () => {
@@ -18,10 +19,10 @@ const Footer = () => {
           <div className="footer-section">
             <h6 className="footer-section-title">Links Rápidos</h6>
             <ul className="footer-links">
-              <li><a href="/">Início</a></li>
-              <li><a href="/sobre">Sobre</a></li>
-              <li><a href="/categorias">Artigos</a></li>
-              <li><a href="/contato">Contato</a></li>
+              <li><Link to="/">Início</Link></li>
+              <li><Link to="/sobre">Sobre</Link></li>
+              <li><Link to="/categorias">Artigos</Link></li>
+              <li><Link to="/contato">Contato</Link></li>
             </ul>
           </div>
           

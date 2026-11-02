@@ -60,7 +60,7 @@ const Header = () => {
             <a href={SITE.social.instagram} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <FaInstagram />
             </a>
-            <a href={`mailto:${SITE.email}`} className="social-text">Contato</a>
+            <Link to="/contato" className="social-text">Contato</Link>
           </div>
         </div>
       </header>
