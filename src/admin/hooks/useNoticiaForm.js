@@ -6,6 +6,7 @@ import { extractYouTubeId } from '../../lib/video';
 import { supabase } from '../../lib/supabase';
 import { requestRepublish } from '../../lib/republish';
 import { useToast, useConfirm } from '../components/AdminFeedback';
+import { compressImage } from '../lib/compressImage';
 
 // Estado e regras de negócio compartilhados pelas telas "Nova notícia" e
 // "Editar notícia". A UI fica em NoticiaForm.jsx.
@@ -60,11 +61,15 @@ const toFormState = (p) => ({
   status: p.status || 'draft'
 });
 
-const uploadImage = async (file, toast) => {
-  const fileName = `${Date.now()}-${file.name}`;
+const uploadImage = async (original, toast) => {
+  const file = await compressImage(original);
+  // Nome sem acentos/espaços: evita URLs quebradas ou com %20 no Storage.
+  const ext = (file.name.match(/\.([a-z0-9]+)$/i)?.[1] || 'jpg').toLowerCase();
+  const base = slugify(file.name.replace(/\.[^.]+$/, '')) || 'imagem';
+  const fileName = `${Date.now()}-${base}.${ext}`;
   const { error } = await supabase.storage
     .from('noticias-imagens')
-    .upload(fileName, file);
+    .upload(fileName, file, { contentType: file.type, cacheControl: '31536000' });
 
   if (error) {
     console.error('Erro ao enviar imagem:', error);
