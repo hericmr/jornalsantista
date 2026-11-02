@@ -96,6 +96,48 @@ export const getPostsPage = async (opts = {}) => {
   }
 };
 
+// Categorias como array: as matérias importadas do Blogger guardam a lista
+// como string JSON ("[\"Política\"]").
+const categoryList = (categories) => {
+  if (Array.isArray(categories)) return categories;
+  if (typeof categories === 'string') {
+    try {
+      const parsed = JSON.parse(categories);
+      return Array.isArray(parsed) ? parsed : [categories];
+    } catch {
+      return categories ? [categories] : [];
+    }
+  }
+  return [];
+};
+
+// "Leia também": matérias que dividem mais categorias com `post`, das mais
+// recentes para as mais antigas; completa com as últimas publicadas.
+export const getRelatedPosts = async (post, limit = 3) => {
+  if (!post) return [];
+  try {
+    let candidates = await loadStaticIndex();
+    if (!candidates) ({ rows: candidates } = await postsAPI.getPostsPage({ page: 0, pageSize: 40 }));
+
+    // compara sem caixa: há "Opinião" e "opinião" no banco
+    const norm = (c) => String(c).trim().toLowerCase();
+    const own = new Set(categoryList(post.categories).map(norm));
+    return candidates
+      .filter((p) => p.slug !== post.slug && p.id !== post.id)
+      .map((p, idx) => ({
+        p,
+        idx,
+        shared: categoryList(p.categories).filter((c) => own.has(norm(c))).length
+      }))
+      .sort((a, b) => b.shared - a.shared || a.idx - b.idx)
+      .slice(0, limit)
+      .map(({ p }) => ({ ...mapPost(p), categories: categoryList(p.categories) }));
+  } catch (error) {
+    console.error('Erro ao carregar relacionadas:', error);
+    return [];
+  }
+};
+
 // Busca textual server-side. Retorna { posts, hasMore, ok }.
 export const searchPosts = async (term, opts) => {
   const q = (term || '').trim();

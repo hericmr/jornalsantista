@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BsCheck2, BsFacebook, BsLink45Deg, BsPersonFill, BsTwitterX, BsWhatsapp } from 'react-icons/bs';
 import { useParams, Link } from 'react-router-dom';
-import { getPublicPostBySlug } from '../lib/postsService';
+import { getPublicPostBySlug, getRelatedPosts } from '../lib/postsService';
 import { processHtmlContent, createExcerpt, stripHtml } from '../utils/textUtils';
 import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
 import { extractYouTubeId, getYouTubeThumbnail, getYouTubeEmbedUrl } from '../lib/video';
@@ -71,6 +71,7 @@ const Noticia = () => {
   const [showNewsletter, setShowNewsletter] = useState(false);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [related, setRelated] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -98,6 +99,17 @@ const Noticia = () => {
       active = false;
     };
   }, [slug]);
+
+  useEffect(() => {
+    let active = true;
+    setRelated([]);
+    getRelatedPosts(post).then((rows) => {
+      if (active) setRelated(rows);
+    });
+    return () => {
+      active = false;
+    };
+  }, [post]);
 
   // Barra de progresso de leitura
   useEffect(() => {
@@ -389,6 +401,31 @@ const Noticia = () => {
               );
             })}
           </section>
+
+          {related.length > 0 && (
+            <section className="article-related" aria-labelledby="leia-tambem">
+              <h2 id="leia-tambem">Leia também</h2>
+              <div className="related-grid">
+                {related.map((item) => {
+                  const img =
+                    toImageSrc(resolvePostImages(item.images)[0]) ||
+                    getYouTubeThumbnail(extractYouTubeId(item.video_url));
+                  const kicker = Array.isArray(item.categories) ? item.categories[0] : undefined;
+                  return (
+                    <Link key={item.id} to={`/noticia/${item.slug}`} className="related-card">
+                      {img && (
+                        <span className="related-media">
+                          <img src={img} alt="" loading="lazy" decoding="async" onError={handleImageError} />
+                        </span>
+                      )}
+                      {kicker && <span className="kicker">{kicker}</span>}
+                      <h3 className="related-title">{item.title}</h3>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </article>
       </div>
     </>
