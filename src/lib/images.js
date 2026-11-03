@@ -41,9 +41,42 @@ export const toImageSrc = (image) => {
   return getFullImageUrl(image) || image;
 };
 
+const SUPABASE_OBJECT = '/storage/v1/object/public/';
+const SUPABASE_RENDER = '/storage/v1/render/image/public/';
+const SRCSET_WIDTHS = [480, 800, 1200, 1600];
+
+/**
+ * Versão redimensionada de uma imagem, para quem sabe gerar uma:
+ * - Supabase Storage: endpoint de transformação (resize=contain mantém a
+ *   proporção; o Supabase entrega WebP quando o navegador aceita).
+ * - Blogger: o tamanho vai na própria URL (/s1600/, /w640-h272/ ou =s1600).
+ * Outras origens voltam null (fica só a original).
+ */
+export const resizedImageSrc = (src, width) => {
+  // URL que já traz parâmetros (ex.: ?imgmax=800) fica como está
+  if (!src || typeof src !== 'string' || src.includes('?')) return null;
+  if (src.includes(SUPABASE_OBJECT)) {
+    return `${src.replace(SUPABASE_OBJECT, SUPABASE_RENDER)}?width=${width}&resize=contain&quality=75`;
+  }
+  if (src.includes('blogger.googleusercontent.com/img/')) {
+    if (/\/[sw]\d+[^/]*\/[^/]+$/.test(src)) return src.replace(/\/[sw]\d+[^/]*\/([^/]+)$/, `/w${width}/$1`);
+    if (/=[sw]\d+[^/]*$/.test(src)) return src.replace(/=[sw]\d+[^/]*$/, `=w${width}`);
+    return `${src}=w${width}`;
+  }
+  return null;
+};
+
+/** `srcset` com as larguras de SRCSET_WIDTHS, ou undefined se a origem não redimensiona. */
+export const imageSrcSet = (src) => {
+  if (!resizedImageSrc(src, SRCSET_WIDTHS[0])) return undefined;
+  return SRCSET_WIDTHS.map((w) => `${resizedImageSrc(src, w)} ${w}w`).join(', ');
+};
+
 /** onError handler para <img>: troca a origem pelo placeholder. */
 export const handleImageError = (e) => {
   if (e?.target) {
+    // sem isso o navegador continua tentando as versões do srcset
+    e.target.removeAttribute('srcset');
     e.target.src = IMAGE_PLACEHOLDER;
     e.target.style.objectFit = 'cover';
   }

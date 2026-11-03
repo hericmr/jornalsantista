@@ -2,7 +2,7 @@ import React from 'react';
 import { BsPlayFill } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import { createExcerpt, slugify } from '../utils/textUtils';
-import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
+import { resolvePostImages, toImageSrc, imageSrcSet, handleImageError } from '../lib/images';
 import { extractYouTubeId, getYouTubeThumbnail } from '../lib/video';
 
 const PostItem = ({ post, variant = 'regular' }) => {
@@ -87,6 +87,7 @@ const PostItem = ({ post, variant = 'regular' }) => {
 
   const categories = getCategories();
   const featuredImage = getFeaturedImage();
+  const srcSet = imageSrcSet(featuredImage);
   const title = post.title || 'Título não disponível';
   const author = getAuthorName();
   const date = formatDate(post.published);
@@ -106,6 +107,8 @@ const PostItem = ({ post, variant = 'regular' }) => {
           <span className="hero-media">
             <img
               src={featuredImage}
+              srcSet={srcSet}
+              sizes="(max-width: 900px) 100vw, 640px"
               alt={getImageAlt()}
               onError={handleImageError}
               loading="eager"
@@ -129,7 +132,15 @@ const PostItem = ({ post, variant = 'regular' }) => {
         <Link to={linkTo}>
           {featuredImage && (
             <span className="feature-media">
-              <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" decoding="async" />
+              <img
+                src={featuredImage}
+                srcSet={srcSet}
+                sizes="(max-width: 1320px) 100vw, 1270px"
+                alt={getImageAlt()}
+                onError={handleImageError}
+                loading="lazy"
+                decoding="async"
+              />
               <PlayBadge />
             </span>
           )}
@@ -154,7 +165,15 @@ const PostItem = ({ post, variant = 'regular' }) => {
       <Link to={linkTo} className="feed-item-link">
         {featuredImage && (
           <span className="feed-media">
-            <img src={featuredImage} alt={getImageAlt()} onError={handleImageError} loading="lazy" decoding="async" />
+            <img
+              src={featuredImage}
+              srcSet={srcSet}
+              sizes="(max-width: 600px) 100vw, (max-width: 900px) 220px, 260px"
+              alt={getImageAlt()}
+              onError={handleImageError}
+              loading="lazy"
+              decoding="async"
+            />
             <PlayBadge />
           </span>
         )}

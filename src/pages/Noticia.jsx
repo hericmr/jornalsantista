@@ -3,7 +3,7 @@ import { BsCheck2, BsFacebook, BsLink45Deg, BsPersonFill, BsTwitterX, BsWhatsapp
 import { useParams, Link } from 'react-router-dom';
 import { getPublicPostBySlug, getRelatedPosts } from '../lib/postsService';
 import { processHtmlContent, createExcerpt, stripHtml } from '../utils/textUtils';
-import { resolvePostImages, toImageSrc, handleImageError } from '../lib/images';
+import { resolvePostImages, toImageSrc, imageSrcSet, handleImageError } from '../lib/images';
 import { extractYouTubeId, getYouTubeThumbnail, getYouTubeEmbedUrl } from '../lib/video';
 import { sanitizeHtml } from '../lib/sanitize';
 import MetaTags from '../components/MetaTags';
@@ -280,6 +280,8 @@ const Noticia = () => {
             <img
               className="article-hero-img"
               src={heroImage}
+              srcSet={imageSrcSet(heroImage)}
+              sizes="100vw"
               alt={post.title || 'Notícia'}
               width="1600"
               height="900"
@@ -415,7 +417,15 @@ const Noticia = () => {
                     <Link key={item.id} to={`/noticia/${item.slug}`} className="related-card">
                       {img && (
                         <span className="related-media">
-                          <img src={img} alt="" loading="lazy" decoding="async" onError={handleImageError} />
+                          <img
+                            src={img}
+                            srcSet={imageSrcSet(img)}
+                            sizes="(max-width: 600px) 100vw, 230px"
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            onError={handleImageError}
+                          />
                         </span>
                       )}
                       {kicker && <span className="kicker">{kicker}</span>}
