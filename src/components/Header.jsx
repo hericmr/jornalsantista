@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { FaSearch, FaBars, FaTimes, FaInstagram } from 'react-icons/fa';
+import { FaSearch, FaBars, FaTimes, FaInstagram, FaYoutube } from 'react-icons/fa';
 import { SITE } from '../config/site';
 
 const navLinks = [
@@ -59,6 +59,9 @@ const Header = () => {
           <div className="masthead-right">
             <a href={SITE.social.instagram} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <FaInstagram />
+            </a>
+            <a href={SITE.social.youtube} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+              <FaYoutube />
             </a>
             <Link to="/contato" className="social-text">Contato</Link>
           </div>

@@ -11,6 +11,7 @@ export const SITE = {
   email: 'contato@jornalsantista.com.br',
   social: {
     instagram: 'https://instagram.com/jornalsantista',
+    youtube: 'https://www.youtube.com/@Jornal.Santista',
     facebook: 'https://facebook.com/jornalsantista',
     twitter: 'https://twitter.com/jornalsantista'
   }
