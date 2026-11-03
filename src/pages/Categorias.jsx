@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PostItem from '../components/PostItem';
 import MetaTags from '../components/MetaTags';
 import { getCategoryNames, getPostsByCategory, getPostsPage } from '../lib/postsService';
 import { SITE } from '../config/site';
 
+const PAGE_SIZE = 20;
+
 const Categorias = () => {
   const { categoria } = useParams();
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [status, setStatus] = useState('loading'); // loading | ready | error
 
   useEffect(() => {
@@ -21,34 +26,39 @@ const Categorias = () => {
     };
   }, []);
 
+  // "Todas" usa o feed geral; uma editoria filtra por categoria.
+  const fetchPage = useCallback(
+    (n) =>
+      categoria
+        ? getPostsByCategory(categoria, { page: n, pageSize: PAGE_SIZE })
+        : getPostsPage({ page: n, pageSize: PAGE_SIZE }),
+    [categoria]
+  );
+
   useEffect(() => {
     let active = true;
-
-    const load = async () => {
-      setStatus('loading');
-      try {
-        if (categoria) {
-          const rows = await getPostsByCategory(categoria);
-          if (active) {
-            setPosts(rows);
-            setStatus('ready');
-          }
-        } else {
-          const { posts: rows, ok } = await getPostsPage({ page: 0, pageSize: 30 });
-          if (!active) return;
-          setPosts(rows);
-          setStatus(ok ? 'ready' : 'error');
-        }
-      } catch (error) {
-        if (active) setStatus('error');
-      }
-    };
-
-    load();
+    setStatus('loading');
+    fetchPage(0).then(({ posts: rows, hasMore: more, ok }) => {
+      if (!active) return;
+      setPosts(rows);
+      setHasMore(more);
+      setPage(0);
+      setStatus(ok ? 'ready' : 'error');
+    });
     return () => {
       active = false;
     };
-  }, [categoria]);
+  }, [fetchPage]);
+
+  const loadMore = async () => {
+    const next = page + 1;
+    setLoadingMore(true);
+    const { posts: rows, hasMore: more } = await fetchPage(next);
+    setPosts((prev) => [...prev, ...rows]);
+    setHasMore(more);
+    setPage(next);
+    setLoadingMore(false);
+  };
 
   if (status === 'loading') {
     return (
@@ -119,7 +129,8 @@ const Categorias = () => {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h1 className="h3 mb-0">{categoria ? categoria : 'Todas as editorias'}</h1>
               <span className="text-muted">
-                {posts.length} {posts.length === 1 ? 'notícia' : 'notícias'}
+                {posts.length}
+                {hasMore ? '+' : ''} {posts.length === 1 && !hasMore ? 'notícia' : 'notícias'}
               </span>
             </div>
 
@@ -136,11 +147,20 @@ const Categorias = () => {
                 </Link>
               </div>
             ) : (
-              <div className="feed-list">
-                {posts.map((post) => (
-                  <PostItem key={post.id} post={post} />
-                ))}
-              </div>
+              <>
+                <div className="feed-list">
+                  {posts.map((post) => (
+                    <PostItem key={post.id} post={post} />
+                  ))}
+                </div>
+                {hasMore && (
+                  <div className="text-center mt-4 mb-2">
+                    <button className="btn btn-dark" onClick={loadMore} disabled={loadingMore}>
+                      {loadingMore ? 'Carregando…' : 'Carregar mais'}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

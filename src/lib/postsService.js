@@ -153,11 +153,25 @@ export const searchPosts = async (term, opts) => {
   }
 };
 
-// Nomes de categorias distintos, ordenados (pt-BR).
+// Nomes de editorias, ordenados (pt-BR). Grafias que só diferem na caixa
+// ("Opinião"/"opinião") viram uma só, preferindo a com maiúscula.
 export const getCategoryNames = async () => {
   try {
-    const names = await postsAPI.getCategoryNames();
-    return names.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const index = await loadStaticIndex();
+    const lists = index ? index.map((p) => p.categories) : await postsAPI.getCategoryLists();
+    const byKey = new Map();
+    lists.forEach((cats) =>
+      categoryList(cats).forEach((raw) => {
+        const name = String(raw || '').trim();
+        if (!name) return;
+        const key = name.toLowerCase();
+        const current = byKey.get(key);
+        if (!current || (current[0] === current[0].toLowerCase() && name[0] !== name[0].toLowerCase())) {
+          byKey.set(key, name);
+        }
+      })
+    );
+    return [...byKey.values()].sort((a, b) => a.localeCompare(b, 'pt-BR'));
   } catch (error) {
     console.error('Erro ao carregar categorias:', error);
     return [];
@@ -279,14 +293,30 @@ export const deletePost = async (id) => {
   }
 };
 
-// Filtra posts por categoria (filtro no servidor: array `categories` contém o valor).
-export const getPostsByCategory = async (category) => {
+// Uma página de matérias de uma editoria. Retorna { posts, hasMore, ok }.
+// No snapshot compara sem caixa e aceita categorias salvas como string JSON.
+export const getPostsByCategory = async (category, opts = {}) => {
+  const { page = 0, pageSize = 12 } = opts;
   try {
-    const rows = await postsAPI.getPostsByCategory(category);
-    return (rows || []).map(mapPost);
+    const index = await loadStaticIndex();
+    if (index) {
+      const wanted = String(category).trim().toLowerCase();
+      const matches = index.filter((p) =>
+        categoryList(p.categories).some((c) => String(c).trim().toLowerCase() === wanted)
+      );
+      const from = page * pageSize;
+      return {
+        posts: matches.slice(from, from + pageSize).map(mapPost),
+        hasMore: matches.length > from + pageSize,
+        ok: true
+      };
+    }
+
+    const { rows, hasMore } = await postsAPI.getPostsByCategory(category, opts);
+    return { posts: rows.map(mapPost), hasMore, ok: true };
   } catch (error) {
     console.error('Erro ao buscar posts por categoria:', error);
-    return [];
+    return { posts: [], hasMore: false, ok: false };
   }
 };
 

@@ -88,8 +88,9 @@ export const postsAPI = {
     return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize }
   },
 
-  // Nomes de categorias distintos (para o menu de editorias).
-  async getCategoryNames() {
+  // Listas de categorias das matérias publicadas (uma por matéria, no
+  // formato em que estão no banco).
+  async getCategoryLists() {
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Configuração do Supabase incompleta')
     }
@@ -101,11 +102,7 @@ export const postsAPI = {
       console.error('Erro ao buscar categorias:', error)
       throw error
     }
-    const set = new Set()
-    ;(data || []).forEach((row) =>
-      (row.categories || []).forEach((c) => c && set.add(c))
-    )
-    return [...set]
+    return (data || []).map((row) => row.categories)
   },
 
   async getPostById(id) {
@@ -179,15 +176,22 @@ export const postsAPI = {
     return true
   },
 
-  async getPostsByCategory(category) {
+  // Mesma paginação de getPostsPage: busca pageSize+1 para saber se há mais.
+  async getPostsByCategory(category, { page = 0, pageSize = 12 } = {}) {
+    const from = page * pageSize
     const { data, error } = await supabase
       .from('posts')
       .select('*')
       .eq('status', 'published')
       .contains('categories', [category])
       .order('published_at', { ascending: false })
+      .range(from, from + pageSize)
 
-    if (error) throw error
-    return data
+    if (error) {
+      if (error.code === 'PGRST103') return { rows: [], hasMore: false }
+      throw error
+    }
+    const rows = data || []
+    return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize }
   }
 }
