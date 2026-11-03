@@ -70,7 +70,7 @@ async function run() {
     authorization: `Bearer ${SUPABASE_KEY}`
   };
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/posts?select=*&order=published_at.desc`,
+    `${SUPABASE_URL}/rest/v1/posts?select=*&status=eq.published&order=published_at.desc`,
     { headers }
   );
 

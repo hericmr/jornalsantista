@@ -44,6 +44,7 @@ export const postsAPI = {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .range(from, to)
 
@@ -72,6 +73,7 @@ export const postsAPI = {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
+      .eq('status', 'published')
       .or(`title.ilike.${like},excerpt.ilike.${like},author.ilike.${like}`)
       .order('published_at', { ascending: false })
       .range(from, to)
@@ -91,7 +93,10 @@ export const postsAPI = {
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Configuração do Supabase incompleta')
     }
-    const { data, error } = await supabase.from('posts').select('categories')
+    const { data, error } = await supabase
+      .from('posts')
+      .select('categories')
+      .eq('status', 'published')
     if (error) {
       console.error('Erro ao buscar categorias:', error)
       throw error
@@ -178,6 +183,7 @@ export const postsAPI = {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
+      .eq('status', 'published')
       .contains('categories', [category])
       .order('published_at', { ascending: false })
 

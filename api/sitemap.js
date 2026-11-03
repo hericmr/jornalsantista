@@ -9,6 +9,7 @@ export default async function handler(req, res) {
     const { data, error } = await supabase
       .from('posts')
       .select('slug, published_at, updated_at')
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(2000);
     if (!error && Array.isArray(data)) posts = data;

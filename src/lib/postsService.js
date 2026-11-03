@@ -200,7 +200,9 @@ export const getPublicPostBySlug = async (slugOrId) => {
     if (staticPost) return mapPost(staticPost);
   }
 
-  return getPostBySlugOrId(slugOrId);
+  // o fallback lê direto do banco, que também tem os rascunhos
+  const post = await getPostBySlugOrId(slugOrId);
+  return post && post.status === 'published' ? post : null;
 };
 
 // Salva um post (sempre no Supabase).

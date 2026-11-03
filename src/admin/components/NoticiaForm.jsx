@@ -254,6 +254,7 @@ const NoticiaForm = ({ mode, id }) => {
                 <option value="published">Publicado</option>
                 <option value="archived">Arquivado</option>
               </select>
+              <div className="form-text">Só matérias &quot;Publicado&quot; aparecem no site.</div>
             </section>
 
             <section className="noticia-details-section">

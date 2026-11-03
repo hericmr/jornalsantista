@@ -75,7 +75,7 @@ const toISO = (d) => {
 async function fetchPost(slug) {
   const base = `${SUPABASE_URL}/rest/v1/posts`;
   const select =
-    'select=title,excerpt,content,text_content,images,author,authors,published_at,updated_at,categories';
+    'status=eq.published&select=title,excerpt,content,text_content,images,author,authors,published_at,updated_at,categories';
   const headers = { apikey: SUPABASE_KEY, authorization: `Bearer ${SUPABASE_KEY}` };
 
   let res = await fetch(`${base}?slug=eq.${encodeURIComponent(slug)}&${select}&limit=1`, { headers });
