@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { FaSearch, FaBars, FaTimes, FaInstagram, FaYoutube } from 'react-icons/fa';
+import { FaSearch, FaBars, FaTimes, FaInstagram, FaYoutube, FaFacebook } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 import { SITE } from '../config/site';
 
 const navLinks = [
@@ -62,6 +63,12 @@ const Header = () => {
             </a>
             <a href={SITE.social.youtube} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
               <FaYoutube />
+            </a>
+            <a href={SITE.social.facebook} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <FaFacebook />
+            </a>
+            <a href={SITE.social.twitter} className="social-icon" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+              <FaXTwitter />
             </a>
             <Link to="/contato" className="social-text">Contato</Link>
           </div>

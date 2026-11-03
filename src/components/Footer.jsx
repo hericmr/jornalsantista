@@ -1,5 +1,5 @@
 import React from 'react';
-import { BsEnvelopeFill, BsFacebook, BsInstagram, BsTwitter, BsYoutube } from 'react-icons/bs';
+import { BsEnvelopeFill, BsFacebook, BsInstagram, BsTwitterX, BsYoutube } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
 import { SITE } from '../config/site';
 
@@ -35,8 +35,8 @@ const Footer = () => {
               <a href={SITE.social.facebook} className="social-link" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook">
                 <BsFacebook className="bi" />
               </a>
-              <a href={SITE.social.twitter} className="social-link" target="_blank" rel="noopener noreferrer" title="Twitter" aria-label="Twitter">
-                <BsTwitter className="bi" />
+              <a href={SITE.social.twitter} className="social-link" target="_blank" rel="noopener noreferrer" title="X (Twitter)" aria-label="X (Twitter)">
+                <BsTwitterX className="bi" />
               </a>
               <a href={SITE.social.instagram} className="social-link" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
                 <BsInstagram className="bi" />
